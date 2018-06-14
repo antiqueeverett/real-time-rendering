@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../rendering/include/rtr/some_module/headers.hpp
+iostream
+-
+string
+-
+cmath
+-
+cstring
+-
+vector
+-
+deque
+-
+glm/gtc/type_ptr.hpp
+-
+glm/common.hpp
+-
+glm/gtc/random.hpp
+-
+typeinfo
+-
+memory
+-
+algorithm
+-
+GL/glew.h
+-
+GL/freeglut.h
+-
+
+/home/anny/Dokumente/Projects/RTR/project-rtr/framework/apps/rtr_test/main.cpp
+rtr/some_module/headers.hpp
+-
+

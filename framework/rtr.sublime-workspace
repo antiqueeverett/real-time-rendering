@@ -1,0 +1,957 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"fvec",
+				"fvec4"
+			],
+			[
+				"proj",
+				"projection_matrix_"
+			],
+			[
+				"camera",
+				"camera_matrix_"
+			],
+			[
+				"render",
+				"render_texture"
+			],
+			[
+				"Pa",
+				"ParticleEffect"
+			],
+			[
+				"glB",
+				"glBindVertexArray"
+			],
+			[
+				"ver",
+				"vertex_position"
+			],
+			[
+				"model",
+				"model_matrix"
+			],
+			[
+				"un",
+				"uniform"
+			],
+			[
+				"uni",
+				"uniform_location"
+			],
+			[
+				"load",
+				"load_model"
+			],
+			[
+				"dra",
+				"draw_mode"
+			],
+			[
+				"par",
+				"particleQuad"
+			],
+			[
+				"laod",
+				"loadVertGeomFragShaders"
+			],
+			[
+				"m_",
+				"m_ticks"
+			],
+			[
+				"P",
+				"ParticleData"
+			],
+			[
+				"m_p",
+				"m_pos"
+			],
+			[
+				"vec",
+				"vec4"
+			],
+			[
+				"tex",
+				"texture_shader_"
+			],
+			[
+				"tut_",
+				"tut_vert"
+			],
+			[
+				"get",
+				"get_model_matrix"
+			],
+			[
+				"tuto",
+				"tutorial_frag"
+			],
+			[
+				"glU",
+				"glUniformMatrix4fv"
+			],
+			[
+				"pa",
+				"particle_position"
+			],
+			[
+				"particleQuad",
+				"particleQuad_geom"
+			],
+			[
+				"shad",
+				"shader_program"
+			],
+			[
+				"ena",
+				"enable_frustum_culling"
+			],
+			[
+				"left_",
+				"left_texture_"
+			],
+			[
+				"left",
+				"left_texture_"
+			],
+			[
+				"righ",
+				"right_tex_id_"
+			],
+			[
+				"se",
+				"secondary_rendering_frustum"
+			],
+			[
+				"current",
+				"current_viewstate_"
+			],
+			[
+				"curr",
+				"current_viewstate_"
+			],
+			[
+				"secondaryPro",
+				"secondaryProjection_view"
+			],
+			[
+				"proje",
+				"projection_view"
+			],
+			[
+				"pu",
+				"push_back"
+			],
+			[
+				"Seria",
+				"SerializedScene"
+			],
+			[
+				"seco",
+				"secondaryCam"
+			],
+			[
+				"scene_",
+				"scene_objects_"
+			],
+			[
+				"icn",
+				"include"
+			],
+			[
+				"din",
+				"dino_file_"
+			],
+			[
+				"scale",
+				"scale_matrix_"
+			],
+			[
+				"rotat",
+				"rotation_matrix_"
+			],
+			[
+				"tranl",
+				"translation_matrix_"
+			],
+			[
+				"sha",
+				"shared_ptr"
+			],
+			[
+				"Send",
+				"SendMouseClickEvent"
+			],
+			[
+				"test_",
+				"test_1"
+			],
+			[
+				"test",
+				"test_1"
+			],
+			[
+				"stat",
+				"startup_url_"
+			],
+			[
+				"bro",
+				"browser_"
+			],
+			[
+				"brow",
+				"browserClient_"
+			],
+			[
+				"adress",
+				"address_bar_path"
+			],
+			[
+				"In",
+				"Interface"
+			],
+			[
+				"ad",
+				"address_bar"
+			],
+			[
+				"arg",
+				"argc"
+			],
+			[
+				"win",
+				"window_info_"
+			],
+			[
+				"heg",
+				"height_"
+			],
+			[
+				"wid",
+				"width_"
+			],
+			[
+				"url",
+				"url_"
+			],
+			[
+				"brows",
+				"browser"
+			],
+			[
+				"website",
+				"website_string"
+			],
+			[
+				"samp",
+				"sampled_color_0"
+			],
+			[
+				"rect",
+				"rect"
+			],
+			[
+				"browser_vi",
+				"browser_view_rect"
+			],
+			[
+				"browser_view",
+				"browser_view_rect"
+			],
+			[
+				"Add",
+				"AddChildView"
+			],
+			[
+				"te",
+				"test_view"
+			],
+			[
+				"tes",
+				"test_view_"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "apps/rtr_intermediate_demo/main.cpp",
+			"settings":
+			{
+				"buffer_size": 8366,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "rendering/src/ren/particleGenerators.cpp",
+			"settings":
+			{
+				"buffer_size": 5575,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "rendering/include/rtr/ren/particleGenerators.hpp",
+			"settings":
+			{
+				"buffer_size": 5703,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "rendering/include/rtr/ren/particleEffects.hpp",
+			"settings":
+			{
+				"buffer_size": 2540,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "rendering/src/ren/particleEffects.cpp",
+			"settings":
+			{
+				"buffer_size": 3367,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "apps/rtr_physics_demo/main.cpp",
+			"settings":
+			{
+				"buffer_size": 11339,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 120.0,
+		"history":
+		[
+			"1+1"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/apps",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/apps/rtr_intermediate_demo",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/apps/rtr_physics_demo",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/ren",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/shaders",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders"
+	],
+	"file_history":
+	[
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders/particleFire.geom",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders/particleFire.frag",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders/particlePoint.vert",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders/particleQuad.vert",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/ren/particleRenderer.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/shaders/TextureShaders.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/shaders/ParticleShaders.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/apps/rtr_physics_demo/main.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren/particleEffects.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/ren/particleSystem.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/ren/particleEffects.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/shaders/SimpleShaders.cpp",
+		"/media/anny/GLYPH/Dokumente/Uni/HiWi/VR/vr_sli_ogl/demo/shared_sources/nv_helpers_gl/glresources.hpp",
+		"/media/anny/GLYPH/Dokumente/Uni/HiWi/VR/vr_sli_ogl/demo/vr_sli_ogl/main.cpp",
+		"/media/anny/GLYPH/Dokumente/Uni/HiWi/VR/vr_sli_ogl/demo/shared_sources/nv_helpers_gl/programmanager.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren/particleData.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren/particleHeaders.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren/particleGenerators.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/ren/particleGenerators.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/object/object.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/object/object.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/apps/rtr_intermediate_demo/main.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren/particleRenderer.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders/tutorial.frag",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders/tutorial.vert",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren/headers.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/apps/rtr_terrain_demo/main.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/camera/Camera.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/shaders/SimpleShaders.h",
+		"/home/anny/Dokumente/Projects/CG/ComputerGrafikWS17/application/source/application_solar.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/camera/Camera.h",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders/particleTexture.geom",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/objects/DRAGNFLY.OBJ",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/model/tiny_obj_loader.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/model/model.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/model/model_loader.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/model/model.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/model/model_loader.hpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/resources/shaders/particleTexture.frag",
+		"/home/anny/Dokumente/Projects/CG/ComputerGrafikWS17/external/tinyobjloader-aa07206/tiny_obj_loader.cc",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/CMakeLists.txt",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/particles.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren/TextureShaders.h",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/TextureShaders.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/include/rtr/ren/ParticleShaders.h",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/SimpleShaders.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/particleGenerators.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/ParticleShaders.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/particleUpdaters.cpp",
+		"/home/anny/Dokumente/Projects/RTR/project-rtr/framework/rendering/src/particleRenderer.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/resources/particleTexture.geom",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/resources/particleQuad.geom",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/resources/particleQuad.vert",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/resources/particleTexture.frag",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/TextureShaders.h",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/TextureShaders.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/particleGenerators.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/particleUpdaters.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/particleRenderer.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/particles.hpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_texture/main/main.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_texture/main/Shaders/TextureShader.frag",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/particleGenerators.hpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/particles.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/particleUpdaters.hpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/ParticleShaders.h",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/ParticleShaders.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_texture/main/Shaders/TextureShader.vert",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/Makefile",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/resources/particlePoint.vert",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/SimpleShaders.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/SimpleShaders.h",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/resources/particle.frag",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_texture/main/TextureShaders.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_texture/main/SimpleShaders.h",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/headers.hpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/main.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/shader_loader.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/resources/tutorial.vert",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr/main.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/resources/tutorial.geom",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/object.cpp",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/shader_loader.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/resources/shaders/tri_mesh_shader.vert",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/resources/shaders/light_visibility.vert",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/resources/shaders/common/quad.vert",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/resources/shaders/common/fullscreen_quad.vert",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/src/gua/renderer/PipelinePass.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/PipelinePass.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/node/CameraNode.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/resources/shaders/common/sps_define.glsl",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/resources/shaders/resolve.frag",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/ABuffer.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/enums.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/src/gua/renderer/CameraUniformBlock.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/resources/shaders/common/gua_camera_uniforms.glsl",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/GlfwWindow.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/src/gua/renderer/ResolvePass.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/scenegraph/SceneGraph.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/src/gua/renderer/Serializer.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/src/gua/scenegraph/SceneGraph.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/Pipeline.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/CameraUniformBlock.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/RenderContext.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/WindowBase.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/plugins/guacamole-vive/include/gua/ViveWindow.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/src/gua/renderer/FullscreenPass.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/examples/input/main.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/examples/vive/main.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/plugins/guacamole-vive/src/gua/ViveWindow.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/src/gua/renderer/TriMeshPass.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/resources/shaders/tri_mesh_shader.frag",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/SerializedScene.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/src/gua/renderer/SSAAPass.cpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/renderer/Renderer.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/include/gua/config.hpp.in",
+		"/home/joje1609/Documents/Projects/project-rtr/tutorial/rtr_physics/object.hpp",
+		"/home/joje1609/Documents/Projects/Nvidia_VRWORKS/guacamole/CMakeLists.txt",
+		"/home/joje1609/.config/sublime-text-3/Packages/User/rtr.sublime-build",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/include/gua/renderer/PipelineDescription.hpp",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/include/gua/renderer/Frustum.hpp",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/examples/vive/main.cpp",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/plugins/guacamole-vive/src/gua/ViveWindow.cpp",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/plugins/guacamole-vive/include/gua/ViveWindow.hpp",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/include/gua/renderer/Pipeline.hpp",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/include/gua/renderer/BBoxPass.hpp",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/plugins/guacamole-vive/readme.md",
+		"/home/joje1609/Documents/Projects/gua_orig/guacamole/plugins/guacamole-gui/src/gua/gui/GuiResource.cpp"
+	],
+	"find":
+	{
+		"height": 38.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"FlameEffect",
+			"GL_TRUE",
+			"projection_matrix_",
+			"camera_matrix_",
+			"camera->getProjectionMatrix()",
+			"camera->getViewMatrix()",
+			"GL_FALSE",
+			"GL_TRUE",
+			"GL_FALSE",
+			"GL_TRUE",
+			"projection_matrix_",
+			"particle_shader_",
+			"multicast",
+			"numGPUs",
+			"multicast",
+			"prepare_multicast_extension",
+			"multicast",
+			"SceneData",
+			"glNamedBufferStorageEXT",
+			"buffer",
+			"multicast",
+			"GL_FALSE",
+			"shader_",
+			"m_rend",
+			"initialize",
+			"GL_TRUE",
+			"texture_shader_",
+			"override",
+			"fire_",
+			"std",
+			"std:shared_ptr",
+			"ParticleEffect",
+			"double",
+			"GL_TRUE",
+			"view",
+			"camera",
+			"cameraPosition",
+			"GL_TRUE",
+			"GL_FALSE",
+			"planet_object",
+			"projection_matrix_",
+			"GL_TRUE",
+			"shader",
+			"std::string",
+			"normal",
+			"planet_model",
+			"planet_object",
+			"vertex_buffer_",
+			"f",
+			"for(",
+			"sort",
+			"particleUpdaters",
+			"pos",
+			"vertex[0].color",
+			"std::cout",
+			"col",
+			"pos",
+			"&",
+			"size_t",
+			"const&",
+			"[]",
+			"end_id",
+			"const",
+			"col",
+			"mProjectionLocation",
+			"m_vel",
+			"PointPosGen",
+			"BLEND",
+			"vertext_uv",
+			"pass_color",
+			"texture_shader_",
+			"std::shared_ptr<",
+			"TEXTURE",
+			"textureShader",
+			"TextureShaders",
+			"mouse",
+			"cout",
+			"camera_matrix_",
+			"\"",
+			"vertex",
+			"glm::fvec4",
+			"glm::vec4",
+			"BasicVelGen",
+			"100",
+			"10",
+			"2",
+			"camera_matrix",
+			"projection_matrix",
+			"spawn",
+			"passed_color",
+			"\\n\\",
+			"shader_file",
+			"model_matrix_",
+			"make_projection",
+			"projection",
+			"spawn",
+			"pair",
+			"string",
+			"vertex_shader",
+			"monkey",
+			"window_right",
+			"camera",
+			"config",
+			"STereo",
+			"sps",
+			"config",
+			"resolution",
+			"blit_fbo_write_",
+			"right_tex_id_",
+			"ifdef",
+			"config",
+			"left_position",
+			"endif",
+			"current",
+			"target",
+			"camera",
+			"config",
+			"texture",
+			"right_texture_",
+			"config",
+			"warpRL_",
+			"WARP",
+			"config",
+			"fullscreen",
+			"display",
+			"right_tex_id_",
+			"ctx",
+			"ctx_"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "apps/rtr_intermediate_demo/main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8366,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7777,
+								7777
+							]
+						],
+						"settings":
+						{
+							"SL.93.region_keys":
+							[
+							],
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2567.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "rendering/src/ren/particleGenerators.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5575,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3059,
+								3059
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "rendering/include/rtr/ren/particleGenerators.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5703,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4352,
+								4352
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "rendering/include/rtr/ren/particleEffects.hpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2540,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2044,
+								2044
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "rendering/src/ren/particleEffects.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3367,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3335,
+								3335
+							]
+						],
+						"settings":
+						{
+							"SL.111.region_keys":
+							[
+							],
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "apps/rtr_physics_demo/main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11339,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8688,
+								8688
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3081.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 22.0
+	},
+	"input":
+	{
+		"height": 34.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.SublimeLinter":
+	{
+		"height": 0.0
+	},
+	"output.exec":
+	{
+		"height": 491.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "rtr",
+	"project": "rtr.sublime-project",
+	"replace":
+	{
+		"height": 40.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"~/Dokumente/Projects/VR/CEF/guacamole/scripts/guacamole.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 387.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
