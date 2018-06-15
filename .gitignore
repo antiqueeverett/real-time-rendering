@@ -1,5 +1,7 @@
+
 #Project files
 framework/build/
+framework/install/
 
 # Prerequisites
 *.d
