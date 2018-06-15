@@ -36,6 +36,7 @@ include_directories(${PROJECT_INCLUDE_DIR}
 include_directories(SYSTEM
                           ${Boost_INCLUDE_DIR}
                           ${GLFW_INCLUDE_DIRS}
+                          ${SDL2_INCLUDE_DIR}
                           ${GLEW_INCLUDE_DIRS}
                            )
 
@@ -57,6 +58,7 @@ set(REND_LIBRARY ${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
     ${PROJECT_LIBS}
+    ${SDL2_LIBRARY}
     ${GLFW_LIBRARIES}
     ${GLEW_LIBRARY}
     ${COMMON_LIBRARY}
