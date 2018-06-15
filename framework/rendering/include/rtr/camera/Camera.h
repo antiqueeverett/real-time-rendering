@@ -15,6 +15,7 @@ public:
 
 	void update();
 	void stop() {mSpeed = 0;}
+	void updateProjection(float ratio);
 
 	const glm::mat4& getViewMatrix() const;
 	const glm::mat4& getProjectionMatrix() const;

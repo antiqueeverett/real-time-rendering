@@ -26,7 +26,7 @@ Camera::Camera(float ratio, vec3 camPos)
 	//mPosition = vec3(70.0f, 64.0f, 70.0f);	
 	mPosition = camPos;
 
-	mProjectionMatrix = perspective(45.0f, ratio, 0.01f, 10000.0f);
+	mProjectionMatrix = perspective(70.0f, ratio, 0.01f, 10000.0f);
 
 }
 
@@ -115,3 +115,9 @@ const glm::mat4& Camera::getProjectionMatrix() const
 {
 	return mProjectionMatrix;
 }
+
+void Camera::updateProjection(float ratio){
+	mProjectionMatrix = perspective(70.0f, ratio, 0.01f, 10000.0f);
+
+}
+

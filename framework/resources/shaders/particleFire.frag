@@ -14,3 +14,4 @@ void main() {
 
 	//fragment_color = vec4(looked_up_color.rgb, looked_up_color.a * vertex_color.a);
 	fragment_color = vertex_color * 0.9 + looked_up_color * 0.1;
+}

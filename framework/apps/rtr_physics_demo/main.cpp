@@ -5,9 +5,10 @@
 #include <rtr/shaders/TextureShaders.h>
 #include <rtr/shaders/ParticleShaders.h>
 #include <rtr/object/object.hpp>
+#include <rtr/transformation/mesh.h>
 
-int32_t window_width_  = 1280;
-int32_t window_height_ = 720;
+int32_t window_width_  = 800;
+int32_t window_height_ = 800;
 
 //model-to-world space representation
 glm::mat4 model_matrix_ = glm::mat4();
@@ -19,7 +20,7 @@ glm::mat4 camera_matrix_ = glm::mat4(0.0f);
 glm::mat4 projection_matrix_ = glm::mat4(0.0f);
 
 //3d mesh input file
-std::string obj_file_ = "../resources/objects/DRAGNFLY.OBJ";
+std::string obj_file_ = "../resources/objects/sphere.obj";
 
 Object* dragonfly;
 
@@ -29,7 +30,7 @@ ParticleShaders* particle_shader_;
 
 Camera* camera;
 
-FlameThrowerEffect* fire_;
+BlackHoleEffect* fire_;
 
 bool render_texture = false;
 
@@ -58,21 +59,21 @@ void glut_display() {
   glDisable(GL_BLEND);
   shader_->activate();
 
-
   //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
   glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix());
   glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
   glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+  
 
   //bind the VBO of the model such that the next draw call will render with these vertices
   dragonfly->activate();
 
   
   //draw triangles from the currently bound buffer
-  dragonfly->draw();
+  //dragonfly->draw();
   dragonfly->deactivate();
 
-  glEnable(GL_BLEND);
+  //glEnable(GL_BLEND);
 
   if(render_texture){
     texture_shader_->setCameraMatrix(camera->getViewMatrix());
@@ -136,6 +137,7 @@ void glut_keyboard(uint8_t _key, int32_t _x, int32_t _y) {
 void glut_resize(int32_t _width, int32_t _height) {
   window_width_ = _width;
   window_height_ = _height;
+  camera->updateProjection(_width/(float)_height);
 }
 
 //on every 16 ms
@@ -164,7 +166,7 @@ int32_t main(int32_t argc, char* argv[]) {
 
 
 
-  camera = new Camera((window_width_/window_height_), glm::fvec3{0.0f, 0.f, 0.f});
+  camera = new Camera((window_width_/(float)window_height_), glm::fvec3{0.0f, 0.f, 0.f});
 
   shader_ = new SimpleShaders();
 
@@ -181,13 +183,13 @@ int32_t main(int32_t argc, char* argv[]) {
   createShaders();
 
   dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD));
-  dragonfly->scale(scale);
 
-  fire_ = new FlameThrowerEffect();
-  fire_->init(1000, camera);
+  fire_ = new BlackHoleEffect();
+  fire_->init(100000, camera);
   fire_->initRenderer();
 
-  fire_->setPos(fire_pos * scale);
+
+
   //register glut-callbacks
   //the arguments are pointers to the functions we defined above
   glutDisplayFunc(glut_display);

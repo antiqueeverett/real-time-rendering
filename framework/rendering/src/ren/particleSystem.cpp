@@ -55,7 +55,7 @@ void ParticleSystem::sort(){
 		for(size_t i = 0; i < m_count; ++i){ index[i] = i; }
 	
 		std::sort(index, index + end_id, [&](size_t const& a, size_t const& b) -> bool {
-			return glm::distance(m_particles.m_pos[a], cam_pos) > distance(m_particles.m_pos[b], cam_pos);
+			return (glm::distance(m_particles.m_pos[a], cam_pos) > glm::distance(m_particles.m_pos[b], cam_pos));
 		});
 
 		//sortPos(index);
@@ -154,3 +154,4 @@ void ParticleSystem::sortTime(const size_t index[]){
 	}
 
 	m_particles.m_time = std::move(new_time);
+}
