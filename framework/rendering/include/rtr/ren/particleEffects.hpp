@@ -8,13 +8,14 @@
 
 #include <rtr/ren/headers.hpp>
 #include <rtr/ren/particleHeaders.hpp>
+#include <rtr/camera/Camera.h>
 
 class ParticleEffect {
 public:
 	ParticleEffect(){}
 	virtual ~ParticleEffect(){}
 
-	virtual void init(size_t numParticles) = 0;
+	virtual void init(size_t numParticles, Camera* cam) = 0;
 	virtual void initRenderer() { m_rend->generate(m_sys.get());}
 	virtual void reset() { m_sys->reset();}
 	virtual void clean() { m_rend->destroy();}
@@ -38,7 +39,7 @@ public:
 	FlameEffect(){}
 	~FlameEffect(){}
 
-	void init(size_t numParticles) override;
+	void init(size_t numParticles, Camera* cam) override;
 	void update(float dt) override;
 
 private:
@@ -63,7 +64,7 @@ public:
 	FlameThrowerEffect(){}
 	~FlameThrowerEffect(){}
 
-	void init(size_t numParticles) override;
+	void init(size_t numParticles, Camera* cam) override;
 	void update(float dt) override;
 
 	void setPos(glm::fvec3 pos);

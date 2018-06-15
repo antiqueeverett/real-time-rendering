@@ -259,7 +259,7 @@ int32_t main(int32_t argc, char* argv[]) {
   dragonfly->scale(scale);
 
   fire_ = new FlameThrowerEffect();
-  fire_->init(1000);
+  fire_->init(1000, camera);
   fire_->initRenderer();
 
   fire_->setPos(fire_pos * scale);

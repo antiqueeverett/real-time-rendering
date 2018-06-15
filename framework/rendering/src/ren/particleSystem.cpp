@@ -6,7 +6,8 @@
 
 #include <rtr/ren/particleSystem.hpp>
 
-ParticleSystem::ParticleSystem(size_t maxCount){
+ParticleSystem::ParticleSystem(size_t maxCount, Camera* cam)
+	: m_camera{cam} {
 	m_count = maxCount;
 	m_particles.generate(maxCount);
 	for (size_t i = 0; i < maxCount; ++i){
@@ -46,6 +47,7 @@ void ParticleSystem::reset(){
 void ParticleSystem::sort(){
 	size_t alive = getAliveCount();
 	size_t end_id = alive - 1;
+	glm::fvec4 cam_pos = glm::fvec4{m_camera->getPosition(), 1.0f};
 	//std::cout << alive << "[System::sort()]"  << std::endl;
 	
 	if(alive > 0){
@@ -53,7 +55,8 @@ void ParticleSystem::sort(){
 		for(size_t i = 0; i < m_count; ++i){ index[i] = i; }
 	
 		std::sort(index, index + end_id, [&](size_t const& a, size_t const& b) -> bool {
-			return m_particles.m_pos[a].z < m_particles.m_pos[b].z;});
+			return glm::distance(m_particles.m_pos[a], cam_pos) > distance(m_particles.m_pos[b], cam_pos);
+		});
 
 		//sortPos(index);
 		sortCol(index);

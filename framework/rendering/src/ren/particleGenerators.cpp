@@ -167,7 +167,7 @@ void VelTimeGen::generate(float dt, ParticleData *p, size_t start_id, size_t end
 	for (size_t i = start_id; i < end_id; ++i) {
 		s = glm::dot(m_velocity, glm::normalize(p->m_vel[i]));
 
-		p->m_time[i].x = p->m_time[i].y = glm::gaussRand(s + m_mean,  m_deviation);
+		p->m_time[i].x = p->m_time[i].y = glm::gaussRand(s * m_mean,  m_deviation);
 		p->m_time[i].z = (float)0.0;
 		p->m_time[i].w = (float)1.0 / p->m_time[i].x;
 	}

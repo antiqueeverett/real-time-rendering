@@ -8,12 +8,13 @@
 #define PARTICLESYSTEM_HPP
 
 #include "headers.hpp"
+#include <rtr/camera/Camera.h>
 #include <rtr/ren/particleUpdaters.hpp>
 #include <rtr/ren/particleEmitter.hpp>
 
 class ParticleSystem {
 public:
-	ParticleSystem(size_t maxCount);
+	ParticleSystem(size_t maxCount, Camera* cam);
 	//virtual ~ParticleSystem() { }									
 	//ParticleSystem(const ParticleSystem &) = delete;
 	//ParticleSystem &operator=(const ParticleSystem &) = delete;
@@ -46,6 +47,7 @@ protected:
 
 
 	ParticleData m_particles;
+	std::shared_ptr<Camera> m_camera;
 
 	size_t m_count;
 	bool do_update = true, do_emit = true, do_sort = true;
