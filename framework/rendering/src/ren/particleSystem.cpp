@@ -154,4 +154,3 @@ void ParticleSystem::sortTime(const size_t index[]){
 	}
 
 	m_particles.m_time = std::move(new_time);
-}

@@ -84,4 +84,4 @@ private:
 	std::shared_ptr<BasicTimeUpdater> m_timeUp;
 
 };
-#endif //PARTICLEEFFECT
+#endif

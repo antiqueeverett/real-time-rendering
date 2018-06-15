@@ -162,6 +162,11 @@ include(find_freeimage)
 ################################
 include(FindSOIL)
 
+################################ 
+# SDL2
+################################
+include(FindSDL2)
+
 #FIND_PACKAGE(CUDA REQUIRED)
 
 
@@ -184,6 +189,8 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources/shaders DESTINATION reso
         PATTERN "*.geom"
         PATTERN "*.frag"
         PATTERN "*.tess"
+    	PATTERN "*.vs"
+    	PATTERN "*.fs"
         )
 
 # install textures

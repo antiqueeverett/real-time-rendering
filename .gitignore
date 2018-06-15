@@ -1,3 +1,8 @@
+
+#Project files
+framework/build/
+framework/install/
+
 # Prerequisites
 *.d
 
@@ -30,6 +35,3 @@
 *.out
 *.app
 
-#framework directories
-build/
-install/
