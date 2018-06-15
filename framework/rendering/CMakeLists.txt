@@ -97,3 +97,4 @@ ENDIF (MSVC)
 
 # header files 
 install(DIRECTORY ${PROJECT_INCLUDE_DIR}/rtr/ren DESTINATION include/rtr FILES_MATCHING PATTERN "*.*h")
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/rtr/ren DESTINATION include/rtr/transformation FILES_MATCHING PATTERN "*.*h")
