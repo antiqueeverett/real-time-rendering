@@ -162,11 +162,6 @@ include(find_freeimage)
 ################################
 include(FindSOIL)
 
-################################ 
-# SDL2
-################################
-include(FindSDL2)
-
 #FIND_PACKAGE(CUDA REQUIRED)
 
 
