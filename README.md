@@ -157,7 +157,7 @@ sudo apt install libfreeimage-dev libfreeimageplus-dev libfreeimage3  libfreeima
 
 ###  Verify installed libraries 
 
-(e.g) *freetype2* flags
+FLAGS
 
 ```
 $ pkg-config --cflags freetype2
@@ -165,11 +165,12 @@ $ pkg-config --cflags freetype2
   -I/usr/include/freetype2  
 ```
 
-(e.g) *freetype2* library (also linking reference)
+LIB
 
 ```
 $ pkg-config --libs freetype2
--lfreetype 
+
+-lfreetype     
 ```
 
 ### ACKNOWLEDGEMENTS
