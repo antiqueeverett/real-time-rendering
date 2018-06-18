@@ -25,6 +25,12 @@ float amplitude = 80.0f;			// Amplitude for noise function
 float frequency = 0.013f;			// frequency for noise function
 const int terrainTextureRes = 512;	// Resolution of the texture images
 
+float elapsedTime = 0.0;							// for moving the terrain, measure elapsed time
+const float speed = 2.0;			// Speed of moving terrain
+vec3 terrainTransl;					// vector for translating terrain in the shader
+float oldTime = 0.0;
+float mSpeed = 0.0;
+
 const char* terrainFrag = "../resources/shaders/TerrainShader.frag";
 const char* terrainVert = "../resources/shaders/TerrainShader.vert";
 const char* skyboxFrag = "../resources/shaders/skybox.frag";
@@ -32,7 +38,7 @@ const char* skyboxVert = "../resources/shaders/skybox.vert";
 std::vector<std::string> textures = { "../resources/textures/Terrain/Mountain1.png", "../resources/textures/Terrain/grassSeemless.png", "../resources/textures/Terrain/snow.png" };
 std::vector<std::string> skyboxTextures = {"../resources/textures/Skybox/right.png", "../resources/textures/Skybox/left.png", "../resources/textures/Skybox/top.png", "../resources/textures/Skybox/bottom.png", "../resources/textures/Skybox/back.png", "../resources/textures/Skybox/front.png" };
 const vec3 terrainCenter = vec3(static_cast<float>(terrainResolution / 2), 0.0f, static_cast<float>(terrainResolution / 2)); //center of terrain
-const vec3 cameraPosition = vec3(0.0f, 80.0f, 0.0f);
+const vec3 cameraPosition = vec3(0.0f, 100.0f, 0.0f);
 
 Terrain* terrain = nullptr;
 TerrainShaders* terrainShaders = nullptr;
@@ -73,7 +79,7 @@ void display(void)
 
 	// update camera
 	camera->update();
-
+	
 	mat4 worldMatrix = calcTerrainTransformation(rotationXAngle, rotationYAngle);
 
 	// render terrain
@@ -82,6 +88,8 @@ void display(void)
 	terrainShaders->setProjectionMatrix(camera->getProjectionMatrix());
 	terrainShaders->setAmplitude(amplitude);
 	terrainShaders->setFrequency(frequency);
+	
+	terrainShaders->setTime(terrainTransl);
 	terrainShaders->activate();
 	terrain->draw();
 	
@@ -91,7 +99,7 @@ void display(void)
 	skyboxShaders->setProjectionMatrix(camera->getProjectionMatrix());
 	skyboxShaders->activate();
 	skybox->draw();
-	glDepthFunc(GL_LESS);	 						// set depth function back to default
+	glDepthFunc(GL_LESS);  								// set depth function back to default 
 	glutSwapBuffers();
 }
 
@@ -116,26 +124,42 @@ void special(int key, int x, int y)
 	glutPostRedisplay();
 }
 
-// change amplitude and frequency with asdf
+vec3 simulateMovement() {
+	float maxSpeed = -0.5;
+	float deltaTime = elapsedTime - oldTime;
+	mSpeed -= speed * deltaTime;
+	//printf("%f, ", mSpeed);
+	if (mSpeed < maxSpeed)
+		mSpeed = maxSpeed;
+	vec3 mDirection = vec3(sin(2.0) * cos(4.0), cos(2.0), sin(2.0) * sin(4.0));
+	oldTime = elapsedTime;
+	return mSpeed * mDirection;
+}
+
+// move terrain with WASD
 void keyboard(unsigned char key, int x, int y)
 {
+	//TODO: Set mSpeed = 0 when wasd is released
+	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
+	elapsedTime += 0.001;
 	switch (key) {
-	case 's':
-		amplitude += 2.0f;
+	case 'w':
+		terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
 		break;
 	case 'a':
-		amplitude -= 2.0f;
+		terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
 		break;
-	case 'f':
-		frequency += 0.02f;
+	case 's':
+		terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
 		break;
 	case 'd':
-		frequency -= 0.02f;
+		terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
 		break;
 	}
 	glutPostRedisplay();
 
 }
+
 
 
 int main(int argc, char** argv)
@@ -144,10 +168,8 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(width, height);
-	glutInitContextVersion(3, 3);
-	glutInitContextProfile(GLUT_CORE_PROFILE);
 
-	if (glutCreateWindow("Illuminated Terrain") == 0)
+	if (glutCreateWindow("rtr_terrain") == 0)
 	{
 		printf("Glut init failed\n");
 		return -1;
@@ -171,6 +193,9 @@ int main(int argc, char** argv)
 	terrainShaders = new TerrainShaders(terrainTextureRes, textures, amplitude, frequency);
 	terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
 	terrainShaders->locateUniforms();
+	
+	//Moving terrain
+	terrainTransl = vec3(0.0);
 
 	//Skybox
 	skybox = new Skybox(terrainResolution);
@@ -185,7 +210,7 @@ int main(int argc, char** argv)
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
-
+	
 	glutMainLoop();
 	return 0;
 }

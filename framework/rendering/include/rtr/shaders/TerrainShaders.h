@@ -20,6 +20,7 @@ public:
 	void setProjectionMatrix(const glm::mat4& projMatrix);
 	void setAmplitude(const float amplitude);
 	void setFrequency(const float frequency);
+	void setTime(const glm::vec3& timeTranslate);
 
 	
 private:
@@ -35,6 +36,7 @@ private:
 	GLint mTextureSamplerLocation2;
 	GLint mAmplitudeLocation;
 	GLint mFrequencyLocation;
+	GLint mTimeLocation;
 	GLuint mTextureID0;
 	GLuint mTextureID1;
 	GLuint mTextureID2;

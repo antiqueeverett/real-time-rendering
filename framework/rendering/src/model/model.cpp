@@ -1,3 +1,5 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <rtr/model/model.hpp>
 
 //#include <glbinding/gl/enum.h>

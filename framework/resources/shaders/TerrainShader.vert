@@ -5,7 +5,7 @@ uniform mat3 modelInvT;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform vec3 worldSunDirection; 
+uniform vec3 timeTranslate;
 
 uniform float amplitude;
 uniform float frequency;
@@ -20,8 +20,9 @@ out vec3 fWorldPos;
 out vec3 fWorldNormal;
 out vec3 fWorldCam;
 
-out vec4 fTexCoord;
+out vec3 fViewPos; // vertex position in view space
 
+out vec4 fTexCoord;
 //------------------------------------------------------------------------------------------------------------------
 // 2D PERLIN NOISE 
 // Code from: 
@@ -31,7 +32,7 @@ out vec4 fTexCoord;
 
 float hash(float n)
 {
-	return fract(sin(n) * 10000);
+    return fract(sin(n) * 10000);
 }
 
 float hash(vec2 p) {
@@ -53,21 +54,21 @@ float noise(vec2 x) {
     vec2 i = floor(x);
     vec2 f = fract(x);
 
-	// Four corners in 2D of a tile
-	float a = hash(i);
+    // Four corners in 2D of a tile
+    float a = hash(i);
     float b = hash(i + vec2(1.0, 0.0));
     float c = hash(i + vec2(0.0, 1.0));
     float d = hash(i + vec2(1.0, 1.0));
 
     // Simple 2D lerp using smoothstep envelope between the values.
-	// return vec3(mix(mix(a, b, smoothstep(0.0, 1.0, f.x)),
-	//			mix(c, d, smoothstep(0.0, 1.0, f.x)),
-	//			smoothstep(0.0, 1.0, f.y)));
+    // return vec3(mix(mix(a, b, smoothstep(0.0, 1.0, f.x)),
+    //          mix(c, d, smoothstep(0.0, 1.0, f.x)),
+    //          smoothstep(0.0, 1.0, f.y)));
 
-	// Same code, with the clamps in smoothstep and common subexpressions
-	// optimized away.
+    // Same code, with the clamps in smoothstep and common subexpressions
+    // optimized away.
     vec2 u = f*f*f*(f*(f*6.0 - 15.0) + 10.0);
-	return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
 float noise2d( in vec2 x )
@@ -106,7 +107,7 @@ float noise2d( in vec2 x )
 
 const mat2 m2 = mat2(  0.80,  0.60,
                       -0.60,  0.80 );
-					  
+                      
 float fBm( vec2 point, double H, double lacunarity, double octaves ) {
 double value = 0.0; 
 double remainder = 0.0;
@@ -118,7 +119,7 @@ point.y *= float(lacunarity);
 }
 remainder = octaves - int(octaves);
 if ( remainder != 0.000000000000){
-	value += remainder * noise2d( point ) * pow( float(lacunarity),float(-H*i)  );
+    value += remainder * noise2d( point ) * pow( float(lacunarity),float(-H*i)  );
 }
 return float(value);
 }
@@ -132,7 +133,7 @@ point.y *= float(lacunarity);
 }
 return float(value);
 }
-				   
+                   
 float fbm_9( in vec2 x )
 {
     float f = 1.9;
@@ -146,38 +147,40 @@ float fbm_9( in vec2 x )
         b *= s;
         x = f*m2*x;
     }
-	return a;
+    return a;
 }
 
 //------------------------------------------------------------------------------------------------------------------
 // MAIN 
 //------------------------------------------------------------------------------------------------------------------
+double H = 1.4;
+double lacunarity = 1.8;
+double octaves = 8.0;
+double offset = 0.7;
 
 void main()
 {
-	double H = 1.4;
-	double lacunarity = 1.8;
-	double octaves = 8.0;
-	double offset = 0.7;
-	vec4 position = vPos;
-	//position.y = fBm((position.xz*frequency), H, lacunarity, octaves)*50.0;
-	//position.y = multifractal((position.xz*frequency), 0.25, lacunarity, int(octaves), offset)*50.0;
-	//position.y = fbm_9(position.xz * frequency)*50.0;
-	//position.y = noise(position.xz*frequency)*amplitude;
-	position.y = 0.25 * noise(position.xz*frequency) + 0.125 * fBm((position.xz*frequency), H, lacunarity, octaves) + 0.25* multifractal((position.xz*frequency/2.0), H, lacunarity, int(octaves), 0.8) + 0.25* fbm_9(position.xz * frequency/2.0);
-	position.y *= 300.0;
-	
-	if(position.y < 0.0)
-	{
-		position.y = 0.0;
-	} 
-	
-	height = position.y;
-	gl_Position = (projection * view * model) * position;
-	fWorldPos = (model * position).xyz;
-	fWorldNormal = normalize(modelInvT * vNormal.xyz);																		
-	fWorldCam = (inverse(view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-	fTexCoord = vTexCoord;
+
+    vec4 position = vPos + vec4(timeTranslate, 0.0); // translate terrain when it moves to make terrain look infinite
+    position.y = 0.25 * noise(position.xz*frequency) + 0.125 * fBm((position.xz*frequency), H, lacunarity, octaves) + 0.25* multifractal((position.xz*frequency/2.0), H, lacunarity, int(octaves), 0.8) + 0.25* fbm_9(position.xz * frequency/2.0);
+    position.y *= 300.0;
+    
+    if(position.y < 0.0)
+    {
+        position.y = 0.0;
+    } 
+    //fTexCoord = vTexCoord + vec4(timeTranslate, 0.0);
+    position.x = vPos.x;    //to stay on the grid, reset x and values
+    position.z = vPos.z;
+    
+    fViewPos = (view * model * position).xyz;                   //in view space
+    height = position.y;                                        //height of vertex
+    gl_Position = (projection * view * model) * position;       //ModelViewTransformation
+    fWorldPos = (model * position).xyz;                         // in world space
+    fWorldNormal = normalize(modelInvT * vNormal.xyz);          //surface normal                                                            
+    fWorldCam = (inverse(view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz; //Camera position in world space
+    fTexCoord = vTexCoord;                                      //texture coordinate
+    
+
 
 }
-

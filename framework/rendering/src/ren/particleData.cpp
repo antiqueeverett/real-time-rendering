@@ -3,7 +3,7 @@
  * https://github.com/fenbf/particles 										  *
  * https://www.bfilipek.com/2014/03/three-particle-effects.html				  *
  ******************************************************************************/
-
+#define GLM_ENABLE_EXPERIMENTAL
 #include <rtr/ren/particleData.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include <rtr/model/model_loader.hpp>
 
 // use floats and med precision operations

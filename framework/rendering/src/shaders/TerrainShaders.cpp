@@ -4,8 +4,6 @@
 
 using namespace glm;
 
-
-
 TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> texture_path, float amplitude, float frequency) :
 	mModelLocation(-1),
 	mModelInvTLocation(-1),
@@ -17,6 +15,7 @@ TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> t
 	mTextureSamplerLocation2(-1),
 	mAmplitudeLocation(-1),
 	mFrequencyLocation(-1),
+	mTimeLocation(-1),
 	mTexturePath(texture_path),
 	amplitude(amplitude),
 	frequency(frequency)
@@ -98,6 +97,10 @@ void TerrainShaders::locateUniforms()
 		printf("Frequency not found\n");
 
 	glUniform1f(mFrequencyLocation, frequency);
+
+	mTimeLocation = glGetUniformLocation(mShaderProgram, "timeTranslate");
+	if (mTimeLocation == -1)
+		printf("Time not found\n");
 }
 
 
@@ -157,6 +160,16 @@ void TerrainShaders::setFrequency(const float frequency)
 
 	glUseProgram(mShaderProgram);
 	glUniform1f(mFrequencyLocation, frequency);
+}
+
+// Vector for translating terrain for fractal input
+void TerrainShaders::setTime(const glm::vec3& timeTranslate)
+{
+	if (mTimeLocation < 0)
+		printf("[TerrainShaders] uniform location for 'time' not known\n");
+	
+	glUseProgram(mShaderProgram);
+	glUniform3fv(mTimeLocation, 1, &timeTranslate[0]);
 }
 
 // Load texture set all parameters

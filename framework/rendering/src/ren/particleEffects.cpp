@@ -1,4 +1,4 @@
-
+#define GLM_ENABLE_EXPERIMENTAL
 /******************************************************************************
  * Concept & Code from  Bartłomiej Filipek									  *
  * https://github.com/fenbf/particles 										  *

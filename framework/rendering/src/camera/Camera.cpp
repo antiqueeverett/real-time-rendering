@@ -103,7 +103,8 @@ void Camera::update()
 
 		mPosition += mSpeed * mDirection;
 
-		mViewMatrix = lookAt(mPosition, mPosition + mDirection, vec3(0.0f, 1.0f, 0.0f));
+	mViewMatrix = lookAt(mPosition, mPosition + mDirection, vec3(0.0f, 0.75f, 0.0f));
+	//mViewMatrix = lookAt(mPosition, vec3(-20.0,90.0,0.0), vec3(0.0f, 0.80f, 0.0f));
 }
 
 const glm::mat4& Camera::getViewMatrix() const
