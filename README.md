@@ -100,6 +100,81 @@ e.g. objects: "../resources/objects/some_object.obj"
 * adding "install" to the make command is important! otherwise, changes in shaders won't be added to install folder#
 
 
+### Libraries linux set-up
+
+* **Boost**
+```
+sudo apt-get install libboost-all-dev
+sudo apt-getinstall libboost-dev libboost-test-dev
+```
+
+* **CMAKE**
+```
+sudo apt-get install cmake cmake-qt-gui cmake-curses-gui pkgconf
+```
+
+* **GLM**
+```
+sudo apt-get install libglm-dev
+```
+
+* **GLEW**
+```
+sudo apt-get install libglew-dev glew-utils libglfw3-dev 
+```
+
+* **SDL2**
+```
+sudo apt-get install libsdl2-dev
+sudo apt-get install libsdl-mixer1.2-dev
+```
+
+* **FREEGLUT3**
+```
+sudo apt-get install freeglut3-dev 
+```	 
+
+* **ASSIMP**
+```
+libassimp-dev
+```
+
+* **SOIL**
+```
+sudo apt-get install libsoil-dev
+```
+
+* **DevIL**
+```
+sudo apt-get install libdevil-dev
+sudo apt-get install libdevil1c2
+```
+
+* **FREEIMAGE**
+```
+sudo apt install libfreeimage-dev libfreeimageplus-dev libfreeimage3  libfreeimageplus3
+```
+
+*optionally verfy the install of the libraries using* 
+
+pkg-config --cflags  &  $ pkg-config --libs
+	     ^^^^^^		       ^^^^		
+```
+$ pkg-config --cflags freetype2
+-I/usr/include/freetype2  
+```
+
+```
+$ pkg-config --libs freetype2
+-lfreetype 
+```
+
+```
+pkg-config --cflags --libs freetype2
+```
+
+
 ### ACKNOWLEDGEMENTS
 
 brosefine
+Marques
