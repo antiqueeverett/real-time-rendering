@@ -155,26 +155,25 @@ sudo apt-get install libdevil1c2
 sudo apt install libfreeimage-dev libfreeimageplus-dev libfreeimage3  libfreeimageplus3
 ```
 
-*optionally verfy the install of the libraries using* 
+###  Verify installed libraries 
 
-pkg-config --cflags  &  $ pkg-config --libs
-	     ^^^^^^		       ^^^^		
+(e.g) *freetype2* flags
+
 ```
 $ pkg-config --cflags freetype2
--I/usr/include/freetype2  
+
+  -I/usr/include/freetype2  
 ```
+
+(e.g) *freetype2* library (also linking reference)
 
 ```
 $ pkg-config --libs freetype2
 -lfreetype 
 ```
 
-```
-pkg-config --cflags --libs freetype2
-```
-
-
 ### ACKNOWLEDGEMENTS
 
 brosefine
+
 Marques
