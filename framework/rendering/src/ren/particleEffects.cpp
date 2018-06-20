@@ -56,7 +56,7 @@ void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
 											   				 glm::fvec4{0.8f, 0.1f, 0.006f, 0.0f}, 
 											   				 glm::fvec4{0.2f, 0.0f, 0.0f, 0.0f},
 											   	 			 glm::fvec4{0.3f, 0.0f, 0.0f, 0.0f}));
-	m_timeGen = std::make_shared<GaussTimeGen>(GaussTimeGen(2.f, 0.7f));
+	m_timeGen = std::make_shared<GaussTimeGen>(GaussTimeGen(3.f, 2.3f));
 	//create emiiter
 	auto emmit = std::make_shared<ParticleEmitter>(100.f);
 	emmit->addGenerator(m_posGen);
@@ -64,7 +64,7 @@ void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
 	emmit->addGenerator(m_colGen);
 	emmit->addGenerator(m_timeGen);
 	//Updaters
-	m_accUp = std::make_shared<BasicAccUpdater>(glm::fvec4{0.0f, 8.f, 0.0f, 0.0f});
+	m_accUp = std::make_shared<BasicAccUpdater>(glm::fvec4{0.0f, 4.f, 0.0f, 0.0f});
 	m_velUp = std::make_shared<BasicVelUpdater>();
 	m_noiseUp = std::make_shared<NoiseVelocityUpdater>(0.6f, 2.0f);
 	m_posUp = std::make_shared<BasicPosUpdater>();

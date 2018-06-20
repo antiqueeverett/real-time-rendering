@@ -47,6 +47,7 @@ void ParticleSystem::reset(){
 void ParticleSystem::sort(){
 	size_t alive = getAliveCount();
 	size_t end_id = alive - 1;
+	
 	glm::fvec4 cam_pos = glm::fvec4{m_camera->getPosition(), 1.0f};
 	//std::cout << alive << "[System::sort()]"  << std::endl;
 	

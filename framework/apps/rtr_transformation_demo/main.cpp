@@ -28,7 +28,7 @@ int main (){
 
 	//Mesh, Shader, Texture, Camera & Transformation ~  
 	Transform transform;
-	Mesh mesh("../resources/objects/DRAGNFLY.OBJ");
+	Mesh mesh("../resources/objects/sphere.obj");
 	Shader shader("../resources/shaders/basicShader");
 	Texture texture("../resources/textures/bricks.jpg");
 	Camera camera(glm::vec3(0,0,-2), 70.0f, (float)WIDTH/(float)HEIGHT, 0.001f, 1000.0f);
