@@ -56,13 +56,16 @@ float rotationXAngle = 0.0f;	// rotation angles for camera movement
 float rotationYAngle = 0.0f;
 Camera* camera;
 
-std::string obj_file_ = "../resources/objects/DRAGNFLY.OBJ";
+std::string obj_file_ = "../resources/objects/dragon_fly.obj";
+//std::string obj_file_ = "../resources/objects/DRAGNFLY.OBJ";
 
 Object* dragonfly;
 
 SimpleShaders* shader_;
 TextureShaders* texture_shader_;
 FlameThrowerEffect* fire_;
+
+bool render_obj = true, render_effect = true, render_terrain = true;
 
 
 // If mouse is moves in direction (x,y)
@@ -100,60 +103,69 @@ void display(void)
 {
   glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
+  glClearColor(0.22f, 0.28f, 0.31f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glDisable(GL_BLEND);
 
 	// update camera
 	camera->update();
-	
-	mat4 worldMatrix = calcTerrainTransformation(rotationXAngle, rotationYAngle);
 
-	// render terrain
-	terrainShaders->setModelMatrix(worldMatrix * mat4(1.0));	
-	terrainShaders->setViewMatrix(camera->getViewMatrix());
-	terrainShaders->setProjectionMatrix(camera->getProjectionMatrix());
-	terrainShaders->setAmplitude(amplitude);
-	terrainShaders->setFrequency(frequency);
+	if(render_terrain){
+		
+		mat4 worldMatrix = calcTerrainTransformation(rotationXAngle, rotationYAngle);
 	
-	terrainShaders->setTime(terrainTransl);
-	terrainShaders->activate();
-	terrain->draw();
-
-	glDepthFunc(GL_LEQUAL);								// change depth function so depth test passes when values are equal to depth buffer's content
-	mat4 viewMat = mat4(mat3(camera->getViewMatrix())); // remove translation from the view matrix
-	skyboxShaders->setViewMatrix(viewMat);
-	skyboxShaders->setProjectionMatrix(camera->getProjectionMatrix());
-	skyboxShaders->activate();
-	skybox->draw();
-	glDepthFunc(GL_LESS);  
+		// render terrain
+		terrainShaders->setModelMatrix(worldMatrix * mat4(1.0));	
+		terrainShaders->setViewMatrix(camera->getViewMatrix());
+		terrainShaders->setProjectionMatrix(camera->getProjectionMatrix());
+		terrainShaders->setAmplitude(amplitude);
+		terrainShaders->setFrequency(frequency);
+		
+		terrainShaders->setTime(terrainTransl);
+		terrainShaders->activate();
+		terrain->draw();
+	
+		glDepthFunc(GL_LEQUAL);								// change depth function so depth test passes when values are equal to depth buffer's content
+		mat4 viewMat = mat4(mat3(camera->getViewMatrix())); // remove translation from the view matrix
+		skyboxShaders->setViewMatrix(viewMat);
+		skyboxShaders->setProjectionMatrix(camera->getProjectionMatrix());
+		skyboxShaders->activate();
+		skybox->draw();
+		glDepthFunc(GL_LESS);
+	}  
 									// set depth function back to default 
-	shader_->activate();
+	
+	if(render_obj){
+		shader_->activate();
+	
+		//upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
+		glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix());
+		glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+		glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+	
+		//bind the VBO of the model such that the next draw call will render with these vertices
+		dragonfly->activate();
+	
+		//draw triangles from the currently bound buffer
+		dragonfly->draw();
+		dragonfly->deactivate();
+	}
 
-	//upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-	glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix());
-	glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
-	glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
-
-	//bind the VBO of the model such that the next draw call will render with these vertices
-	dragonfly->activate();
-
-	//draw triangles from the currently bound buffer
-	dragonfly->draw();
-	dragonfly->deactivate();
-
-	glEnable(GL_BLEND);
-
-	texture_shader_->activate();
-	texture_shader_->setCameraMatrix(camera->getViewMatrix());
-	texture_shader_->setProjectionMatrix(camera->getProjectionMatrix());
-	texture_shader_->setAtlasDim();
-
-	fire_->cpuUpdate(16.f/1000.f);
-	fire_->gpuUpdate();
-	fire_->render();
-
-	glDisable(GL_BLEND);
-
+	if(render_effect){
+		glEnable(GL_BLEND);
+	
+		texture_shader_->activate();
+		texture_shader_->setCameraMatrix(camera->getViewMatrix());
+		texture_shader_->setProjectionMatrix(camera->getProjectionMatrix());
+		texture_shader_->setAtlasDim();
+	
+		fire_->cpuUpdate(16.f/1000.f);
+		fire_->gpuUpdate();
+		fire_->render();
+	
+		glDisable(GL_BLEND);
+	}
 	
 	glutSwapBuffers();
 }
@@ -213,6 +225,16 @@ void keyboard(unsigned char key, int x, int y)
 	case ' ':
       	camera->stop();
     	break;
+    case 'y':
+    	render_obj = !render_obj;
+    	break;
+    case 'x':
+    	render_terrain = !render_terrain;
+    	break;
+    case 'c':
+    	render_effect = !render_effect;
+    	break;
+
 	}
 	glutPostRedisplay();
 
@@ -277,7 +299,7 @@ int main(int argc, char** argv)
   	float scale = 50.0;
   	glm::fvec3 drgnfly_pos{0.0, 80.0, 0.0};
 
-  	dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD));
+  	dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
 	dragonfly->scale(scale);
 	dragonfly->translate(drgnfly_pos);
 
