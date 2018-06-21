@@ -74,7 +74,11 @@ void Object::load_model(model::attrib_flag_t import_attribs) {
   // third attribute is 3 floats with no offset & stride
   glVertexAttribPointer(1, model::TEXCOORD.components, model::TEXCOORD.type, GL_FALSE, m_model.vertex_bytes, m_model.offsets[model::TEXCOORD]);
     
-  
+  // activate third attribute on gpu
+  glEnableVertexAttribArray(2);
+  // third attribute is 3 floats with no offset & stride
+  glVertexAttribPointer(2, model::NORMAL.components, model::NORMAL.type, GL_FALSE, m_model.vertex_bytes, m_model.offsets[model::NORMAL]);
+    
   // generate generic buffer
   glGenBuffers(1, &m_element_BO);
   // bind this as an vertex array buffer containing all attributes
