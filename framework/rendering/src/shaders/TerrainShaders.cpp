@@ -4,7 +4,7 @@
 
 using namespace glm;
 
-TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> texture_path, float amplitude, float frequency) :
+TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> texture_path, float amplitude, float frequency, int terrainResolution, int tileNumber) :
 	mModelLocation(-1),
 	mModelInvTLocation(-1),
 	mViewLocation(-1),
@@ -16,9 +16,13 @@ TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> t
 	mAmplitudeLocation(-1),
 	mFrequencyLocation(-1),
 	mTimeLocation(-1),
+	mTerrainResLocation(-1),
+	mTileNoLocation(-1),
 	mTexturePath(texture_path),
-	amplitude(amplitude),
-	frequency(frequency)
+	mAmplitude(amplitude),
+	mFrequency(frequency),
+	mTerrainResolution(terrainResolution),
+	mTileNumber(tileNumber)
 {
 		mTextureID0 = generateTexture(textureResolution, mTexturePath[0].c_str());
 		mTextureID1 = generateTexture(textureResolution, mTexturePath[1].c_str());
@@ -90,17 +94,30 @@ void TerrainShaders::locateUniforms()
 	if (mAmplitudeLocation == -1)
 		printf("Amplitude not found\n");
 	
-	glUniform1f(mAmplitudeLocation, amplitude);
+	glUniform1f(mAmplitudeLocation, mAmplitude);
 
 	mFrequencyLocation = glGetUniformLocation(mShaderProgram, "frequency");
 	if (mFrequencyLocation == -1)
 		printf("Frequency not found\n");
 
-	glUniform1f(mFrequencyLocation, frequency);
+	glUniform1f(mFrequencyLocation, mFrequency);
 
 	mTimeLocation = glGetUniformLocation(mShaderProgram, "timeTranslate");
 	if (mTimeLocation == -1)
 		printf("Time not found\n");
+
+	mTerrainResLocation = glGetUniformLocation(mShaderProgram, "terrainResolution");
+	if (mTimeLocation == -1)
+		printf("TerrainResolution not found\n");
+	
+	glUniform1i(mTerrainResLocation, mTerrainResolution);
+
+
+	mTileNoLocation = glGetUniformLocation(mShaderProgram, "textureTileNumber");
+	if (mTileNoLocation == -1)
+		printf("Tilenumber not found\n");
+
+	glUniform1i(mTileNoLocation, mTileNumber);
 }
 
 

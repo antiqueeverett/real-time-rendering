@@ -249,7 +249,7 @@ int main(int argc, char** argv)
 	camera = new Camera((width/(float)height), cameraPosition);
 	// Terrain  
 	terrain = new Terrain(terrainResolution, tileNumber);
-	terrainShaders = new TerrainShaders(terrainTextureRes, textures, amplitude, frequency);
+	terrainShaders = new TerrainShaders(terrainTextureRes, textures, amplitude, frequency, terrainResolution, tileNumber);
 	terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
 	terrainShaders->locateUniforms();
 	

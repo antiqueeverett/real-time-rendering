@@ -9,7 +9,7 @@
 class TerrainShaders : public SimpleShaders
 {
 public:
-	explicit TerrainShaders(int textureResolution, std::vector<std::string> texture_path, float amplitude, float frequency);
+	explicit TerrainShaders(int textureResolution, std::vector<std::string> texture_path, float amplitude, float frequency, int terrainResolution, int tileNumber);
 	virtual ~TerrainShaders() = default;
 
 	void locateUniforms();
@@ -37,14 +37,17 @@ private:
 	GLint mAmplitudeLocation;
 	GLint mFrequencyLocation;
 	GLint mTimeLocation;
+	GLint mTerrainResLocation;
+	GLint mTileNoLocation;
 	GLuint mTextureID0;
 	GLuint mTextureID1;
 	GLuint mTextureID2;
 
 	std::vector<std::string> mTexturePath;
-	float const frequency;
-	float const amplitude;
-
+	float const mFrequency;
+	float const mAmplitude;
+	float const mTerrainResolution;
+	float const mTileNumber;
 };
 
 #endif

@@ -16,8 +16,8 @@
 
 using namespace glm;
 // Dimensions of the windows
-const int width = 1280;
-const int height = 720;
+int width = 1280;
+int height = 720;
 
 const int terrainResolution = 512;	// Size of the terrain: 64 x 64 grid
 const int tileNumber = 12;			// No of tiles of terrain => 12 texture tiles
@@ -48,6 +48,13 @@ SkyboxShaders* skyboxShaders = nullptr;
 float rotationXAngle = 0.0f;	// rotation angles for camera movement
 float rotationYAngle = 0.0f;
 Camera* camera;
+
+//on resize window, re-create projection matrix
+void glut_resize(int32_t _width, int32_t _height) {
+  width = _width;
+  height = _height;
+  camera->updateProjection(width/(float)height);
+}
 
 // If mouse is moves in direction (x,y)
 void mouseMotion(int x, int y)
@@ -155,6 +162,9 @@ void keyboard(unsigned char key, int x, int y)
 	case 'd':
 		terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
 		break;
+	case ' ':
+      	camera->stop();
+    	break;
 	}
 	glutPostRedisplay();
 
@@ -190,7 +200,7 @@ int main(int argc, char** argv)
 
 	// Terrain  
 	terrain = new Terrain(terrainResolution, tileNumber);
-	terrainShaders = new TerrainShaders(terrainTextureRes, textures, amplitude, frequency);
+	terrainShaders = new TerrainShaders(terrainTextureRes, textures, amplitude, frequency, terrainResolution, tileNumber);
 	terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
 	terrainShaders->locateUniforms();
 	

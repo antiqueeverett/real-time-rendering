@@ -22,6 +22,8 @@ out vec3 fWorldCam;
 
 out vec3 fViewPos; // vertex position in view space
 
+out vec3 fTimeTranslate;
+
 out vec4 fTexCoord;
 //------------------------------------------------------------------------------------------------------------------
 // 2D PERLIN NOISE 
@@ -169,10 +171,11 @@ void main()
     {
         position.y = 0.0;
     } 
-    //fTexCoord = vTexCoord + vec4(timeTranslate, 0.0);
+
     position.x = vPos.x;    //to stay on the grid, reset x and values
     position.z = vPos.z;
-    
+
+    fTimeTranslate = timeTranslate;
     fViewPos = (view * model * position).xyz;                   //in view space
     height = position.y;                                        //height of vertex
     gl_Position = (projection * view * model) * position;       //ModelViewTransformation
