@@ -88,10 +88,10 @@ public:
 	glm::vec4 m_max_end_col;
 
 	BasicColorGen()
-	: m_min_start_col(0.0)
-	, m_max_start_col(0.0)
-	, m_min_end_col(0.0)
-	, m_max_end_col(0.0) { }
+	: m_min_start_col(1.0f)
+	, m_max_start_col(1.0f)
+	, m_min_end_col(glm::fvec4{glm::linearRand(0.0f, 1.0f)})
+	, m_max_end_col(glm::fvec4{glm::linearRand(0.0f, 1.0f)}) { }
 
 	BasicColorGen(glm::fvec4 s, glm::fvec4 e)
 	: m_min_start_col{s}

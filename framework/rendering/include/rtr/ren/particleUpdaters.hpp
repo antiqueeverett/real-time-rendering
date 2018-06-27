@@ -38,6 +38,13 @@ public:
 	virtual void update(float dt, ParticleData *p) override;
 };
 
+class AttractorUpdater : public ParticleUpdater {
+public:
+	std::vector<glm::vec4> m_attractors;
+
+	virtual void update(float dt, ParticleData *p) override;
+};
+
 class BasicAccUpdater : public ParticleUpdater {
 public:
 	glm::fvec4 m_acceleration;

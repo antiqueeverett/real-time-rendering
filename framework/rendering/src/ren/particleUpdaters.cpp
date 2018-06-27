@@ -53,6 +53,25 @@ void NoiseVelocityUpdater::update(float dt, ParticleData *p){
 	}
 }
 
+void AttractorUpdater::update(float dt, ParticleData *p){
+	size_t end_id = p->m_count_alive;
+
+	glm::fvec4* acc = p->m_acc.get();
+	glm::fvec4* pos = p->m_pos.get();
+
+	float dist;
+	glm::fvec4 dir;
+
+	for (size_t i = 0; i < end_id; ++i) {
+		for(auto const& att : m_attractors){
+			dir = att - pos[i];
+			dist = glm::length(dir);
+
+			acc[i] += dir * att.w / dist;
+		}
+	}
+}
+
 void BasicVelUpdater::update(float dt, ParticleData *p){
 	size_t end_id = p->m_count_alive;
 

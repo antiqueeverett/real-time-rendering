@@ -22,25 +22,22 @@ glm::mat4 projection_matrix_ = glm::mat4(0.0f);
 //3d mesh input file
 std::string obj_file_ = "../resources/objects/sphere.obj";
 
-Object* dragonfly;
+Object* object_;
 
 SimpleShaders* shader_;
-TextureShaders* texture_shader_;
 ParticleShaders* particle_shader_;
 
 Camera* camera;
 
-BlackHoleEffect* fire_;
+BlackHoleEffect* effect_;
 
 bool render_texture = false;
 
 uint64_t elapsed_ms_{0};
 
 void createShaders(){
-  texture_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleFire.geom", "../resources/shaders/particleFire.frag");
-  texture_shader_->locateUniforms();
-
-  particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
+  particle_shader_->loadVertexFragmentShaders("../resources/shaders/particlePoint.vert", "../resources/shaders/particlePoint.frag");
+  //particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
   particle_shader_->locateUniforms();
 }
 
@@ -50,7 +47,7 @@ void glut_display() {
 
   //set the viewport, background color, and reset default framebuffer
   glViewport(0, 0, (GLsizei)window_width_, (GLsizei)window_height_);
-  glClearColor(0.22f, 0.28f, 0.31f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // update camera
@@ -60,35 +57,28 @@ void glut_display() {
   shader_->activate();
 
   //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-  glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix());
+  glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, object_->get_model_matrix());
   glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
   glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
   
 
   //bind the VBO of the model such that the next draw call will render with these vertices
-  dragonfly->activate();
+  object_->activate();
 
   
   //draw triangles from the currently bound buffer
-  //dragonfly->draw();
-  dragonfly->deactivate();
+  //object_->draw();
+  object_->deactivate();
 
   //glEnable(GL_BLEND);
 
-  if(render_texture){
-    texture_shader_->setCameraMatrix(camera->getViewMatrix());
-    texture_shader_->setProjectionMatrix(camera->getProjectionMatrix());
-    texture_shader_->setAtlasDim();
-    texture_shader_->activate();
-  } else {
-    particle_shader_->setCameraMatrix(camera->getViewMatrix());
-    particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
-    particle_shader_->activate();
-  }
+  particle_shader_->setCameraMatrix(camera->getViewMatrix());
+  particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
+  particle_shader_->activate();
 
-  fire_->cpuUpdate(16.f/1000.f);
-  fire_->gpuUpdate();
-  fire_->render();
+  effect_ ->cpuUpdate(16.f/1000.f);
+  effect_ ->gpuUpdate();
+  effect_ ->render();
 
   //unbind, unuse
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -125,8 +115,11 @@ void glut_keyboard(uint8_t _key, int32_t _x, int32_t _y) {
     case ' ':
       camera->stop();
       break;
-    case 't':
-      render_texture = !render_texture;
+    case 'q':
+      effect_->toggleUpdate();
+      break;
+    case 'e':
+      effect_->toggleEmit();
     default:
       break;
 
@@ -176,17 +169,15 @@ int32_t main(int32_t argc, char* argv[]) {
   shader_->addUniform("camera_matrix");
   shader_->addUniform("projection_matrix");
 
-  texture_shader_ = new TextureShaders(400, "../resources/textures/explosion.png", 8);
-
   particle_shader_ = new ParticleShaders();
 
   createShaders();
 
-  dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD));
+  object_ = new Object(obj_file_, (model::POSITION | model::TEXCOORD));
 
-  fire_ = new BlackHoleEffect();
-  fire_->init(100000, camera);
-  fire_->initRenderer();
+  effect_ = new BlackHoleEffect();
+  effect_->init(100000, camera);
+  effect_->initRenderer();
 
 
 

@@ -19,6 +19,8 @@ public:
 	virtual void initRenderer() { m_rend->generate(m_sys.get());}
 	virtual void reset() { m_sys->reset();}
 	virtual void clean() { m_rend->destroy();}
+	virtual void toggleUpdate() { m_sys->toggleUpdate(); }
+	virtual void toggleEmit() { m_sys->toggleEmit(); }
 	
 	virtual void update(float dt) = 0;
 	virtual void cpuUpdate(float dt) { m_sys->update(dt);}
@@ -106,6 +108,7 @@ private:
 	std::shared_ptr<BasicPosUpdater> m_posUp;
 	std::shared_ptr<BasicTimeUpdater> m_timeUp;
 	std::shared_ptr<BasicColorUpdater> m_colUp;
+	std::shared_ptr<AttractorUpdater> m_attUp;
 	
 
 };
