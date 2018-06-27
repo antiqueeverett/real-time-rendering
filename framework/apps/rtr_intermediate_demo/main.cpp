@@ -28,6 +28,7 @@ using namespace glm;
 
 const int terrainResolution = 512;	// Size of the terrain: 64 x 64 grid
 const int tileNumber = 12;			// No of tiles of terrain => 12 texture tiles
+const int subdivide = 1;
 float amplitude = 80.0f;			// Amplitude for noise function
 float frequency = 0.013f;			// frequency for noise function
 const int terrainTextureRes = 512;	// Resolution of the texture images
@@ -283,7 +284,7 @@ int main(int argc, char** argv)
 
 	camera = new Camera((width/(float)height), cameraPosition);
 	// Terrain  
-	terrain = new Terrain(terrainResolution, tileNumber);
+	terrain = new Terrain(terrainResolution, tileNumber, subdivide);
 	terrainShaders = new TerrainShaders(terrainTextureRes, textures, amplitude, frequency, terrainResolution, tileNumber);
 	terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
 	terrainShaders->locateUniforms();
