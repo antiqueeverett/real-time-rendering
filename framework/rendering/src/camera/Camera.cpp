@@ -17,8 +17,8 @@ Camera::Camera(float ratio, vec3 camPos)
 	mOldX = 0;
 	mOldY = 0;
 	mMotionState = CAMERA_ROTATE;										
-	mTheta = 2.0;								
-	mPhi = 4.0;									
+	mTheta = 2.1;								
+	mPhi = PI/2.0f;									
 	mSpeed = 0.0f;														
 	mMotionStep = 0.001f;											
 	mThetaStep = 0.001f;

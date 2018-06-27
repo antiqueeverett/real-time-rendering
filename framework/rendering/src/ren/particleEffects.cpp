@@ -51,7 +51,8 @@ void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
 	//Generators
 	m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.f, 0.f, 0.0f}));
-	m_velGen = std::make_shared<ConeVelGen>(ConeVelGen());
+	m_velGen = std::make_shared<ConeVelGen>(ConeVelGen(0.5f, 2.0f, glm::fvec4{0.0, -3.0, -1.0, 0.0}, 0.032f));
+
 	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.5f, 0.02f, 0.005f, 0.0f}, 
 											   				 glm::fvec4{0.8f, 0.1f, 0.006f, 0.0f}, 
 											   				 glm::fvec4{0.2f, 0.0f, 0.0f, 0.0f},
@@ -89,7 +90,11 @@ void FlameThrowerEffect::update(float dt) {
 }
 
 void FlameThrowerEffect::setPos(glm::fvec3 pos){
-	m_posGen->m_pos = glm::fvec4(pos, 1.0);
+	m_posGen->m_pos = glm::fvec4(pos, 1.0f);
+}
+
+void FlameThrowerEffect::setDir(glm::fvec3 dir){
+	m_velGen->set_dir(glm::fvec4(dir, 1.0f));
 }
 
 void BlackHoleEffect::init(size_t numParticles, Camera* cam) {

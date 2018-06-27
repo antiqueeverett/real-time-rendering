@@ -68,6 +68,7 @@ public:
 	void update(float dt) override;
 
 	void setPos(glm::fvec3 pos);
+	void setDir(glm::fvec3 dir);
 
 private:
 	//generators

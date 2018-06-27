@@ -137,13 +137,19 @@ public:
 	glm::fvec4 m_dir;
 	float m_rad;
 
-	ConeVelGen() : m_min_vel(0.5), m_max_vel(2.0), m_dir(glm::fvec4{0.0, -3.0, -1.0, 0.0}), m_rad(0.032) {
+	ConeVelGen() : m_min_vel(0.0f), m_max_vel(1.0f), m_dir(glm::fvec4{0.0f, 0.0f, 1.0f, 0.0f}), m_rad(0.032f) {
+		m_dir = glm::normalize(m_dir);
+		calc_rot_mat();
+	}
+	ConeVelGen(float min, float max, glm::fvec4 dir, float rad) 
+		: m_min_vel{min}, m_max_vel{max}
+		, m_dir{dir}, m_rad{rad} {
 		m_dir = glm::normalize(m_dir);
 		calc_rot_mat();
 	}
 
 	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
-	void set_dir(glm::fvec4 dir) {m_dir = dir;}
+	void set_dir(glm::fvec4 dir);
 private:
 	glm::fmat4 m_rot_mat;
 

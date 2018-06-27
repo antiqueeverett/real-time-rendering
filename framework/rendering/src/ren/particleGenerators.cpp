@@ -144,6 +144,12 @@ void ConeVelGen::calc_rot_mat(){
 	m_rot_mat = glm::rotate(glm::fmat4{1.0}, rot_angle, rot_axis);
 }
 
+void ConeVelGen::set_dir(glm::fvec4 dir) {
+	m_dir = glm::normalize(dir);
+	calc_rot_mat();
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////77777
 
 void BasicTimeGen::generate(float dt, ParticleData *p, size_t start_id, size_t end_id){

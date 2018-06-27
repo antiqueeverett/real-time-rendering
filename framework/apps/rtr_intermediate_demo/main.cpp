@@ -45,7 +45,7 @@ const char* skyboxVert = "../resources/shaders/skybox.vert";
 std::vector<std::string> textures = { "../resources/textures/Terrain/Mountain1.png", "../resources/textures/Terrain/grassSeemless.png", "../resources/textures/Terrain/snow.png" };
 std::vector<std::string> skyboxTextures = {"../resources/textures/Skybox/right.png", "../resources/textures/Skybox/left.png", "../resources/textures/Skybox/top.png", "../resources/textures/Skybox/bottom.png", "../resources/textures/Skybox/back.png", "../resources/textures/Skybox/front.png" };
 const vec3 terrainCenter = vec3(static_cast<float>(terrainResolution / 2), 0.0f, static_cast<float>(terrainResolution / 2)); //center of terrain
-const vec3 cameraPosition = vec3(0.0f, 100.0f, 0.0f);
+const vec3 cameraPosition = vec3(0.0f, 85.0f, -5.0f);
 
 Terrain* terrain = nullptr;
 TerrainShaders* terrainShaders = nullptr;
@@ -64,6 +64,11 @@ Object* dragonfly;
 SimpleShaders* shader_;
 TextureShaders* texture_shader_;
 FlameThrowerEffect* fire_;
+
+float scale_ = 50.0f;
+glm::fvec3 drgnfly_pos{0.0f, 80.0f, 0.0f};
+glm::fvec3 fire_pos = {0.0f, 0.008f, 0.01f};
+glm::fvec3 fire_dir{0.0f, -3.0f, -1.0f};
 
 bool render_obj = true, render_effect = true, render_terrain = true;
 
@@ -234,6 +239,14 @@ void keyboard(unsigned char key, int x, int y)
     case 'c':
     	render_effect = !render_effect;
     	break;
+    case 'q':
+    	fire_dir +=  glm::fvec3{0.0f, 0.1f, 0.0f};
+    	fire_->setDir(fire_dir);
+    	break;
+    case 'e':
+    	fire_dir -=  glm::fvec3{0.0f, 0.1f, 0.0f};
+    	fire_->setDir(fire_dir);
+    	break;
 
 	}
 	glutPostRedisplay();
@@ -296,20 +309,19 @@ int main(int argc, char** argv)
 	texture_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleFire.geom", "../resources/shaders/particleFire.frag");
   	texture_shader_->locateUniforms();
   	
-  	float scale = 50.0;
-  	glm::fvec3 drgnfly_pos{0.0, 80.0, 0.0};
+  	
 
   	dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
-	dragonfly->scale(scale);
+	dragonfly->scale(scale_);
 	dragonfly->translate(drgnfly_pos);
 
-	glm::fvec3 fire_pos = {0.0, 0.008, 0.01};
+	
 
 	fire_ = new FlameThrowerEffect();
 	fire_->init(10000, camera);
 	fire_->initRenderer();
 
-	fire_->setPos(fire_pos * scale + drgnfly_pos);
+	fire_->setPos(fire_pos * scale_ + drgnfly_pos);
 	
 	// Camera 
 	glutMotionFunc(mouseMotion);
