@@ -105,6 +105,7 @@ private:
 	std::shared_ptr<BasicVelUpdater> m_velUp;
 	std::shared_ptr<BasicPosUpdater> m_posUp;
 	std::shared_ptr<BasicTimeUpdater> m_timeUp;
+	std::shared_ptr<BasicColorUpdater> m_colUp;
 	
 
 };

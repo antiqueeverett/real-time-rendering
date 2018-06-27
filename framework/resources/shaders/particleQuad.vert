@@ -16,7 +16,7 @@ out VertexAttrib
 
 void main() {
   gl_Position = (camera_matrix) * vec4(particle_position.xyz, 1.0);
-  vertex.color = vec4(particle_color.xyz, 0.0);
+  vertex.color = vec4(particle_color.xyz, 1.0);
   vertex.life = particle_life;
 
 }

@@ -110,7 +110,7 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{1.0f, 1.0f, 1.0f, 1.0f}, 
 											   				 glm::fvec4{1.0f, 1.0f, 1.0f, 1.0f}, 
 											   				 glm::fvec4{1.0f, 0.0f, 0.0f, 1.0f},
-											   	 			 glm::fvec4{0.0f, 0.1f, 0.0f, 1.0f}));
+											   	 			 glm::fvec4{0.0f, 1.0f, 0.0f, 1.0f}));
 	m_timeGen = std::make_shared<GaussTimeGen>(GaussTimeGen(8.f, 2.f));
 	//create emiiter
 	auto emmit = std::make_shared<ParticleEmitter>(1.f);
@@ -128,11 +128,14 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_velUp = std::make_shared<BasicVelUpdater>();
 	m_posUp = std::make_shared<BasicPosUpdater>();
 	m_timeUp = std::make_shared<BasicTimeUpdater>();
+	m_colUp = std::make_shared<BasicColorUpdater>();
+
 
 
 	m_sys->addUpdater(m_velUp);
 	m_sys->addUpdater(m_posUp);
 	m_sys->addUpdater(m_timeUp);
+	m_sys->addUpdater(m_colUp);
 
 
 	m_sys->addEmitter(emmit2);
