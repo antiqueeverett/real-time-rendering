@@ -128,9 +128,9 @@ void ConeVelGen::generate(float dt, ParticleData *p, size_t start_id, size_t end
 }
 
 glm::fvec3 ConeVelGen::rotate(glm::fvec3 vec){
-	if(m_dir == glm::fvec4{0.0, 1.0, 0.0, m_dir.w}){
+	if(m_dir == glm::fvec3{0.0, 1.0, 0.0}){
 		return vec;
-	} else if(m_dir == glm::fvec4{0.0, -1.0, 0.0, m_dir.w}){
+	} else if(m_dir == glm::fvec3{0.0, -1.0, 0.0}){
 		return -vec;
 	} else {
 		return glm::fvec3(m_rot_mat * glm::fvec4(vec, 1.0));
@@ -138,13 +138,12 @@ glm::fvec3 ConeVelGen::rotate(glm::fvec3 vec){
 }
 
 void ConeVelGen::calc_rot_mat(){
-	glm::fvec3 dir = glm::fvec3(m_dir);
-	glm::fvec3 rot_axis = glm::cross(dir, glm::fvec3{0.0, 1.0, 0.0});
-	float rot_angle = glm::acos(glm::dot(dir, glm::fvec3{0.0, 1.0, 0.0})/glm::length(dir));
-	m_rot_mat = glm::rotate(glm::fmat4{1.0}, rot_angle, rot_axis);
+	glm::fvec3 rot_axis = glm::cross(m_dir, glm::fvec3{0.0, 1.0, 0.0});
+	float rot_angle = glm::acos(glm::dot(m_dir, glm::fvec3{0.0, 1.0, 0.0})/glm::length(m_dir));
+	m_rot_mat = glm::rotate(glm::fmat4{1.0}, rot_angle, -rot_axis);
 }
 
-void ConeVelGen::set_dir(glm::fvec4 dir) {
+void ConeVelGen::set_dir(glm::fvec3 dir) {
 	m_dir = glm::normalize(dir);
 	calc_rot_mat();
 }

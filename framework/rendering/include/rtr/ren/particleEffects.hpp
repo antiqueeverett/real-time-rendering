@@ -101,8 +101,8 @@ private:
 	//generators
 	std::vector<std::shared_ptr<PointPosGen>> m_posGen;
 	std::vector<std::shared_ptr<ConeVelGen>> m_velGen;
-	std::shared_ptr<BasicColorGen> m_colGen;
-	std::shared_ptr<GaussTimeGen> m_timeGen;
+	std::vector<std::shared_ptr<BasicColorGen>> m_colGen;
+	std::shared_ptr<BasicTimeGen> m_timeGen;
 	//updaters
 	std::shared_ptr<BasicVelUpdater> m_velUp;
 	std::shared_ptr<BasicPosUpdater> m_posUp;

@@ -46,7 +46,7 @@ const char* skyboxVert = "../resources/shaders/skybox.vert";
 std::vector<std::string> textures = { "../resources/textures/Terrain/Mountain1.png", "../resources/textures/Terrain/grassSeemless.png", "../resources/textures/Terrain/snow.png" };
 std::vector<std::string> skyboxTextures = {"../resources/textures/Skybox/right.png", "../resources/textures/Skybox/left.png", "../resources/textures/Skybox/top.png", "../resources/textures/Skybox/bottom.png", "../resources/textures/Skybox/back.png", "../resources/textures/Skybox/front.png" };
 const vec3 terrainCenter = vec3(static_cast<float>(terrainResolution / 2), 0.0f, static_cast<float>(terrainResolution / 2)); //center of terrain
-const vec3 cameraPosition = vec3(0.0f, 85.0f, -5.0f);
+const vec3 cameraPosition = vec3(0.0f, 80.0f, -5.0f);
 
 Terrain* terrain = nullptr;
 TerrainShaders* terrainShaders = nullptr;
@@ -62,6 +62,16 @@ std::string obj_file_ = "../resources/objects/dragon_fly.obj";
 
 Object* dragonfly;
 
+//what we need for character control
+glm::fvec3 move_dir_{0.0f, 0.0f, 1.0f};		//vector representing the direction in which we move
+float move_speed = 0.01f;
+float rot_angle_ = 0.01f;
+//rotation axis we need when using wasd
+glm::vec3 rot_axis_ws_{1.0, 0.0, 0.0};
+glm::vec3 rot_axis_ad_{0.0, 1.0, 0.0};
+glm::vec3 rot_axis_qe_{0.0, 0.0, 1.0};
+
+
 SimpleShaders* shader_;
 TextureShaders* texture_shader_;
 FlameThrowerEffect* fire_;
@@ -69,15 +79,15 @@ FlameThrowerEffect* fire_;
 float scale_ = 50.0f;
 glm::fvec3 drgnfly_pos{0.0f, 80.0f, 0.0f};
 glm::fvec3 fire_pos = {0.0f, 0.008f, 0.01f};
-glm::fvec3 fire_dir{0.0f, -3.0f, -1.0f};
+glm::fvec3 fire_dir{0.0f, -0.5f, 1.0f};
 
-bool render_obj = true, render_effect = true, render_terrain = true;
+bool render_obj = true, render_effect = true, render_terrain = true, move_obj = false;
 
 
 // If mouse is moves in direction (x,y)
 void mouseMotion(int x, int y)
 {
-	camera->mouseMove(x, y);
+	camera->mouseRotate(x, y);
 	glutPostRedisplay();
 }
 
@@ -105,6 +115,21 @@ mat4 calcTerrainTransformation(float rotationXAngle, float rotationYAngle)
 	return transformMatrix;
 }
 
+void rotate_drgnfly_fire(glm::fvec3 rot_axis, float angle){
+	dragonfly->rotate(rot_axis, angle);
+	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
+	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
+	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
+	fire_->setDir(new_fire_dir);
+}
+
+void translate_drgnfly_fire(glm::fvec3 transl){
+	dragonfly->translate(transl);
+	drgnfly_pos += transl;
+	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
+	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
+}
+
 void display(void)
 {
   glViewport(0, 0, (GLsizei)width, (GLsizei)height);
@@ -115,8 +140,8 @@ void display(void)
 	glDisable(GL_BLEND);
 
 	// update camera
-	camera->update();
-
+	//camera->update();
+	camera->setViewDir(drgnfly_pos - cameraPosition);
 	if(render_terrain){
 		
 		mat4 worldMatrix = calcTerrainTransformation(rotationXAngle, rotationYAngle);
@@ -143,6 +168,12 @@ void display(void)
 									// set depth function back to default 
 	
 	if(render_obj){
+
+		if(move_obj){
+			glm::fvec3 dir_ = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}} ;
+	    	translate_drgnfly_fire(glm::fvec3{0.0f, dir_.y * move_speed, 0.0f});
+	    	terrainTransl += vec3(dir_.x * move_speed, 0.0, dir_.z * move_speed);
+		}
 		shader_->activate();
 	
 		//upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
@@ -156,6 +187,7 @@ void display(void)
 		//draw triangles from the currently bound buffer
 		dragonfly->draw();
 		dragonfly->deactivate();
+
 	}
 
 	if(render_effect){
@@ -217,37 +249,48 @@ void keyboard(unsigned char key, int x, int y)
 	elapsedTime += 0.001;
 	switch (key) {
 	case 'w':
-		terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
+    	rotate_drgnfly_fire(rot_axis_ws_, rot_angle_);
+		//terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
 		break;
 	case 'a':
-		terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
+    	rotate_drgnfly_fire(rot_axis_ad_, rot_angle_);
+    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_/3);
+		//terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
 		break;
 	case 's':
-		terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
+    	rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_);
+		//terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
 		break;
 	case 'd':
-		terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
+    	rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_);
+    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_/3);
+		//terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
 		break;
-	case ' ':
-      	camera->stop();
-    	break;
-    case 'y':
-    	render_obj = !render_obj;
-    	break;
-    case 'x':
-    	render_terrain = !render_terrain;
-    	break;
-    case 'c':
-    	render_effect = !render_effect;
-    	break;
     case 'q':
-    	fire_dir +=  glm::fvec3{0.0f, 0.1f, 0.0f};
-    	fire_->setDir(fire_dir);
+    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_);
     	break;
     case 'e':
-    	fire_dir -=  glm::fvec3{0.0f, 0.1f, 0.0f};
-    	fire_->setDir(fire_dir);
+    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_);
     	break;
+	case 'c':
+      	camera->stop();
+    	break;
+    case 'r':
+    	render_obj = !render_obj;
+    	break;
+    case 'f':
+    	render_terrain = !render_terrain;
+    	break;
+    case 'v':
+    	render_effect = !render_effect;
+    	break;
+    case ' ':
+    	move_obj = !move_obj;
+    case 'x':
+    	move_speed += 0.05f;
+    	break;
+    case 'y':
+    	move_speed -= 0.05f;	
 
 	}
 	glutPostRedisplay();
@@ -323,6 +366,7 @@ int main(int argc, char** argv)
 	fire_->initRenderer();
 
 	fire_->setPos(fire_pos * scale_ + drgnfly_pos);
+	fire_->setDir(fire_dir);
 	
 	// Camera 
 	glutMotionFunc(mouseMotion);

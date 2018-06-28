@@ -11,10 +11,13 @@ public:
 	~Camera();
 
 	void mouseMove(int x, int y);
+	void mouseRotate(int x, int y);
+
 	void mouseButton(int button, int state, int x, int y);
 
 	void update();
 	void stop() {mSpeed = 0;}
+	void setViewDir(glm::fvec3 dir);
 	void updateProjection(float ratio);
 
 	const glm::mat4& getViewMatrix() const;

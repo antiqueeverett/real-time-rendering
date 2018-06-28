@@ -134,14 +134,14 @@ class ConeVelGen : public ParticleGenerator {
 public:
 	float m_min_vel;
 	float m_max_vel;
-	glm::fvec4 m_dir;
+	glm::fvec3 m_dir;
 	float m_rad;
 
-	ConeVelGen() : m_min_vel(0.0f), m_max_vel(1.0f), m_dir(glm::fvec4{0.0f, 0.0f, 1.0f, 0.0f}), m_rad(0.032f) {
+	ConeVelGen() : m_min_vel(0.0f), m_max_vel(1.0f), m_dir(glm::fvec3{0.0f, 0.0f, 1.0f}), m_rad(0.032f) {
 		m_dir = glm::normalize(m_dir);
 		calc_rot_mat();
 	}
-	ConeVelGen(float min, float max, glm::fvec4 dir, float rad) 
+	ConeVelGen(float min, float max, glm::fvec3 dir, float rad) 
 		: m_min_vel{min}, m_max_vel{max}
 		, m_dir{dir}, m_rad{rad} {
 		m_dir = glm::normalize(m_dir);
@@ -149,7 +149,7 @@ public:
 	}
 
 	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
-	void set_dir(glm::fvec4 dir);
+	void set_dir(glm::fvec3 dir);
 private:
 	glm::fmat4 m_rot_mat;
 

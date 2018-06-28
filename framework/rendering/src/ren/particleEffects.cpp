@@ -51,13 +51,13 @@ void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
 	//Generators
 	m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.f, 0.f, 0.0f}));
-	m_velGen = std::make_shared<ConeVelGen>(ConeVelGen(0.5f, 2.0f, glm::fvec4{0.0, -3.0, -1.0, 0.0}, 0.032f));
+	m_velGen = std::make_shared<ConeVelGen>(ConeVelGen(1.0f, 3.0f, glm::fvec3{0.0, -3.0, -1.0}, 0.032f));
 
 	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.5f, 0.02f, 0.005f, 0.0f}, 
 											   				 glm::fvec4{0.8f, 0.1f, 0.006f, 0.0f}, 
 											   				 glm::fvec4{0.2f, 0.0f, 0.0f, 0.0f},
 											   	 			 glm::fvec4{0.3f, 0.0f, 0.0f, 0.0f}));
-	m_timeGen = std::make_shared<GaussTimeGen>(GaussTimeGen(3.f, 2.3f));
+	m_timeGen = std::make_shared<GaussTimeGen>(GaussTimeGen(1.f, 1.5f));
 	//create emiiter
 	auto emmit = std::make_shared<ParticleEmitter>(100.f);
 	emmit->addGenerator(m_posGen);
@@ -94,32 +94,34 @@ void FlameThrowerEffect::setPos(glm::fvec3 pos){
 }
 
 void FlameThrowerEffect::setDir(glm::fvec3 dir){
-	m_velGen->set_dir(glm::fvec4(dir, 1.0f));
+	m_velGen->set_dir(dir);
 }
 
 void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
 	//Generators
 	m_posGen.push_back(std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{4.f, 1.f, 0.f, 1.0f})));
-	m_velGen.push_back(std::make_shared<ConeVelGen>(ConeVelGen(0.5f, 2.0f, glm::fvec4{0.0, -1.0, -1.0, 0.0}, 0.032f)));
+	m_velGen.push_back(std::make_shared<ConeVelGen>(ConeVelGen(0.5f, 2.0f, glm::fvec3{0.0, -1.0, -1.0}, 0.032f)));
 
 	m_posGen.push_back(std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{-4.f, 1.f, 0.f, 1.0f})));
-	m_velGen.push_back(std::make_shared<ConeVelGen>(ConeVelGen(0.5f, 2.0f, glm::fvec4{0.0, 1.0, -1.0, 0.0}, 0.032f)));
+	m_velGen.push_back(std::make_shared<ConeVelGen>(ConeVelGen(0.5f, 2.0f, glm::fvec3{0.0, 1.0, -1.0}, 0.032f)));
 
 
-	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen());
-	m_timeGen = std::make_shared<GaussTimeGen>(GaussTimeGen(8.f, 5.f));
+	m_colGen.push_back(std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{1.0f, 0.0f, 0.0f, 1.0f}, glm::fvec4{0.1f, 0.0f, 0.0f, 1.0f})));
+	m_colGen.push_back(std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.0f, 1.0f, 0.0f, 1.0f}, glm::fvec4{0.0f, 0.1f, 0.0f, 1.0f})));
+	
+	m_timeGen = std::make_shared<BasicTimeGen>(BasicTimeGen(20.f, 20.f));
 	//create emiiter
-	auto emmit = std::make_shared<ParticleEmitter>(3.f);
+	auto emmit = std::make_shared<ParticleEmitter>(10.f);
 	emmit->addGenerator(m_posGen[0]);
 	emmit->addGenerator(m_velGen[0]);
-	emmit->addGenerator(m_colGen);
+	emmit->addGenerator(m_colGen[0]);
 	emmit->addGenerator(m_timeGen);
 
-	auto emmit2 = std::make_shared<ParticleEmitter>(3.f);
+	auto emmit2 = std::make_shared<ParticleEmitter>(10.f);
 	emmit2->addGenerator(m_posGen[1]);
 	emmit2->addGenerator(m_velGen[1]);
-	emmit2->addGenerator(m_colGen);
+	emmit2->addGenerator(m_colGen[1]);
 	emmit2->addGenerator(m_timeGen);
 	//Updaters
 	m_velUp = std::make_shared<BasicVelUpdater>();
@@ -128,7 +130,7 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_colUp = std::make_shared<BasicColorUpdater>();
 	m_attUp = std::make_shared<AttractorUpdater>();
 
-	m_attUp->m_attractors.push_back(glm::fvec4{0.0f, 0.0f, 0.0f, 1.0f});
+	m_attUp->m_attractors.push_back(glm::fvec4{0.0f, 0.0f, 0.0f, 10.0f});
 
 
 	m_sys->addUpdater(m_attUp);

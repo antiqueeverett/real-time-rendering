@@ -15,7 +15,7 @@ Object::Object(std::string const& file, model::attrib_flag_t import_attribs)
 
 
 float* Object::get_model_matrix(){
-  model_matrix_ = translation_matrix_ * rotation_matrix_ * scale_matrix_;
+  model_matrix_ = translation_matrix_ * scale_matrix_ * rotation_matrix_;
   return glm::value_ptr(model_matrix_);
 }
 

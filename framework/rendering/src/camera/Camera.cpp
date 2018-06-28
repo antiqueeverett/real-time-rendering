@@ -95,6 +95,32 @@ void Camera::mouseMove(int x, int y)
 	mOldY = y;
 }
 
+void Camera::mouseRotate(int x, int y)
+{
+	
+	int deltaX = x - mOldX;
+	int deltaY = y - mOldY;
+
+	{
+		mTheta += mThetaStep * static_cast<float>(deltaY);
+
+		if (mTheta < mThetaStep) 
+			mTheta = mThetaStep;
+		else if (mTheta > PI - mThetaStep) 
+			mTheta = PI - mThetaStep;
+
+		mPhi += mPhiStep * static_cast<float>(deltaX);
+
+		if (mPhi < 0.0f) 
+			mPhi += 2.0f*PI;
+		else if (mPhi > 2.0f*PI) 
+			mPhi -= 2.0f*PI;
+	}
+
+	mOldX = x;
+	mOldY = y;
+}
+
 void Camera::update()
 {
 		mDirection.x = sin(mTheta) * cos(mPhi);
@@ -120,5 +146,9 @@ const glm::mat4& Camera::getProjectionMatrix() const
 void Camera::updateProjection(float ratio){
 	mProjectionMatrix = perspective(70.0f, ratio, 0.01f, 10000.0f);
 
+}
+
+void Camera::setViewDir(glm::fvec3 dir){
+	mViewMatrix = lookAt(mPosition, mPosition + dir, vec3(0.0f, 0.75f, 0.0f));
 }
 
