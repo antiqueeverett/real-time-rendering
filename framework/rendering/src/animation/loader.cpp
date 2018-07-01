@@ -19,13 +19,15 @@ Loader::~Loader()
 }
 
 void Loader::init()
-{
-	shaders_animated_model = ForShader::makeProgram("resources/shaders/animated_model.vert", "resources/shaders/animated_model.frag");
+{	
+	cout << "Loading animation shaders" << endl;
+	shaders_animated_model = ForShader::makeProgram("../../resources/shaders/animated_model.vert", "../../resources/shaders/animated_model.frag");
 	cout << "Animation shaders loaded successfully !" << endl;
 
-	//model_astroboy.loadModel("resources/collada/boy/rigged.dae");
-	model_astroboy.loadModel("resources/collada/astroboy/astroBoy_walk_Max.dae");
+	cout << "Loading animation model!" << endl;
+	model_astroboy.loadModel("../../resources/collada/astroboy/astroBoy_walk_Max.dae");
 	model_astroboy.initShaders(shaders_animated_model);
+	cout << "Animation model loaded successfully !" << endl;
 
 	matr_model_2 = glm::rotate(matr_model_2, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	matr_model_2 = glm::translate(matr_model_2, glm::vec3(5.0f, 0.0f, 0.0f));
