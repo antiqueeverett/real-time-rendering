@@ -37,6 +37,8 @@ include_directories(SYSTEM
                           ${Boost_INCLUDE_DIR}
                           ${GLFW_INCLUDE_DIRS}
                           ${SDL2_INCLUDE_DIR}
+                          ${ASSIMP_INCLUDE_DIR}
+                          ${IL_INCLUDE_DIR}
                           ${GLEW_INCLUDE_DIRS}
                            )
 
@@ -59,7 +61,11 @@ set(REND_LIBRARY ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}
     ${PROJECT_LIBS}
     ${SDL2_LIBRARY}
+    ${IL_LIBRARIES}
+    ${ILU_LIBRARIES}
+    ${ILUT_LIBRARIES}
     ${GLFW_LIBRARIES}
+    ${ASSIMP_LIBRARY}
     ${GLEW_LIBRARY}
     ${COMMON_LIBRARY}
 #    ${SCHISM_LIBRARIES}
@@ -100,3 +106,5 @@ ENDIF (MSVC)
 # header files 
 install(DIRECTORY ${PROJECT_INCLUDE_DIR}/rtr/ren DESTINATION include/rtr FILES_MATCHING PATTERN "*.*h")
 install(DIRECTORY ${PROJECT_INCLUDE_DIR}/rtr/ren DESTINATION include/rtr/transformation FILES_MATCHING PATTERN "*.*h")
+install(DIRECTORY ${PROJECT_INCLUDE_DIR}/rtr/ren DESTINATION include/rtr/animation FILES_MATCHING PATTERN "*.*h")
+
