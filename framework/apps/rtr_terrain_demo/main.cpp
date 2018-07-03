@@ -15,11 +15,19 @@
 #include "rtr/camera/Camera.h"
 
 using namespace glm;
+
+struct TerrainRegion{
+	float min;
+	float max;
+	GLuint texture;
+	const char* file;
+};
+
 // Dimensions of the windows
 int width = 1280;
 int height = 720;
 
-const int terrainResolution = 512;	// Size of the terrain: 64 x 64 grid
+const int terrainResolution = 512;	// Size of the terrain
 const int tileNumber = 12;			// No of tiles of terrain => 12 texture tiles
 const int subdivide = 1;
 float amplitude = 80.0f;			// Amplitude for noise function
@@ -147,21 +155,25 @@ vec3 simulateMovement() {
 // move terrain with WASD
 void keyboard(unsigned char key, int x, int y)
 {
-	//TODO: Set mSpeed = 0 when wasd is released
 	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
-	elapsedTime += 0.001;
+	//elapsedTime += 0.001;
+	elapsedTime = static_cast<float>(1.0f/ subdivide);
 	switch (key) {
 	case 'w':
-		terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
+		terrainTransl += vec3(elapsedTime, 0.0, 0.0);
+		//terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
 		break;
 	case 'a':
-		terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
+		//terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
+		terrainTransl -= vec3(0.0, 0.0, elapsedTime);
 		break;
 	case 's':
-		terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
+		//terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
+		terrainTransl -= vec3(elapsedTime, 0.0, 0.0);
 		break;
 	case 'd':
-		terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
+		//terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
+		terrainTransl += vec3(0.0, 0.0, elapsedTime);
 		break;
 	case ' ':
       	camera->stop();
