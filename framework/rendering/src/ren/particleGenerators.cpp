@@ -47,16 +47,8 @@ void SpherePosGen::generate(float dt, ParticleData *p, size_t start_id, size_t e
 	glm::fvec3 dir;
 	float rad;
 	for (size_t i = start_id; i < end_id; ++i) {
-		/*phi = glm::linearRand(-M_PI, M_PI);
-		theta = glm::linearRand(-M_PI, M_PI);*/
 		rad = glm::linearRand(m_min_r, m_max_r);
-
 		dir = glm::ballRand(rad);
-
-		/*r = rad * sin(phi);
-		p->m_pos[i].x = m_pos.x + r * cos(theta);
-		p->m_pos[i].y = m_pos.y + r * sin(theta);
-		p->m_pos[i].z = m_pos.z + rad * cos(phi);*/
 
 		p->m_pos[i].x = m_pos.x + dir.x;
 		p->m_pos[i].y = m_pos.y + dir.y;
@@ -108,6 +100,20 @@ void SphereVelGen::generate(float dt, ParticleData *p, size_t start_id, size_t e
 		p->m_vel[i].x = dir.x;
 		p->m_vel[i].y = dir.y;
 		p->m_vel[i].z = dir.z;
+		
+	}
+}
+
+
+void OrbitVelGen::generate(float dt, ParticleData *p, size_t start_id, size_t end_id){
+	glm::fvec3 dir, vel, down = glm::fvec3{0.0f, -1.0f, 0.0f};
+	for (size_t i = start_id; i < end_id; ++i) {
+		dir = glm::fvec3{p->m_pos[i] - m_center};
+		vel = glm::normalize(glm::cross(dir, down)) * m_vel;
+
+		p->m_vel[i].x = vel.x;
+		p->m_vel[i].y = vel.y;
+		p->m_vel[i].z = vel.z;
 		
 	}
 }

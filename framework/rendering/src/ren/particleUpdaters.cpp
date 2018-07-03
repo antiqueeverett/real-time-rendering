@@ -67,7 +67,7 @@ void AttractorUpdater::update(float dt, ParticleData *p){
 			dir = att - pos[i];
 			dist = glm::length(dir);
 
-			acc[i] += dir * att.w / dist;
+			acc[i] += dir * att.w / (dist*dist);
 		}
 	}
 }

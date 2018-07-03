@@ -109,9 +109,15 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 
 	m_colGen.push_back(std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{1.0f, 0.0f, 0.0f, 1.0f}, glm::fvec4{0.1f, 0.0f, 0.0f, 1.0f})));
 	m_colGen.push_back(std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.0f, 1.0f, 0.0f, 1.0f}, glm::fvec4{0.0f, 0.1f, 0.0f, 1.0f})));
+
+	m_posGen.push_back(std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.f, 0.f, 1.0f})));
+
+	std::shared_ptr<OrbitVelGen> orbit = std::make_shared<OrbitVelGen>(OrbitVelGen());
+	std::shared_ptr<SpherePosGen> sphere = std::make_shared<SpherePosGen>(SpherePosGen(10.0f));
 	
 	m_timeGen = std::make_shared<BasicTimeGen>(BasicTimeGen(20.f, 20.f));
 	//create emiiter
+	/*
 	auto emmit = std::make_shared<ParticleEmitter>(10.f);
 	emmit->addGenerator(m_posGen[0]);
 	emmit->addGenerator(m_velGen[0]);
@@ -123,6 +129,14 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	emmit2->addGenerator(m_velGen[1]);
 	emmit2->addGenerator(m_colGen[1]);
 	emmit2->addGenerator(m_timeGen);
+	*/
+
+	auto emmit3 = std::make_shared<ParticleEmitter>(numParticles);
+	emmit3->addGenerator(sphere);
+	emmit3->addGenerator(m_colGen[0]);
+	emmit3->addGenerator(orbit);
+	emmit3->addGenerator(m_timeGen);
+
 	//Updaters
 	m_velUp = std::make_shared<BasicVelUpdater>();
 	m_posUp = std::make_shared<BasicPosUpdater>();
@@ -131,19 +145,20 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_colUp = std::make_shared<VelColorUpdater>(glm::fvec4{-0.5f, -0.5f, -0.5f, 0.0f}, glm::fvec4{2.0f});
 	m_attUp = std::make_shared<AttractorUpdater>();
 
-	m_attUp->m_attractors.push_back(glm::fvec4{0.0f, 0.0f, 0.0f, 5.0f});
+	m_attUp->m_attractors.push_back(glm::fvec4{0.0f, 0.0f, 0.0f, 1.f});
 
 
 	m_sys->addUpdater(m_attUp);
 	m_sys->addUpdater(m_velUp);
 	m_sys->addUpdater(m_posUp);
 	m_sys->addUpdater(m_remUp);
-	m_sys->addUpdater(m_timeUp);
+	//m_sys->addUpdater(m_timeUp);
 	m_sys->addUpdater(m_colUp);
 
 
-	m_sys->addEmitter(emmit2);
-	m_sys->addEmitter(emmit);
+	//m_sys->addEmitter(emmit2);
+	//m_sys->addEmitter(emmit);
+	m_sys->addEmitter(emmit3);
 
 }
 

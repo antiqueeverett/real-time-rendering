@@ -56,7 +56,7 @@ public:
 	glm::fvec4 m_pos;
 	float m_min_r, m_max_r;
 
-	SpherePosGen() : m_min_r{0.0f}, m_max_r{1.0f} {}
+	SpherePosGen() : m_pos{glm::fvec4{0.0f}}, m_min_r{0.0f}, m_max_r{1.0f} {}
 	SpherePosGen(float r) : m_pos{glm::fvec4{0.0f}}, m_min_r{r}, m_max_r{r} {}
 	SpherePosGen(float min_r, float max_r) : m_pos{glm::fvec4{0.0f}}, m_min_r{min_r}, m_max_r{max_r} {}
 	SpherePosGen(glm::fvec4 pos, float min_r, float max_r) : m_pos{pos} , m_min_r{min_r}, m_max_r{max_r} {}
@@ -128,6 +128,19 @@ public:
 	SphereVelGen(float min_vel, float max_vel) : m_min_vel{min_vel}, m_max_vel{max_vel} {}
 
 	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
+};
+
+class OrbitVelGen : public ParticleGenerator {
+public:
+	glm::fvec4 m_center;
+	float m_vel;
+
+	OrbitVelGen() : m_center{0.0f, 0.0f, 0.0f, 0.0f}, m_vel{1.0f} {}
+	OrbitVelGen(glm::fvec4 center, float vel) : m_center{center}, m_vel{vel} {}
+
+
+	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
+
 };
 
 class ConeVelGen : public ParticleGenerator {
