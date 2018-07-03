@@ -94,6 +94,18 @@ void BasicPosUpdater::update(float dt, ParticleData *p){
 	}
 }
 
+void PositionRemover::update(float dt, ParticleData *p){
+	size_t end_id = p->m_count_alive;
+
+	glm::fvec4* pos = p->m_pos.get();
+	
+	for (size_t i = 0; i < end_id; ++i) {
+		if (glm::length(glm::fvec3{pos[i]})<m_dist){
+			p->kill(i);
+		}
+	}
+}
+
 void BasicColorUpdater::update(float dt, ParticleData *p){
 	size_t end_id = p->m_count_alive;
 
@@ -104,6 +116,29 @@ void BasicColorUpdater::update(float dt, ParticleData *p){
 
 	for (size_t i = 0; i < end_id; ++i) {
 		col[i] = glm::mix(start_col[i], end_col[i], time[i].z);
+	}
+}
+
+void VelColorUpdater::update(float dt, ParticleData *p) {
+	size_t end_id = p->m_count_alive;
+    glm::fvec4* col = p->m_col.get();
+    glm::fvec4* start_col = p->m_start_col.get();
+    glm::fvec4* end_col = p->m_end_col.get();
+    glm::fvec4* t = p->m_time.get();
+    glm::fvec4* vel = p->m_vel.get();
+			
+	float scaler, scaleg, scaleb;
+	float diffr = m_maxVel.x - m_minVel.x;
+	float diffg = m_maxVel.y - m_minVel.y;
+	float diffb = m_maxVel.z - m_minVel.z;
+	for (size_t i = 0; i < end_id; ++i) {
+		scaler = (vel[i].x - m_minVel.x) / diffr;
+		scaleg = (vel[i].y - m_minVel.y) / diffg;
+		scaleb = (vel[i].z - m_minVel.z) / diffb;
+		col[i].r = scaler;// glm::mix(p->m_startCol[i].r, p->m_endCol[i].r, scaler);
+		col[i].g = scaleg;// glm::mix(p->m_startCol[i].g, p->m_endCol[i].g, scaleg);
+		col[i].b = scaleb;// glm::mix(p->m_startCol[i].b, p->m_endCol[i].b, scaleb);
+		col[i].a = glm::mix(start_col[i].a, end_col[i].a, t[i].z);
 	}
 }
 

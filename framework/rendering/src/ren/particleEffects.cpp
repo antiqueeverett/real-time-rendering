@@ -126,16 +126,18 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	//Updaters
 	m_velUp = std::make_shared<BasicVelUpdater>();
 	m_posUp = std::make_shared<BasicPosUpdater>();
+	m_remUp = std::make_shared<PositionRemover>();
 	m_timeUp = std::make_shared<BasicTimeUpdater>();
-	m_colUp = std::make_shared<BasicColorUpdater>();
+	m_colUp = std::make_shared<VelColorUpdater>(glm::fvec4{-0.5f, -0.5f, -0.5f, 0.0f}, glm::fvec4{2.0f});
 	m_attUp = std::make_shared<AttractorUpdater>();
 
-	m_attUp->m_attractors.push_back(glm::fvec4{0.0f, 0.0f, 0.0f, 10.0f});
+	m_attUp->m_attractors.push_back(glm::fvec4{0.0f, 0.0f, 0.0f, 5.0f});
 
 
 	m_sys->addUpdater(m_attUp);
 	m_sys->addUpdater(m_velUp);
 	m_sys->addUpdater(m_posUp);
+	m_sys->addUpdater(m_remUp);
 	m_sys->addUpdater(m_timeUp);
 	m_sys->addUpdater(m_colUp);
 

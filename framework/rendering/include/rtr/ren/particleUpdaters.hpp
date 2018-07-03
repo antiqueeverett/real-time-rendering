@@ -64,9 +64,33 @@ public:
 	virtual void update(float dt, ParticleData *p) override;
 };
 
+class PositionRemover : public ParticleUpdater {
+public:
+	float m_dist;
+
+	PositionRemover() : m_dist(1.0f) {}
+	PositionRemover(float dist) : m_dist(dist) {}
+
+	virtual void update(float dt, ParticleData *p) override;
+	
+};
+
 class BasicColorUpdater : public ParticleUpdater {
 public:
 	virtual void update(float dt, ParticleData *p) override; 
+};
+
+
+class VelColorUpdater : public ParticleUpdater {
+public:
+	glm::vec4 m_minVel;
+	glm::vec4 m_maxVel;
+
+	VelColorUpdater() : m_minVel(0.0), m_maxVel(1.0) { }
+	VelColorUpdater(glm::fvec4 min, glm::fvec4 max) : m_minVel(min), m_maxVel(max) { }
+
+
+	virtual void update(float dt, ParticleData *p) override;
 };
 
 class BasicTimeUpdater : public ParticleUpdater {

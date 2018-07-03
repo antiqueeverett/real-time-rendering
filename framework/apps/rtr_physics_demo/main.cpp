@@ -47,7 +47,7 @@ void glut_display() {
 
   //set the viewport, background color, and reset default framebuffer
   glViewport(0, 0, (GLsizei)window_width_, (GLsizei)window_height_);
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.5f, 0.5f, 0.55f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // update camera
@@ -67,10 +67,10 @@ void glut_display() {
 
   
   //draw triangles from the currently bound buffer
-  //object_->draw();
+  object_->draw();
   object_->deactivate();
 
-  //glEnable(GL_BLEND);
+  glEnable(GL_BLEND);
 
   particle_shader_->setCameraMatrix(camera->getViewMatrix());
   particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
@@ -164,7 +164,7 @@ int32_t main(int32_t argc, char* argv[]) {
   shader_ = new SimpleShaders();
 
 
-  shader_->loadVertexFragmentShaders("../resources/shaders/tutorial.vert", "../resources/shaders/tutorial.frag"); 
+  shader_->loadVertexFragmentShaders("../resources/shaders/tutorial.vert", "../resources/shaders/color.frag"); 
   shader_->addUniform("model_matrix");
   shader_->addUniform("camera_matrix");
   shader_->addUniform("projection_matrix");
