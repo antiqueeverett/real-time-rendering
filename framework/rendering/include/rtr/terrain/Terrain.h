@@ -7,7 +7,7 @@
 class Terrain : public VertexArrayObject {
 
 public:
-    Terrain(int resolution, int tileNumber, int subDivide);
+    Terrain(int resolution, int tileNumber, int subDivide, int stretchFactor);
 	Terrain(int resolution);
     ~Terrain();
     
@@ -25,6 +25,7 @@ private:
 	int mTileNumber;
 	int mSubdivide;
 	float mFactor;
+	int mStretchFactor;
 	std::vector<float> mHeight;
 };
 

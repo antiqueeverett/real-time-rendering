@@ -6,26 +6,26 @@
 
 using namespace glm;
 
-Terrain::Terrain(int resolution, int tileNumber, int subDivide)
+Terrain::Terrain(int resolution, int tileNumber, int subDivide, int stretchFactor)
 {
     mResolution = resolution;
-    mHeight.resize((resolution*subDivide*resolution*subDivide) ); //mHeight.size = resolution^2 => store all values needed for grid in this vector
+    mHeight.resize((resolution*subDivide)*(resolution*subDivide) ); //mHeight.size = resolution^2 => store all values needed for grid in this vector
 	mTileNumber = tileNumber;
 	mSubdivide = subDivide;
 	mFactor = static_cast<float>(1.0f / mSubdivide);
-
+	mStretchFactor = stretchFactor;
 	// flat grid
-    for (int i = 0 ; i < resolution*resolution ; i++)
+    for (int i = 0 ; i < (resolution*subDivide)*(resolution*subDivide); i++)
 		mHeight[i] = 0.0f;
-
+	
 	setVAOPositions();
 }
 
 Terrain::Terrain(int resolution)
 {
 	mResolution = resolution;
-	mHeight.resize(resolution*resolution);
-	for (int i = 0; i < resolution*resolution; i++)
+	mHeight.resize((resolution*mSubdivide)*(resolution*mSubdivide));
+	for (int i = 0; i < (resolution*mSubdivide)*(resolution*mSubdivide); i++)
 		mHeight[i] = 0.0f;
 
 }
@@ -39,43 +39,27 @@ void Terrain::setVAOPositions()
 	// methods from VertexArrayObject
 	begin(GL_TRIANGLES);
 	// Create mesh/grid 
-	/*
-	* TODO: wert für 0.5/0.35 wenn subdivide 2/3, für die +1 Sachen
-	*/
 	for (float z = 1.0; z < mResolution - 1; z = z + mFactor) {
 		for (float x = 1.0; x < mResolution - 1; x = x + mFactor) {
 			// calculate normals
-			n.x = getHeight(x - (1 * mFactor), z) - getHeight(x + (1 * mFactor), z);
-			n.y = 2.0f;
-			n.z = getHeight(x, z - (1 * mFactor)) - getHeight(x, z + (1 * mFactor));
-			n = normalize(n);
-			addNormal3f(n.x, n.y, n.z);
-
- 			addVertex3f(static_cast<float>(x), getHeight(x, z), static_cast<float>(z));
-
+			addVertex3f(static_cast<float>(x+mStretchFactor), 0.0, static_cast<float>(z+mStretchFactor));
 			// calculate texture coordinates
-			float s = x / static_cast<float>(mResolution-1) * mTileNumber;
+			float s = x / static_cast<float>(mResolution - 1) * mTileNumber;
 			float t = z / static_cast<float>(mResolution - 1) * mTileNumber;
-			addTexCoord2f(s,t);
+			addTexCoord2f(s, t);
 
+			if (z < mResolution - 3 && x < mResolution - 3) {
+
+				addIndex1ui(calcIndex(x, z));
+				addIndex1ui(calcIndex(x + (1 * mFactor), z));
+				addIndex1ui(calcIndex(x + (1 * mFactor), z + (1 * mFactor)));
+
+				addIndex1ui(calcIndex(x, z));
+				addIndex1ui(calcIndex(x + (1 * mFactor), z + (1 * mFactor)));
+				addIndex1ui(calcIndex(x, z + (1 * mFactor)));
+			}
 		}
     }
-
-	// 1 quad = 2 triangles, for a connected grid
-	for (float z = 0.0 ; z < mResolution-3 ; z = z + mFactor) {
-        for (float x = 0.0 ; x < mResolution-3 ; x = x + mFactor) {
-
-			addIndex1ui( calcIndex(x, z) );
-			addIndex1ui( calcIndex(x+ (1 * mFactor), z) );
-			addIndex1ui( calcIndex(x+ (1 * mFactor), z+ (1 * mFactor)) );
-
-			addIndex1ui( calcIndex(x, z) );
-			addIndex1ui( calcIndex(x+(1*mFactor), z+ (1 * mFactor)) );
-			addIndex1ui( calcIndex(x, z+ (1 * mFactor)) );
-
-		}
-    }
-
 	end();
 }
 
@@ -98,18 +82,18 @@ std::vector<float>  Terrain::makeCollisionMesh()
 
 void Terrain::setHeight(float x, float z, float height)
 {
-    if (getHeight(x, z) == 0)
-        mHeight[(z*mSubdivide) * (mResolution*mSubdivide) + (x*mSubdivide)] = height;
+	if (getHeight(x, z) == 0)
+		mHeight[(z*mSubdivide) * (mResolution*mSubdivide) + (x*mSubdivide)] = height;
 }
 
 float Terrain::getHeight(float x, float z) const
 {
-    return mHeight[(z*mSubdivide) * (mResolution*mSubdivide) + (x*mSubdivide)];
+	return 0.0f;
 }
 
 int Terrain::calcIndex(float x, float z)
 {
-    return (z*mSubdivide)*((mResolution*mSubdivide) -2) + (x*mSubdivide);
+	return (z*mSubdivide)*((mResolution*mSubdivide) - 2) + (x*mSubdivide);
 }
 
 

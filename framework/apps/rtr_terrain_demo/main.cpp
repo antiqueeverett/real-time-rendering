@@ -16,22 +16,18 @@
 
 using namespace glm;
 
-struct TerrainRegion{
-	float min;
-	float max;
-	GLuint texture;
-	const char* file;
-};
-
 // Dimensions of the windows
 int width = 1280;
 int height = 720;
 
+// CHANGE terrainResolution TO 512: normal PC / laptop, 2048: VR lab PC
+const int stretch = 200;
+
 const int terrainResolution = 512;	// Size of the terrain
-const int tileNumber = 12;			// No of tiles of terrain => 12 texture tiles
+const int tileNumber = 20;			// No of tiles of terrain => 12 texture tiles
 const int subdivide = 1;
-float amplitude = 80.0f;			// Amplitude for noise function
-float frequency = 0.013f;			// frequency for noise function
+float amplitude = 50.0f;			// Amplitude for noise function
+float frequency = 0.0083f;			// frequency for noise function
 const int terrainTextureRes = 512;	// Resolution of the texture images
 
 float elapsedTime = 0.0;							// for moving the terrain, measure elapsed time
@@ -44,10 +40,11 @@ const char* terrainFrag = "../resources/shaders/TerrainShader.frag";
 const char* terrainVert = "../resources/shaders/TerrainShader.vert";
 const char* skyboxFrag = "../resources/shaders/skybox.frag";
 const char* skyboxVert = "../resources/shaders/skybox.vert";
-std::vector<std::string> textures = { "../resources/textures/Terrain/Mountain1.png", "../resources/textures/Terrain/grassSeemless.png", "../resources/textures/Terrain/snow.png" };
+std::vector<std::string> textures = { "../resources/textures/Terrain/Mud.png", "../resources/textures/Terrain/grassSeemless.png", "../resources/textures/Terrain/Mountain1.png" };
 std::vector<std::string> skyboxTextures = {"../resources/textures/Skybox/right.png", "../resources/textures/Skybox/left.png", "../resources/textures/Skybox/top.png", "../resources/textures/Skybox/bottom.png", "../resources/textures/Skybox/back.png", "../resources/textures/Skybox/front.png" };
-const vec3 terrainCenter = vec3(static_cast<float>(terrainResolution / 2), 0.0f, static_cast<float>(terrainResolution / 2)); //center of terrain
-const vec3 cameraPosition = vec3(0.0f, 100.0f, 0.0f);
+
+const vec3 terrainCenter = vec3(static_cast<float>((terrainResolution + stretch) / 2.0), 0.0f, static_cast<float>((terrainResolution + stretch) / 2.0)); //center of terrain
+const vec3 cameraPosition = vec3(0.0f, 60.0f, 0.0f);
 
 Terrain* terrain = nullptr;
 TerrainShaders* terrainShaders = nullptr;
@@ -144,7 +141,6 @@ vec3 simulateMovement() {
 	float maxSpeed = -0.5;
 	float deltaTime = elapsedTime - oldTime;
 	mSpeed -= speed * deltaTime;
-	//printf("%f, ", mSpeed);
 	if (mSpeed < maxSpeed)
 		mSpeed = maxSpeed;
 	vec3 mDirection = vec3(sin(2.0) * cos(4.0), cos(2.0), sin(2.0) * sin(4.0));
@@ -178,6 +174,11 @@ void keyboard(unsigned char key, int x, int y)
 	case ' ':
       	camera->stop();
     	break;
+    case 't':
+		terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
+		terrainShaders->locateUniforms();
+		break;	
+	
 	}
 	glutPostRedisplay();
 
@@ -212,7 +213,7 @@ int main(int argc, char** argv)
 	}
 
 	// Terrain  
-	terrain = new Terrain(terrainResolution, tileNumber, subdivide);
+	terrain = new Terrain(terrainResolution, tileNumber, subdivide, stretch);
 	terrainShaders = new TerrainShaders(terrainTextureRes, textures, amplitude, frequency, terrainResolution, tileNumber);
 	terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
 	terrainShaders->locateUniforms();

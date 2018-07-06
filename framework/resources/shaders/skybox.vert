@@ -1,4 +1,4 @@
-#version 420
+#version 450
 
 uniform mat4 view;
 uniform mat4 projection;
@@ -6,7 +6,6 @@ uniform mat4 projection;
 layout(location = 0) in vec4 vPos;
 
 out vec4 fTexCoord;
-
 void main()
 {
 	fTexCoord = vPos;

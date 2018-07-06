@@ -156,22 +156,34 @@ float fbm_9( in vec2 x )
 // MAIN 
 //------------------------------------------------------------------------------------------------------------------
 double H = 1.4;
-double lacunarity = 1.8;
-double octaves = 8.0;
+double lacunarity = 3.2;
+double octaves = 10.0;
 double offset = 0.7;
 
 void main()
 {
 
     vec4 position = vPos + vec4(timeTranslate, 0.0); // translate terrain when it moves to make terrain look infinite
-    position.y = 0.25 * noise(position.xz*frequency) + 0.125 * fBm((position.xz*frequency), H, lacunarity, octaves) + 0.25* multifractal((position.xz*frequency/2.0), H, lacunarity, int(octaves), 0.8) + 0.25* fbm_9(position.xz * frequency/2.0);
-    position.y *= 300.0;
+    //position.y = 0.25 * noise(position.xz*frequency) + 0.125 * fBm((position.xz*frequency), H, lacunarity, octaves)+ 0.25* fbm_9(position.xz * frequency/2.0);
+	//	position.y = multifractal(position.xz, H, lacunarity, int(octaves), 0.8);
+	position.y = fBm(position.xz*frequency, 1.4, 3.2, octaves);
+	//position.y = fbm_9(position.xz*frequency);
+	position.y *= amplitude;
     
-    if(position.y < 0.0)
+   if(position.y < -amplitude)
     {
-        position.y = 0.0;
+        position.y = -amplitude;
     } 
 
+	   if(position.y > amplitude)
+    {
+        position.y = amplitude;
+    } 
+	
+	/*
+	CALCULATE NORMALS
+	*/
+	
     position.x = vPos.x;    //to stay on the grid, reset x and values
     position.z = vPos.z;
 
@@ -182,8 +194,7 @@ void main()
     fWorldPos = (model * position).xyz;                         // in world space
     fWorldNormal = normalize(modelInvT * vNormal.xyz);          //surface normal                                                            
     fWorldCam = (inverse(view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz; //Camera position in world space
-    fTexCoord = vTexCoord;                                      //texture coordinate
-    
+	fTexCoord = vTexCoord; 
 
 
 }
