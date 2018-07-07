@@ -46,6 +46,8 @@ std::vector<std::string> skyboxTextures = {"../resources/textures/Skybox/right.p
 const vec3 terrainCenter = vec3(static_cast<float>((terrainResolution + stretch) / 2.0), 0.0f, static_cast<float>((terrainResolution + stretch) / 2.0)); //center of terrain
 const vec3 cameraPosition = vec3(0.0f, 60.0f, 0.0f);
 
+const vec3 sunDirection = normalize(vec3(0.5f, 100.0f, 0.5f));	// Direction of sunlight in world space
+
 Terrain* terrain = nullptr;
 TerrainShaders* terrainShaders = nullptr;
 Skybox* skybox = nullptr;
@@ -214,7 +216,7 @@ int main(int argc, char** argv)
 
 	// Terrain  
 	terrain = new Terrain(terrainResolution, tileNumber, subdivide, stretch);
-	terrainShaders = new TerrainShaders(terrainTextureRes, textures, amplitude, frequency, terrainResolution, tileNumber);
+	terrainShaders = new TerrainShaders(terrainTextureRes, textures, sunDirection, amplitude, frequency, terrainResolution, tileNumber, subdivide);
 	terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
 	terrainShaders->locateUniforms();
 	

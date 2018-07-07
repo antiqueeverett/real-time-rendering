@@ -4,7 +4,7 @@
 
 using namespace glm;
 
-TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> texture_path, float amplitude, float frequency, int terrainResolution, int tileNumber) :
+TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> texture_path, vec3 sunDirection, float amplitude, float frequency, int terrainResolution, int tileNumber, int subdivide) :
 	mModelLocation(-1),
 	mModelInvTLocation(-1),
 	mViewLocation(-1),
@@ -19,10 +19,12 @@ TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> t
 	mTerrainResLocation(-1),
 	mTileNoLocation(-1),
 	mTexturePath(texture_path),
+	mSunDirection(sunDirection),
 	mAmplitude(amplitude),
 	mFrequency(frequency),
 	mTerrainResolution(terrainResolution),
-	mTileNumber(tileNumber)
+	mTileNumber(tileNumber),
+	mSubdivide(subdivide)
 {
 		mTextureID0 = generateTexture(textureResolution, mTexturePath[0].c_str());
 		mTextureID1 = generateTexture(textureResolution, mTexturePath[1].c_str());
@@ -50,8 +52,10 @@ void TerrainShaders::locateUniforms()
 
 
 	mModelLocation = glGetUniformLocation(mShaderProgram, "model");
-	if (mModelLocation == -1)
+	if (mModelLocation == -1){
 		printf("[TerrainShaders] Model location not found\n");
+		exit(0);
+	}
 
 
 	mModelInvTLocation = glGetUniformLocation(mShaderProgram, "modelInvT");
@@ -71,9 +75,7 @@ void TerrainShaders::locateUniforms()
 	if (mWorldSunDirectionLocation == -1)
 		printf("[TerrainShaders] WorldSunDirection location not found\n");
 
-	// Sun light direction
-	vec3 worldSunDirection = normalize(vec3(0.25f, 1.0f, 0.25f));
-	glUniform3fv(mWorldSunDirectionLocation, 1, &worldSunDirection[0]);
+	glUniform3fv(mWorldSunDirectionLocation, 1, &mSunDirection[0]);
 
 	mTextureSamplerLocation0 = glGetUniformLocation(mShaderProgram, "terrain0");
 	if (mTextureSamplerLocation0 == -1)
@@ -118,6 +120,12 @@ void TerrainShaders::locateUniforms()
 		printf("Tilenumber not found\n");
 
 	glUniform1i(mTileNoLocation, mTileNumber);
+
+	mSubdivideLocation = glGetUniformLocation(mShaderProgram, "subdivide");
+	if (mSubdivideLocation == -1)
+		printf("Subdivide not found\n");
+
+	glUniform1i(mSubdivideLocation, mSubdivide);
 }
 
 

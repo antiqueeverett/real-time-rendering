@@ -10,8 +10,8 @@ uniform vec3 timeTranslate;
 uniform float amplitude;
 uniform float frequency;
 
+uniform int subdivide;
 layout(location = 0) in vec4 vPos;
-layout(location = 2) in vec4 vNormal;
 layout(location = 3) in vec4 vTexCoord;
 
 out float height;
@@ -155,19 +155,20 @@ float fbm_9( in vec2 x )
 //------------------------------------------------------------------------------------------------------------------
 // MAIN 
 //------------------------------------------------------------------------------------------------------------------
+// parameters for fractals
 double H = 1.4;
 double lacunarity = 3.2;
 double octaves = 10.0;
 double offset = 0.7;
+
+vec4 vNormal = vec4(0.0);
 
 void main()
 {
 
     vec4 position = vPos + vec4(timeTranslate, 0.0); // translate terrain when it moves to make terrain look infinite
     //position.y = 0.25 * noise(position.xz*frequency) + 0.125 * fBm((position.xz*frequency), H, lacunarity, octaves)+ 0.25* fbm_9(position.xz * frequency/2.0);
-	//	position.y = multifractal(position.xz, H, lacunarity, int(octaves), 0.8);
 	position.y = fBm(position.xz*frequency, 1.4, 3.2, octaves);
-	//position.y = fbm_9(position.xz*frequency);
 	position.y *= amplitude;
     
    if(position.y < -amplitude)
@@ -180,9 +181,11 @@ void main()
         position.y = amplitude;
     } 
 	
-	/*
-	CALCULATE NORMALS
-	*/
+	// Calculate surface normals based on height of neighboring heights with fractals
+	vNormal.x = fBm(vec2(position.x - float(1.0/subdivide), position.z )*frequency, 1.4, 3.2, octaves) - fBm(vec2(position.x + float(1.0/subdivide), position.z )*frequency, 1.4, 3.2, octaves);
+	vNormal.y = float(1.0/subdivide) + float(1.0/subdivide);
+	vNormal.z = fBm(vec2(position.x, position.z - float(1.0/subdivide))*frequency, 1.4, 3.2, octaves) - fBm(vec2(position.x, position.z + float(1.0/subdivide))*frequency, 1.4, 3.2, octaves);
+	vNormal = normalize(vNormal);
 	
     position.x = vPos.x;    //to stay on the grid, reset x and values
     position.z = vPos.z;
@@ -195,6 +198,5 @@ void main()
     fWorldNormal = normalize(modelInvT * vNormal.xyz);          //surface normal                                                            
     fWorldCam = (inverse(view) * vec4(0.0, 0.0, 0.0, 1.0)).xyz; //Camera position in world space
 	fTexCoord = vTexCoord; 
-
 
 }

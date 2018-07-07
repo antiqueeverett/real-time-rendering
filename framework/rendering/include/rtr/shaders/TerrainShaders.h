@@ -6,21 +6,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
+using namespace glm;
+
 class TerrainShaders : public SimpleShaders
 {
 public:
-	explicit TerrainShaders(int textureResolution, std::vector<std::string> texture_path, float amplitude, float frequency, int terrainResolution, int tileNumber);
+	explicit TerrainShaders(int textureResolution, std::vector<std::string> texture_path, vec3 sunDirection, float amplitude, float frequency, int terrainResolution, int tileNumber, int subdivide);
 	virtual ~TerrainShaders() = default;
 
 	void locateUniforms();
 	void activate() override;
 
-	void setModelMatrix(const glm::mat4& transformMatrix);
-	void setViewMatrix(const glm::mat4& viewMatrix);
-	void setProjectionMatrix(const glm::mat4& projMatrix);
+	void setModelMatrix(const mat4& transformMatrix);
+	void setViewMatrix(const mat4& viewMatrix);
+	void setProjectionMatrix(const mat4& projMatrix);
 	void setAmplitude(const float amplitude);
 	void setFrequency(const float frequency);
-	void setTime(const glm::vec3& timeTranslate);
+	void setTime(const vec3& timeTranslate);
 
 	
 private:
@@ -39,15 +41,18 @@ private:
 	GLint mTimeLocation;
 	GLint mTerrainResLocation;
 	GLint mTileNoLocation;
+	GLint mSubdivideLocation;
 	GLuint mTextureID0;
 	GLuint mTextureID1;
 	GLuint mTextureID2;
 
 	std::vector<std::string> mTexturePath;
+	vec3 mSunDirection;
 	float const mFrequency;
 	float const mAmplitude;
 	float const mTerrainResolution;
 	float const mTileNumber;
+	int const mSubdivide;
 };
 
 #endif
