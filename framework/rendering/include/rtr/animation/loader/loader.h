@@ -2,8 +2,8 @@
 
 #include <GL/glew.h>
 #include <iostream>
-#include "../camera/camera.h"
-#include "../animate/model.h"
+#include <rtr/animation/camera/camera.h>
+#include <rtr/animation/animate/model.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

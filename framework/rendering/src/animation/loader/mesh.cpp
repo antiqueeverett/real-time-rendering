@@ -1,4 +1,4 @@
-#include "mesh.h"
+#include <rtr/animation/loader/mesh.h>
 
 animation_Mesh::animation_Mesh(vector<Vertex> vertic, vector<GLuint> ind, vector<Texture> textur, vector<VertexBoneData> bone_id_weights)
 {

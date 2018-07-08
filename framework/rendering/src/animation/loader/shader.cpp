@@ -1,4 +1,4 @@
-#include "shader.h"
+#include <rtr/animation/loader/shader.h>
 
 ForShader::ForShader()
 {

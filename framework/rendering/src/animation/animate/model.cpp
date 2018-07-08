@@ -1,5 +1,5 @@
-#include "model.h"
-#include "../loader/loader.h"
+#include <rtr/animation/animate/model.h>
+#include <rtr/animation/loader/loader.h>
 
 #include <chrono>
 #include <iostream>

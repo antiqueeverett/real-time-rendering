@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../loader/mesh.h"
+#include <rtr/animation/loader/mesh.h>
 
 #include <map>
 #include <vector>

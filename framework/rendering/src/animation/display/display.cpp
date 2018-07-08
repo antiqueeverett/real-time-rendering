@@ -12,8 +12,8 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-#include "../loader/loader.h"
-#include "display.h"
+#include <rtr/animation/loader/loader.h>
+#include <rtr/animation/display/display.h>
 
 Loader loader;	
 
@@ -26,12 +26,12 @@ int32_t window_width_ = 1280;
 int32_t window_height_ = 720;
 
 
-Display::Display()
+Display_ani::Display_ani()
 {
 
 }
 
-Display::~Display()
+Display_ani::~Display_ani()
 {
 
 }
@@ -83,7 +83,7 @@ void glut_display()
   	glutSwapBuffers();
 }
 
-void Display::init(int argc, char** argv)
+void Display_ani::init(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);

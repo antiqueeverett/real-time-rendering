@@ -1,13 +1,13 @@
-#ifndef DISPLAY_H
-#define DISPLAY_H
+#ifndef Display_ani_H
+#define Display_ani_H
 
-class Display
+class Display_ani
 {
 public:	
-	Display();
-	virtual ~Display();
+	Display_ani();
+	virtual ~Display_ani();
 
 	void init(int argc, char** argv);
 };
 
-#endif //DISPLAY_H
+#endif //Display_ani_H
