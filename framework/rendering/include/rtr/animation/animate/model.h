@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../opengl/mesh.h"
+#include "../loader/mesh.h"
 
 #include <map>
 #include <vector>
@@ -24,7 +24,7 @@ public:
 
 	void initShaders(GLuint shader_program);
 	void loadModel(const string& path);
-	void update();
+
 	void draw(GLuint shaders_program);
 	void showNodeName(aiNode* node);
 

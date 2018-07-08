@@ -1,10 +1,13 @@
-#include <rtr/animation/collada_parser/model.h>
-#include <rtr/animation/loader.h>
-#include <rtr/animation/controls/input.h>
+#include "model.h"
+#include "../loader/loader.h"
 
+#include <chrono>
+#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+using namespace std::chrono;
 
 Model::Model()
 {
@@ -29,30 +32,19 @@ void Model::initShaders(GLuint shader_program)
 	//rotate_head_xz *= glm::quat(cos(glm::radians(-45.0f / 2)), sin(glm::radians(-45.0f / 2)) * glm::vec3(1.0f, 0.0f, 0.0f));
 }
 
-void Model::update()
-{
-	// making new quaternions for rotate head
-	if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_1)){
-		rotate_head_xz *= glm::quat(cos(glm::radians(1.0f / 2)), sin(glm::radians(1.0f / 2)) * glm::vec3(1.0f, 0.0f, 0.0f));
-	}
 
-	if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_2)){
-		rotate_head_xz *= glm::quat(cos(glm::radians(-1.0f / 2)), sin(glm::radians(-1.0f / 2)) * glm::vec3(1.0f, 0.0f, 0.0f));
-	}
-
-	if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_3)){
-		rotate_head_xz *= glm::quat(cos(glm::radians(1.0f / 2)), sin(glm::radians(1.0f / 2)) * glm::vec3(0.0f, 0.0f, 1.0f));
-	}
-
-	if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_4)){
-		rotate_head_xz *= glm::quat(cos(glm::radians(-1.0f / 2)), sin(glm::radians(-1.0f / 2)) * glm::vec3(0.0f, 0.0f, 1.0f));
-	}
-}
 
 void Model::draw(GLuint shaders_program)
 {
+   
+    auto now = system_clock::now();
+    auto now_ms = time_point_cast<milliseconds>(now);
+
+    auto value = now_ms.time_since_epoch();
+    double duration = value.count();
+
 	vector<aiMatrix4x4> transforms;
-	boneTransform((double) SDL_GetTicks() / 1000.0f, transforms);
+	boneTransform(duration / 1000.0f, transforms);
 
 	for (uint i = 0; i < transforms.size(); i++) // move all matrices for actual model position to shader
 	{
@@ -132,6 +124,7 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 	animation_Mesh mesh;
 	for (uint i = 0; i < scene->mNumMeshes; i++)
 	{
+		std::cout << "process mesh " << i << " of " << scene->mNumMeshes << std::endl;
 		aiMesh* ai_mesh = scene->mMeshes[i];
 		mesh = processMesh(ai_mesh, scene);
 		meshes.push_back(mesh); //accumulate all meshes in one vector

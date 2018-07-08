@@ -4,8 +4,8 @@ Guide for including an application into the framework
 
 ## Getting Started - Brief
 
-* **class-files** *(.h, .hpp, .cpp, ...)* to be placed in **rendering/** 
 * **application-files** *(main.cpp)* to be placed in **apps/**
+* **class-files** *(.h, .hpp, .cpp, ...)* to be placed in **rendering/** 
 * **resources** *(shaders, meshes, textures)* to be placed in  **resources/**
 
 
@@ -132,7 +132,7 @@ sudo apt-get install libsdl-mixer1.2-dev
 * **FREEGLUT3**
 ```
 sudo apt-get install freeglut3-dev 
-```	 
+```
 
 * **ASSIMP**
 ```
@@ -155,6 +155,18 @@ sudo apt-get install libdevil1c2
 sudo apt install libfreeimage-dev libfreeimageplus-dev libfreeimage3  libfreeimageplus3
 ```
 
+* **CCMAKE (one-liner)**
+```
+sudo apt-get install build-essential g++ libboost-all-dev cmake cmake-qt-gui cmake-curses-gui pkgconf
+```
+
+* **ogl (one-liner)**
+```
+sudo apt-get install libglm-dev libglew-dev glew-utils libglfw3-dev libsdl2-dev freeglut3-dev libassimp-dev libsoil-dev libdevil-dev libdevil1c2 libfreeimage-dev libfreeimageplus-dev libfreeimage3  libfreeimageplus3
+
+```
+
+
 ###  Verify installed libraries 
 
 FLAGS
@@ -162,7 +174,7 @@ FLAGS
 ```
 $ pkg-config --cflags freetype2
 
-  -I/usr/include/freetype2  
+  -I/usr/include/freetype2
 ```
 
 LIB
@@ -170,11 +182,5 @@ LIB
 ```
 $ pkg-config --libs freetype2
 
--lfreetype     
+-lfreetype 
 ```
-
-### ACKNOWLEDGEMENTS
-
-brosefine
-
-Marques

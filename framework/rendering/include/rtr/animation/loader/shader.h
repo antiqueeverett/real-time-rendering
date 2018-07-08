@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <GL/glew.h>
-#include <SDL2/SDL_opengl.h>
 
 class ForShader
 {

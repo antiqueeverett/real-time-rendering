@@ -2,8 +2,8 @@
 
 #include <GL/glew.h>
 #include <iostream>
-#include "opengl/camera.h"
-#include "collada_parser/model.h"
+#include "../camera/camera.h"
+#include "../animate/model.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -22,7 +22,7 @@ public:
 	GLfloat last_frame = 0.0f;
 	GLfloat last_x;
 	GLfloat last_y;
-	Vector2D mouse_position;
+
 	GLboolean mouse_first_in;
 	animation_Camera camera;
 
@@ -37,7 +37,7 @@ public:
 	glm::mat4 matr_model_2;
 
 	void init();
-	void update();
+	void update(int32_t width, int32_t height);
 	void render();
 	void playSound();
 	

@@ -1,4 +1,4 @@
-#include <rtr/animation/opengl/shader.h>
+#include "shader.h"
 
 ForShader::ForShader()
 {

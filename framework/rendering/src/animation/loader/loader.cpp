@@ -1,10 +1,13 @@
-#include <rtr/animation/loader.h>
-#include <rtr/animation/opengl/shader.h>
-#include <rtr/animation/opengl/display.h>
+#include "loader.h"
+#include "shader.h"
 
+#include <chrono>
 #include <IL/il.h>
 #include <IL/ilu.h>
 #include <IL/ilut.h>
+
+using namespace std::chrono;
+typedef high_resolution_clock Clock;
 
 Loader::Loader()
 {
@@ -19,13 +22,13 @@ Loader::~Loader()
 }
 
 void Loader::init()
-{	
+{
 	cout << "Loading animation shaders" << endl;
-	shaders_animated_model = ForShader::makeProgram("../../resources/shaders/animated_model.vert", "../../resources/shaders/animated_model.frag");
+	shaders_animated_model = ForShader::makeProgram("resources/shaders/animated_model.vert", "resources/shaders/animated_model.frag");
 	cout << "Animation shaders loaded successfully !" << endl;
 
 	cout << "Loading animation model!" << endl;
-	model_astroboy.loadModel("../../resources/collada/astroboy/astroBoy_walk_Max.dae");
+	model_astroboy.loadModel("resources/collada/astroboy/astroBoy_walk_Max.dae");
 	model_astroboy.initShaders(shaders_animated_model);
 	cout << "Animation model loaded successfully !" << endl;
 
@@ -34,40 +37,22 @@ void Loader::init()
 	//matr_model2 = glm::scale(matr_model, glm::vec3(0.3f, 0.3f, 0.3f));
 }
 
-void Loader::update()
+void Loader::update(int32_t width, int32_t height)
 {
-	GLfloat current_frame = SDL_GetTicks();
+
+/*	GLfloat delta_time = 0.0f;
+	GLfloat last_frame = 0.0f;*/
+
+	auto _current_frame = system_clock::now();
+    auto __current_frame = time_point_cast<milliseconds>(_current_frame);
+
+    auto value = __current_frame.time_since_epoch();
+    GLfloat current_frame = value.count();
 	delta_time = (current_frame - last_frame);
 	last_frame = current_frame;
 
-	// camera
-	camera.updateKey(delta_time, speed);
-	// mouse
-	if (InputHandler::Instance()->getMouseButtonState(LEFT_PRESSED) )
-	{
-		SDL_ShowCursor(SDL_DISABLE);
-		mouse_position = InputHandler::Instance()->getMousePosition();
-
-		if (mouse_first_in) // need run ONLY if mouse on window !!!
-		{
-			last_x = mouse_position.getX();
-			last_y = mouse_position.getY();
-			mouse_first_in = false;
-		}
-		
-		GLfloat x_offset = mouse_position.getX() - last_x;
-		GLfloat y_offset = mouse_position.getY() - last_y;
-		last_x = mouse_position.getX();
-		last_y = mouse_position.getY();
-
-		camera.updateMouse(x_offset, y_offset);
-	}
-	if (InputHandler::Instance()->getMouseButtonState(LEFT_RELEASED)){
-		SDL_ShowCursor(SDL_ENABLE);
-		mouse_first_in = true;
-	}
 	perspective_view = camera.getViewMatrix();
-	perspective_projection = glm::perspective(glm::radians(camera.fov), (float)animation_Display::Instance()->screen_width / (float)animation_Display::Instance()->screen_height, 1.0f, 2000.0f); 
+	perspective_projection = glm::perspective(glm::radians(camera.fov), (float)width / (float)height, 1.0f, 2000.0f); 
 }
 
 void Loader::render()

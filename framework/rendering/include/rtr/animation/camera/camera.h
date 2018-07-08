@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../controls/input.h"
-#include "../controls/2D_vector.h"
-
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -41,57 +38,6 @@ public:
 		updateCameraVectors();
 	}
 
-	void updateKey(GLfloat delta_time, GLfloat speed)
-	{
-		GLfloat velocity = speed * delta_time;
-
-		if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_W))
-		{
-			camera_pos += velocity * camera_front;
-		}
-		if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_S))
-		{
-			camera_pos -= velocity / 2 * camera_front;
-		}
-		if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_A))
-		{
-			camera_pos -= camera_right * velocity;
-		}
-		if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_D))
-		{
-			camera_pos += camera_right * velocity;
-		}
-		if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_SPACE))
-		{
-			camera_pos += glm::vec3(0.0f, 0.01f * delta_time, 0.0f); // for jump
-		}
-
-		// zoom
-		if (InputHandler::Instance()->isKeyDown(SDL_SCANCODE_LSHIFT))
-		{
-			fov = 10.0f;
-			sensitivity = 0.025f;
-		}
-		
-		else
-		{
-			fov = 45.0f;
-			sensitivity = 0.1f;
-		}
-	}
-
-	void updateMouse(GLfloat x_offset, GLfloat y_offset)
-	{
-		x_offset *= sensitivity;
-		y_offset *= sensitivity;
-		yaw += x_offset;
-		pitch -= y_offset;
-
-		if (pitch > 89.0f) pitch = 89.0f;
-		if (pitch < -89.0f) pitch = -89.0f;
-
-		updateCameraVectors();
-	}
 
 	glm::mat4 getViewMatrix()
 	{

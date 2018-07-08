@@ -1,4 +1,4 @@
-#include <rtr/animation/opengl/mesh.h>
+#include "mesh.h"
 
 animation_Mesh::animation_Mesh(vector<Vertex> vertic, vector<GLuint> ind, vector<Texture> textur, vector<VertexBoneData> bone_id_weights)
 {
