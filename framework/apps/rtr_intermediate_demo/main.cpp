@@ -88,6 +88,8 @@ glm::fvec3 fire_dir{0.0f, -0.5f, 1.0f};
 
 bool render_obj = true, render_effect = true, render_terrain = true, move_obj = false;
 
+std::map<unsigned char, bool> keys_;
+
 
 // If mouse is moves in direction (x,y)
 void mouseMotion(int x, int y)
@@ -246,69 +248,106 @@ vec3 simulateMovement() {
 	return mSpeed * mDirection;
 }
 
+void init_keys(){
+	keys_['w'] = false;
+	keys_['a'] = false;
+	keys_['s'] = false;
+	keys_['d'] = false;
+	keys_['e'] = false;
+	keys_['q'] = false;
+	keys_['c'] = false;
+	keys_['r'] = false;
+	keys_['f'] = false;
+	keys_['v'] = false;
+	keys_[' '] = false;
+	keys_['x'] = false;
+	keys_['y'] = false;
+	keys_['t'] = false;
+}
+
 // move terrain with WASD
-void keyboard(unsigned char key, int x, int y)
+void keyboard()
 {
 	//TODO: Set mSpeed = 0 when wasd is released
 	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
 	elapsedTime += 0.001;
-	switch (key) {
-	case 'w':
+	
+	if (keys_.at('w')){
     	rotate_drgnfly_fire(rot_axis_ws_, rot_angle_);
 		//terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
-		break;
-	case 'a':
+	}
+	if (keys_.at('a')){
     	rotate_drgnfly_fire(rot_axis_ad_, rot_angle_);
     	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_/3);
 		//terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
-		break;
-	case 's':
+	}
+	if (keys_.at('s')){
     	rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_);
 		//terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
-		break;
-	case 'd':
+	}
+	if (keys_.at('d')){
     	rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_);
     	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_/3);
 		//terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
-		break;
-    case 'q':
+	}
+    if (keys_.at('q')){
     	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_);
-    	break;
-    case 'e':
+    }
+    if (keys_.at('e')){
     	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_);
-    	break;
-	case 'c':
+    }
+	if (keys_.at('c')){
       	camera->stop();
-    	break;
-    case 'r':
+    }
+    if (keys_.at('r')){
     	render_obj = !render_obj;
-    	break;
-    case 'f':
+    }
+    if (keys_.at('f')){
     	render_terrain = !render_terrain;
-    	break;
-    case 'v':
+    }
+    if (keys_.at('v')){
     	render_effect = !render_effect;
-    	break;
-    case ' ':
+    }
+    if (keys_.at(' ')){
     	move_obj = !move_obj;
-    case 'x':
+    }
+    if (keys_.at('x')){
     	move_speed += 0.05f;
-    	break;
-    case 'y':
-    	move_speed -= 0.05f;	
-    case 't':
+    }
+    if (keys_.at('y')){
+    	move_speed -= 0.05f;
+    }	
+    if (keys_.at('t')){
 		terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
 		terrainShaders->locateUniforms();
-		break;		
-	}
+	}		
+	
 	glutPostRedisplay();
 
 }
 
+// move terrain with WASD
+void keyboarddown(unsigned char key, int x, int y)
+{
+	//TODO: Set mSpeed = 0 when wasd is released
+	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
+	keys_[key] = true;
+	keyboard();
+}
 
+// move terrain with WASD
+void keyboardup(unsigned char key, int x, int y)
+{
+	//TODO: Set mSpeed = 0 when wasd is released
+	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
+	keys_[key] = false;
+	keyboard();
+}
 
 int main(int argc, char** argv)
 {
+	init_keys();
+
 	// Initialize GLUT
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
@@ -323,7 +362,8 @@ int main(int argc, char** argv)
 	glutDisplayFunc(display);
 	glutSpecialFunc(special);
 	glutIdleFunc(display);
-	glutKeyboardFunc(keyboard);
+	glutKeyboardFunc(keyboarddown);
+	glutKeyboardUpFunc(keyboardup);
 
 	// Init glew so that the GLSL functionality will be available
 	glewExperimental = GL_TRUE;
@@ -375,6 +415,7 @@ int main(int argc, char** argv)
 
 	fire_->setPos(fire_pos * scale_ + drgnfly_pos);
 	fire_->setDir(fire_dir);
+
 	
 	// Camera 
 	glutMotionFunc(mouseMotion);
