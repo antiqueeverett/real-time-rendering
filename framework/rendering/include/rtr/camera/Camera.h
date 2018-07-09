@@ -3,6 +3,12 @@
 
 #include <glm/glm.hpp>
 
+// Default camera values
+/*const GLfloat YAW = -90.0f;
+const GLfloat PITCH = 0.0f;
+const GLfloat SENSITIVTY = 0.1f;
+const GLfloat FOV = 45.0f;*/
+
 class Camera
 {
 public:
@@ -23,6 +29,17 @@ public:
 	const glm::mat4& getViewMatrix() const;
 	const glm::mat4& getProjectionMatrix() const;
 	const glm::vec3& getPosition() const { return mPosition;}
+
+/*	GLfloat yaw;
+	GLfloat fov;
+	GLfloat pitch;
+	GLfloat sensitivity;
+	
+	glm::vec3 world_up;
+	glm::vec3 camera_up;
+	glm::vec3 camera_pos;
+	glm::vec3 camera_right;
+	glm::vec3 camera_front;*/
 
 private:
 	int mOldX;             

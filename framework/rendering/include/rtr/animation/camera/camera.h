@@ -37,12 +37,13 @@ public:
 
 		updateCameraVectors();
 	}
-
-
+	
+//--------------------------------------------------------------------------------------------------
 	glm::mat4 getViewMatrix()
 	{
 		return glm::lookAt(camera_pos, camera_pos + camera_front, camera_up);
 	}
+//--------------------------------------------------------------------------------------------------
 
 private:
 	void updateCameraVectors()

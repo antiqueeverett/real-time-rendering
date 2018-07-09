@@ -1,11 +1,23 @@
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 #include <glm/glm.hpp>
+#include <GL/freeglut.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <IL/il.h>
+#include <IL/ilu.h>
+#include <IL/ilut.h> 
+
+#include <cmath>
+#include <string>
+#include <vector>
+#include <chrono>
+#include <cstring>
 #include <stdio.h>
 #include <stdlib.h> 
-#include <vector>
+#include <iostream>
+
+#include <rtr/animation/loader/loader.h>
+#include <rtr/animation/display/display.h>
 
 #include "rtr/terrain/Terrain.h"
 #include "rtr/terrain/Skybox.h"
@@ -14,12 +26,20 @@
 #include "rtr/shaders/SkyboxShaders.h"
 #include "rtr/camera/Camera.h"
 
-
 #include <rtr/ren/headers.hpp>
 #include <rtr/ren/particleHeaders.hpp>
 #include <rtr/shaders/TextureShaders.h>
 #include <rtr/shaders/ParticleShaders.h>
 #include <rtr/object/object.hpp>
+
+Loader loader;
+
+//high resolution clock used to establish time points reletive to each frame
+using namespace std::chrono;
+typedef high_resolution_clock Clock;
+std::chrono::duration<double> last_frame;
+
+uint64_t elapsed_ms_{0};
 
 using namespace glm;
 // Dimensions of the windows
@@ -103,6 +123,13 @@ void mouse(int button, int state, int x, int y)
 	glutPostRedisplay();
 }
 
+void glut_timer(int32_t _e)
+{
+  	glutPostRedisplay();
+  	glutTimerFunc(16, glut_timer, 1);
+  	elapsed_ms_ += 16;
+}
+
 //on resize window, re-create projection matrix
 void glut_resize(int32_t _width, int32_t _height) {
   width = _width;
@@ -182,10 +209,13 @@ void display(void)
 		shader_->activate();
 	
 		//upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-		glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix());
-		glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+		glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix()); 
+		glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix())); 
 		glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
-	
+		
+		//loader.MVP(camera, dragonfly->get_model_matrix(), camera->getViewMatrix(), camera->getProjectionMatrix());
+		loader.update(width, height);
+
 		//bind the VBO of the model such that the next draw call will render with these vertices
 		dragonfly->activate();
 	
@@ -210,6 +240,7 @@ void display(void)
 		glDisable(GL_BLEND);
 	}
 	
+	loader.render();
 	glutSwapBuffers();
 }
 
@@ -333,7 +364,20 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	//initialize DeviL -- utilized for loading animation diffuse textures
+	ilInit(); 
+	iluInit();
+	ilutInit();
+	ilutRenderer(ILUT_OPENGL);
+	ilEnable(IL_ORIGIN_SET); 
+	ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
+
+	loader.init();
+	
 	camera = new Camera((width/(float)height), cameraPosition);
+	//initialize animation loading
+
+
 	// Terrain  
 	terrain = new Terrain(terrainResolution, tileNumber, subdivide, stretch);
 	terrainShaders = new TerrainShaders(terrainTextureRes, textures, sunDirection, amplitude, frequency, terrainResolution, tileNumber, subdivide);
