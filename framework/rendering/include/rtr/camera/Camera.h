@@ -24,6 +24,7 @@ public:
 	void update();
 	void stop() {mSpeed = 0;}
 	void setViewDir(glm::fvec3 dir);
+	void setPosition(glm::fvec3 pos);
 	void updateProjection(float ratio);
 
 	const glm::mat4& getViewMatrix() const;
