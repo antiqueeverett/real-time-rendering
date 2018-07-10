@@ -32,6 +32,9 @@
 #include <rtr/shaders/ParticleShaders.h>
 #include <rtr/object/object.hpp>
 
+#include <rtr/gamepad/joy.h>
+#include <rtr/gamepad/updates.h>
+
 Loader loader;
 
 //high resolution clock used to establish time points reletive to each frame
@@ -108,7 +111,9 @@ glm::fvec3 fire_dir{0.0f, -0.5f, 1.0f};
 
 bool render_obj = true, render_effect = true, render_terrain = true, move_obj = false;
 
+//controls
 std::map<unsigned char, bool> keys_;
+Joystick* joy = new Joystick("/dev/input/js0");
 
 
 // If mouse is moves in direction (x,y)
@@ -123,6 +128,96 @@ void mouse(int button, int state, int x, int y)
 {
 	camera->mouseButton(button, state, x, y);
 	glutPostRedisplay();
+}
+
+void rotate_drgnfly_fire(glm::fvec3 rot_axis, float angle){
+	dragonfly->rotate(rot_axis, angle);
+	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
+	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
+	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
+	fire_->setDir(new_fire_dir);
+}
+
+void translate_drgnfly_fire(glm::fvec3 transl){
+	dragonfly->translate(transl);
+	drgnfly_pos += transl;
+	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
+	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
+}
+
+// move terrain with WASD
+void keyboard()
+{
+	//TODO: Set mSpeed = 0 when wasd is released
+	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
+	elapsedTime += 0.001;
+	
+	if (keys_.at('w')){
+    	rotate_drgnfly_fire(rot_axis_ws_, rot_angle_);
+		//terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
+	}
+	if (keys_.at('a')){
+    	rotate_drgnfly_fire(rot_axis_ad_, rot_angle_);
+    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_/3);
+		//terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
+	}
+	if (keys_.at('s')){
+    	rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_);
+		//terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
+	}
+	if (keys_.at('d')){
+    	rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_);
+    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_/3);
+		//terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
+	}
+    if (keys_.at('q')){
+    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_);
+    }
+    if (keys_.at('e')){
+    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_);
+    }
+	if (keys_.at('c')){
+      	camera->stop();
+    }
+    if (keys_.at('r')){
+    	render_obj = !render_obj;
+    }
+    if (keys_.at('f')){
+    	render_terrain = !render_terrain;
+    }
+    if (keys_.at('v')){
+    	render_effect = !render_effect;
+    }
+    if (keys_.at(' ')){
+    	move_obj = !move_obj;
+    }
+    if (keys_.at('x')){
+    	move_speed += 0.05f;
+    }
+    if (keys_.at('y')){
+    	move_speed -= 0.05f;
+    }	
+    if (keys_.at('t')){
+		terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
+		terrainShaders->locateUniforms();
+	}		
+	
+	glutPostRedisplay();
+
+}
+
+void joystick(){
+	joy->Update();
+
+        if (joy->hasButtonUpdate()){
+            update_buttons(joy, &keys_);
+        }
+
+        if (joy->hasAxisUpdate()){
+            update_axes(joy,&keys_);
+        }
+
+    keyboard();
 }
 
 void glut_timer(int32_t _e)
@@ -149,23 +244,11 @@ mat4 calcTerrainTransformation(float rotationXAngle, float rotationYAngle)
 	return transformMatrix;
 }
 
-void rotate_drgnfly_fire(glm::fvec3 rot_axis, float angle){
-	dragonfly->rotate(rot_axis, angle);
-	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
-	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
-	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
-	fire_->setDir(new_fire_dir);
-}
 
-void translate_drgnfly_fire(glm::fvec3 transl){
-	dragonfly->translate(transl);
-	drgnfly_pos += transl;
-	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
-	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
-}
 
-void display(void)
-{
+void display(void){
+  joystick();
+
   glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
   glClearColor(0.22f, 0.28f, 0.31f, 1.0f);
@@ -216,7 +299,7 @@ void display(void)
 		glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
 		
 		//loader.MVP(camera, dragonfly->get_model_matrix(), camera->getViewMatrix(), camera->getProjectionMatrix());
-		loader.update(width, height);
+		//loader.update(width, height);
 
 		//bind the VBO of the model such that the next draw call will render with these vertices
 		dragonfly->activate();
@@ -296,66 +379,7 @@ void init_keys(){
 	keys_['t'] = false;
 }
 
-// move terrain with WASD
-void keyboard()
-{
-	//TODO: Set mSpeed = 0 when wasd is released
-	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
-	elapsedTime += 0.001;
-	
-	if (keys_.at('w')){
-    	rotate_drgnfly_fire(rot_axis_ws_, rot_angle_);
-		//terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
-	}
-	if (keys_.at('a')){
-    	rotate_drgnfly_fire(rot_axis_ad_, rot_angle_);
-    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_/3);
-		//terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
-	}
-	if (keys_.at('s')){
-    	rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_);
-		//terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
-	}
-	if (keys_.at('d')){
-    	rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_);
-    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_/3);
-		//terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
-	}
-    if (keys_.at('q')){
-    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_);
-    }
-    if (keys_.at('e')){
-    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_);
-    }
-	if (keys_.at('c')){
-      	camera->stop();
-    }
-    if (keys_.at('r')){
-    	render_obj = !render_obj;
-    }
-    if (keys_.at('f')){
-    	render_terrain = !render_terrain;
-    }
-    if (keys_.at('v')){
-    	render_effect = !render_effect;
-    }
-    if (keys_.at(' ')){
-    	move_obj = !move_obj;
-    }
-    if (keys_.at('x')){
-    	move_speed += 0.05f;
-    }
-    if (keys_.at('y')){
-    	move_speed -= 0.05f;
-    }	
-    if (keys_.at('t')){
-		terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
-		terrainShaders->locateUniforms();
-	}		
-	
-	glutPostRedisplay();
 
-}
 
 // move terrain with WASD
 void keyboarddown(unsigned char key, int x, int y)
@@ -375,9 +399,12 @@ void keyboardup(unsigned char key, int x, int y)
 	keyboard();
 }
 
+
+
 int main(int argc, char** argv)
 {
 	init_keys();
+	joy->Update();
 
 	// Initialize GLUT
 	glutInit(&argc, argv);
