@@ -27,7 +27,7 @@ public:
     ~Joystick();
 
     // reads in the next available joystick update. Blocks until it receives an update.
-    void Update();
+    bool Update();
 
     // Checks if the most recent call to this->Update() was a Button or an Axis
     bool hasButtonUpdate();

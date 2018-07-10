@@ -2,7 +2,7 @@
 
 Joystick::Joystick(std::string filename)
 {
-    int fd = open(filename.c_str(), O_RDONLY);
+    int fd = open(filename.c_str(), O_RDONLY | O_NONBLOCK);
 
     if (fd < 0)
     {
@@ -18,23 +18,18 @@ Joystick::~Joystick()
     close(this->file_descriptor);
 }
 
-void Joystick::Update()
+bool Joystick::Update()
 {
     // zero out the previous event
     memset(&event, 0, JS_EVENT_SIZE);
-    size_t bytes_read = 0;
     ssize_t tmp = 0;
 
     // perform a blocking read.
-    while (bytes_read < JS_EVENT_SIZE)
-    {
-        tmp = read(file_descriptor, &event + bytes_read, JS_EVENT_SIZE - bytes_read);
+    //while (bytes_read < JS_EVENT_SIZE){
+        tmp = read(file_descriptor, &event, JS_EVENT_SIZE );
 
-        if (tmp > 0)
-        {
-            bytes_read += tmp;
-        }
-    }
+        if (tmp < 0){return false;}
+    //}
 
     // ignore non-input events
     event.type &= ~EVENT_INIT;
@@ -55,6 +50,8 @@ void Joystick::Update()
         is_button_update = true;
         button_values[event.id] = event.value;
     }
+
+    return true;
 }
 
 bool Joystick::hasButtonUpdate()

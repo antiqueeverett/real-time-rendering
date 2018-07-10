@@ -112,8 +112,8 @@ glm::fvec3 fire_dir{0.0f, -0.5f, 1.0f};
 bool render_obj = true, render_effect = true, render_terrain = true, move_obj = false;
 
 //controls
-std::map<unsigned char, bool> keys_;
-Joystick* joy = new Joystick("/dev/input/js0");
+std::map<unsigned char, float> keys_;
+Joystick* joy = new Joystick("/dev/input/js1");
 
 
 // If mouse is moves in direction (x,y)
@@ -153,28 +153,28 @@ void keyboard()
 	elapsedTime += 0.001;
 	
 	if (keys_.at('w')){
-    	rotate_drgnfly_fire(rot_axis_ws_, rot_angle_);
+    	rotate_drgnfly_fire(rot_axis_ws_, rot_angle_*keys_.at('w'));
 		//terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
 	}
 	if (keys_.at('a')){
-    	rotate_drgnfly_fire(rot_axis_ad_, rot_angle_);
-    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_/3);
+    	rotate_drgnfly_fire(rot_axis_ad_, rot_angle_*keys_.at('a'));
+    	//rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_/3);
 		//terrainTransl += vec3(simulateMovement().x, 0.0, 0.0);
 	}
 	if (keys_.at('s')){
-    	rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_);
+    	rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_*keys_.at('s'));
 		//terrainTransl -= vec3(0.0, 0.0, simulateMovement().z);
 	}
 	if (keys_.at('d')){
-    	rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_);
-    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_/3);
+    	rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_*keys_.at('d'));
+    	//rotate_drgnfly_fire(rot_axis_qe_, rot_angle_/3);
 		//terrainTransl -= vec3(simulateMovement().x, 0.0, 0.0);
 	}
     if (keys_.at('q')){
-    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_);
+    	rotate_drgnfly_fire(rot_axis_qe_, -rot_angle_*keys_.at('q'));
     }
     if (keys_.at('e')){
-    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_);
+    	rotate_drgnfly_fire(rot_axis_qe_, rot_angle_*keys_.at('e'));
     }
 	if (keys_.at('c')){
       	camera->stop();
@@ -207,7 +207,7 @@ void keyboard()
 }
 
 void joystick(){
-	joy->Update();
+	if(joy->Update()){
 
         if (joy->hasButtonUpdate()){
             update_buttons(joy, &keys_);
@@ -218,6 +218,7 @@ void joystick(){
         }
 
     keyboard();
+  }
 }
 
 void glut_timer(int32_t _e)
@@ -299,7 +300,7 @@ void display(void){
 		glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
 		
 		//loader.MVP(camera, dragonfly->get_model_matrix(), camera->getViewMatrix(), camera->getProjectionMatrix());
-		//loader.update(width, height);
+		loader.update(width, height);
 
 		//bind the VBO of the model such that the next draw call will render with these vertices
 		dragonfly->activate();
@@ -363,20 +364,20 @@ vec3 simulateMovement() {
 }
 
 void init_keys(){
-	keys_['w'] = false;
-	keys_['a'] = false;
-	keys_['s'] = false;
-	keys_['d'] = false;
-	keys_['e'] = false;
-	keys_['q'] = false;
-	keys_['c'] = false;
-	keys_['r'] = false;
-	keys_['f'] = false;
-	keys_['v'] = false;
-	keys_[' '] = false;
-	keys_['x'] = false;
-	keys_['y'] = false;
-	keys_['t'] = false;
+	keys_['w'] = 0.0f;
+	keys_['a'] = 0.0f;
+	keys_['s'] = 0.0f;
+	keys_['d'] = 0.0f;
+	keys_['e'] = 0.0f;
+	keys_['q'] = 0.0f;
+	keys_['c'] = 0.0f;
+	keys_['r'] = 0.0f;
+	keys_['f'] = 0.0f;
+	keys_['v'] = 0.0f;
+	keys_[' '] = 0.0f;
+	keys_['x'] = 0.0f;
+	keys_['y'] = 0.0f;
+	keys_['t'] = 0.0f;
 }
 
 
@@ -386,7 +387,7 @@ void keyboarddown(unsigned char key, int x, int y)
 {
 	//TODO: Set mSpeed = 0 when wasd is released
 	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
-	keys_[key] = true;
+	keys_[key] = 1.0f;
 	keyboard();
 }
 
@@ -395,7 +396,7 @@ void keyboardup(unsigned char key, int x, int y)
 {
 	//TODO: Set mSpeed = 0 when wasd is released
 	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
-	keys_[key] = false;
+	keys_[key] = 0.0f;
 	keyboard();
 }
 
@@ -403,6 +404,7 @@ void keyboardup(unsigned char key, int x, int y)
 
 int main(int argc, char** argv)
 {
+
 	init_keys();
 	joy->Update();
 
