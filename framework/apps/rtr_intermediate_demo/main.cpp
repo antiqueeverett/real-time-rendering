@@ -86,6 +86,7 @@ std::string obj_file_ = "../resources/objects/dragon_fly.obj";
 //std::string obj_file_ = "../resources/objects/DRAGNFLY.OBJ";
 
 Object* dragonfly;
+glm::mat4 model_matrix;
 
 //what we need for character control
 glm::fvec3 move_dir_{0.0f, 0.0f, 1.0f};		//vector representing the direction in which we move
@@ -216,7 +217,11 @@ void display(void)
 		glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
 		
 		//loader.MVP(camera, dragonfly->get_model_matrix(), camera->getViewMatrix(), camera->getProjectionMatrix());
-		loader.update(width, height);
+		// --- depricating .....loader.update(width, height);
+
+		dragonfly->get_model_matrix();
+
+		loader.update(width, height, *camera, dragonfly->model_matrix_, camera->getViewMatrix(), camera->getProjectionMatrix());
 
 		//bind the VBO of the model such that the next draw call will render with these vertices
 		dragonfly->activate();
@@ -412,11 +417,9 @@ int main(int argc, char** argv)
 	ilEnable(IL_ORIGIN_SET); 
 	ilOriginFunc(IL_ORIGIN_UPPER_LEFT);
 
-	loader.init();
-	
+	loader.init(); //initialize animation
 	camera = new Camera((width/(float)height), cameraPosition);
-	//initialize animation loading
-
+	 
 
 	// Terrain  
 	terrain = new Terrain(terrainResolution, tileNumber, subdivide, stretch);
@@ -435,7 +438,6 @@ int main(int argc, char** argv)
 
 	shader_ = new SimpleShaders();
 
-
 	shader_->loadVertexFragmentShaders("../resources/shaders/tutorial.vert", "../resources/shaders/tutorial.frag"); 
 	shader_->addUniform("model_matrix");
 	shader_->addUniform("camera_matrix");
@@ -445,13 +447,11 @@ int main(int argc, char** argv)
 	texture_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleFire.geom", "../resources/shaders/particleFire.frag");
   	texture_shader_->locateUniforms();
   	
-  	
-
   	dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
-	dragonfly->scale(scale_);
-	dragonfly->translate(drgnfly_pos);
-
 	
+	dragonfly->translate(drgnfly_pos);
+	dragonfly->rotate(glm::fvec3(1.0f, 0.0f, 0.0f), 1.5f);
+	// --- dragonfly->scale(scale_);
 
 	fire_ = new FlameThrowerEffect();
 	fire_->init(10000, camera);
@@ -459,13 +459,11 @@ int main(int argc, char** argv)
 
 	fire_->setPos(fire_pos * scale_ + drgnfly_pos);
 	fire_->setDir(fire_dir);
-
 	
 	// Camera 
 	glutMotionFunc(mouseMotion);
 	glutMouseFunc(mouse);
   	glutReshapeFunc(glut_resize);
-
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_DEPTH_TEST);
@@ -473,4 +471,3 @@ int main(int argc, char** argv)
 	glutMainLoop();
 	return 0;
 }
-

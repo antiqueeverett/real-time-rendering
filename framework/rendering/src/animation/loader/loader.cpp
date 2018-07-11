@@ -9,10 +9,11 @@
 using namespace std::chrono;
 typedef high_resolution_clock Clock;
 
+
 Loader::Loader()
 {
 	glm::vec3 position(2.0f, 5.0f, 18.0f);
-	camera = animation_Camera(position);
+	// --- camera = animation_Camera(position); 
 	mouse_first_in = true;
 }
 
@@ -21,29 +22,18 @@ Loader::~Loader()
 	glDeleteProgram(shade_model);
 }
 
+
 void Loader::init()
 {
 	//shaders used for all collada(.dae) animation models
 	shade_model = ForShader::makeProgram("../../resources/shaders/animated_model.vert", "../../resources/shaders/animated_model.frag");
-	
-	//refer to loader.h for list of animation models instances 
-	astroboy.loadModel("../../resources/collada/eagle/model.dae");
-	//astroboy.loadModel("resources/collada/astroboy/model.dae");
-
-	astroboy.initShaders(shade_model);
-	cout << "--------------- animation shaders and animated model/s loaded successfully --------------- "<< endl;
-
-	matr_model_2 = glm::rotate(matr_model_2, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	matr_model_2 = glm::translate(matr_model_2, glm::vec3(5.0f, 0.0f, 0.0f));
-	//matr_model2 = glm::scale(matr_model, glm::vec3(0.3f, 0.3f, 0.3f));
+	model.loadModel("../../resources/collada/eagle/model.dae");
+	model.initShaders(shade_model);
+	cout << " \n --------------- animation shaders and animated model/s loaded successfully --------------- \n"<< endl;
 }
 
-void Loader::update(int32_t width, int32_t height)
+void Loader::update(int32_t width, int32_t height, Camera camera_, glm::mat4 model, glm::mat4 view, glm::mat4 projection)
 {
-
-/*	GLfloat delta_time = 0.0f;
-	GLfloat last_frame = 0.0f;*/
-
 	auto _current_frame = system_clock::now();
     auto __current_frame = time_point_cast<milliseconds>(_current_frame);
 
@@ -52,21 +42,25 @@ void Loader::update(int32_t width, int32_t height)
 	delta_time = (current_frame - last_frame);
 	last_frame = current_frame;
 
-	perspective_view = camera.getViewMatrix();
-	perspective_projection = glm::perspective(glm::radians(camera.fov), (float)width / (float)height, 1.0f, 2000.0f); 
+	camera 		  	  = &camera_;
+	model_matrix 	  = model;
+	view_matrix		  = view;
+	projection_matrix = projection;
+
+	// --- view_matrix = camera.getViewMatrix();
+	// --- projection_matrix = glm::perspective(glm::radians(camera.fov), (float)width / (float)height, 1.0f, 2000.0f); 
 }
+
 
 void Loader::render()
 {
 	glUseProgram(shade_model);
-
-	glUniform3f(glGetUniformLocation(shade_model, "view_pos"), camera.camera_pos.x, camera.camera_pos.y, camera.camera_pos.z);
+	
+	glUniform3f(glGetUniformLocation(shade_model, "view_pos"), camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 	glUniform1f(glGetUniformLocation(shade_model, "material.shininess"), 32.0f);
 	glUniform1f(glGetUniformLocation(shade_model, "material.transparency"), 1.0f);
 
-	// Point Light 1
-	glUniform3f(glGetUniformLocation(shade_model, "point_light.position"), camera.camera_pos.x, camera.camera_pos.y, camera.camera_pos.z);
-
+	glUniform3f(glGetUniformLocation(shade_model, "point_light.position"), camera->getPosition().x, camera->getPosition().y, camera->getPosition().z);
 	glUniform3f(glGetUniformLocation(shade_model, "point_light.ambient"), 0.1f, 0.1f, 0.1f);
 	glUniform3f(glGetUniformLocation(shade_model, "point_light.diffuse"), 1.0f, 1.0f, 1.0f);
 	glUniform3f(glGetUniformLocation(shade_model, "point_light.specular"), 1.0f, 1.0f, 1.0f);
@@ -75,14 +69,14 @@ void Loader::render()
 	glUniform1f(glGetUniformLocation(shade_model, "point_light.linear"), 0.007);	
 	glUniform1f(glGetUniformLocation(shade_model, "point_light.quadratic"), 0.0002);
 
-	MVP = perspective_projection * perspective_view * matr_model_2;
+	MVP = projection_matrix * view_matrix * model_matrix;
 	glUniformMatrix4fv(glGetUniformLocation(shade_model, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
-	glUniformMatrix4fv(glGetUniformLocation(shade_model, "M_matrix"), 1, GL_FALSE, glm::value_ptr(matr_model_2));
-	glm::mat4 matr_normals_cube2 = glm::mat4(glm::transpose(glm::inverse(matr_model_2)));
+	glUniformMatrix4fv(glGetUniformLocation(shade_model, "M_matrix"), 1, GL_FALSE, glm::value_ptr(model_matrix));
+	glm::mat4 matr_normals_cube2 = glm::mat4(glm::transpose(glm::inverse(model_matrix)));
 	glUniformMatrix4fv(glGetUniformLocation(shade_model, "normals_matrix"), 1, GL_FALSE, glm::value_ptr(matr_normals_cube2));
-	astroboy.draw(shade_model);
-	glUseProgram(0);
 
+	model.draw(shade_model);
+	glUseProgram(0);
 	glDepthFunc(GL_ALWAYS);
 	glDepthFunc(GL_LESS);
 }
@@ -94,7 +88,7 @@ GLuint Loader::loadImageToTexture(const char* image_path)
 	ilBindImage(ImageName); 
 
 	if (!ilLoadImage((ILstring)image_path)){
-		cout << "------------------------- Image loading failed ------------------------------------------- "<< endl;
+		cout << " ------------------------- Image loading failed ------------------------------------------- \n "<< endl;
 	}
 
 	GLuint textureID;
@@ -118,15 +112,13 @@ GLuint Loader::loadDDS(const char* image_path, int *w, int *h)
 	/**
 	 *   Loader:: loadDDS
 	 *   compress image and save as .DDS (e.g photoshop / nvidia utility)
-	 *   pass compressed image to this method and the method returns an openGL texture 
-	 *      drawing on screen.
+	 *   pass compressed image to this method. The method returns texture.   
 	 */
 	unsigned char header[124];
 
 	FILE *fp;
 	fp = fopen(image_path, "rb");
-	if (fp == NULL){
-		std::cout << "image not load \n";
+	if (fp == NULL){	
 		return 0;
 	}
 
@@ -134,6 +126,7 @@ GLuint Loader::loadDDS(const char* image_path, int *w, int *h)
 	fread(filecode, 1, 4, fp);
 	if (strncmp(filecode, "DDS ", 4) != 0) {
 		std::cout << "return 0; \n";
+
 		fclose(fp);
 		return 0;
 	}
@@ -178,14 +171,14 @@ GLuint Loader::loadDDS(const char* image_path, int *w, int *h)
 	GLuint textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	if (mipmap_count == 1) // if we have only 1 image 0 level ( not mipmap )
+	if (mipmap_count == 1) 
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);	// highest resolution
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);	// lowest resolution
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
-	else // we have mipmap
+	else 
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);			//  highest resolution
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipmap_count);	// lowest resolution

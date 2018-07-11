@@ -31,17 +31,6 @@ public:
 	const glm::mat4& getProjectionMatrix() const;
 	const glm::vec3& getPosition() const { return mPosition;}
 
-/*	GLfloat yaw;
-	GLfloat fov;
-	GLfloat pitch;
-	GLfloat sensitivity;
-	
-	glm::vec3 world_up;
-	glm::vec3 camera_up;
-	glm::vec3 camera_pos;
-	glm::vec3 camera_right;
-	glm::vec3 camera_front;*/
-
 private:
 	int mOldX;             
 	int mOldY;
