@@ -119,7 +119,7 @@ bool render_obj = true, render_effect = true, render_terrain = true, move_obj = 
 
 //controls
 std::map<unsigned char, float> keys_;
-Joystick* joy = new Joystick("/dev/input/js0");
+Joystick* joy = new Joystick("/dev/input/js1");
 
 
 // If mouse is moves in direction (x,y)
@@ -360,7 +360,7 @@ void display(void){
 		glDisable(GL_BLEND);
 	}
 	
-	loader.render();
+	//loader.render();
 	glutSwapBuffers();
 }
 
@@ -508,8 +508,8 @@ int main(int argc, char** argv)
   	dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
 	
 	dragonfly->translate(drgnfly_pos);
-	dragonfly->rotate(glm::fvec3(1.0f, 0.0f, 0.0f), 1.5f);
-	// --- dragonfly->scale(scale_);
+	//dragonfly->rotate(glm::fvec3(1.0f, 0.0f, 0.0f), 1.5f);
+	dragonfly->scale(scale_);
 
 	fire_ = new FlameThrowerEffect();
 	fire_->init(10000, camera);
