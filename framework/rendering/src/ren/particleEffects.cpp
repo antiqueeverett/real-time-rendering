@@ -97,6 +97,56 @@ void FlameThrowerEffect::setDir(glm::fvec3 dir){
 	m_velGen->set_dir(dir);
 }
 
+void TrailEffect::init(size_t numParticles, Camera* cam) {
+	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
+	//Generators
+	m_posGen = std::make_shared<SpherePosGen>(SpherePosGen(0.1f));
+	m_velGen = std::make_shared<ConeVelGen>(ConeVelGen(1.0f, 3.0f, glm::fvec3{0.0, -3.0, -1.0}, 0.032f));
+
+	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.5f, 0.02f, 0.005f, 0.0f}, 
+											   				 glm::fvec4{0.8f, 0.1f, 0.006f, 0.0f}, 
+											   				 glm::fvec4{0.2f, 0.0f, 0.0f, 0.0f},
+											   	 			 glm::fvec4{0.3f, 0.0f, 0.0f, 0.0f}));
+	m_timeGen = std::make_shared<GaussTimeGen>(GaussTimeGen(1.f, 1.5f));
+	//create emiiter
+	auto emmit = std::make_shared<ParticleEmitter>(100.f);
+	emmit->addGenerator(m_posGen);
+	emmit->addGenerator(m_velGen);
+	emmit->addGenerator(m_colGen);
+	emmit->addGenerator(m_timeGen);
+	//Updaters
+	m_accUp = std::make_shared<BasicAccUpdater>(glm::fvec4{0.0f, 4.f, 0.0f, 0.0f});
+	m_velUp = std::make_shared<BasicVelUpdater>();
+	m_noiseUp = std::make_shared<NoiseVelocityUpdater>(0.6f, 2.0f);
+	m_posUp = std::make_shared<BasicPosUpdater>();
+	m_colUp = std::make_shared<BasicColorUpdater>();
+	m_timeUp = std::make_shared<BasicTimeUpdater>();
+
+	//m_sys->addUpdater(m_accUp);
+	m_sys->addUpdater(m_velUp);
+	m_sys->addUpdater(m_noiseUp);
+	m_sys->addUpdater(m_posUp);
+	m_sys->addUpdater(m_colUp);
+	m_sys->addUpdater(m_timeUp);
+
+	m_sys->addEmitter(emmit);
+
+}
+
+
+
+void TrailEffect::update(float dt) {
+	return;
+}
+
+void TrailEffect::setPos(glm::fvec3 pos){
+	m_posGen->m_pos = glm::fvec4(pos, 1.0f);
+}
+
+void TrailEffect::setDir(glm::fvec3 dir){
+	m_velGen->set_dir(dir);
+}
+
 void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
 	//Generators

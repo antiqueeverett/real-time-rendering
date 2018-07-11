@@ -73,7 +73,7 @@ void glut_resize(int32_t _width, int32_t _height) {
 
 void glut_display()
 {
-  	loader.update(window_width_, window_height_);
+  	//loader.update(window_width_, window_height_);
 
   	glViewport(0, 0, (GLsizei)window_width_, (GLsizei)window_height_);
   	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
