@@ -35,6 +35,8 @@
 #include <rtr/gamepad/joy.h>
 #include <rtr/gamepad/updates.h>
 
+#include <rtr/gamepad/ps3_mappings.h>
+
 Loader loader;
 
 //high resolution clock used to establish time points reletive to each frame
@@ -94,6 +96,9 @@ Object* dragonfly;
 glm::fvec3 move_dir_{0.0f, 0.0f, 1.0f};		//vector representing the direction in which we move
 float move_speed = 0.01f;
 float rot_angle_ = 0.01f;
+float tilt_angle_ = 0.0f;
+float max_tilt_angle_ = 1.5f;
+glm::fmat4 rotation_ {};
 //rotation axis we need when using wasd
 glm::vec3 rot_axis_ws_{1.0, 0.0, 0.0};
 glm::vec3 rot_axis_ad_{0.0, 1.0, 0.0};
@@ -113,7 +118,7 @@ bool render_obj = true, render_effect = true, render_terrain = true, move_obj = 
 
 //controls
 std::map<unsigned char, float> keys_;
-Joystick* joy = new Joystick("/dev/input/js1");
+Joystick* joy = new Joystick("/dev/input/js0");
 
 
 // If mouse is moves in direction (x,y)
@@ -132,6 +137,14 @@ void mouse(int button, int state, int x, int y)
 
 void rotate_drgnfly_fire(glm::fvec3 rot_axis, float angle){
 	dragonfly->rotate(rot_axis, angle);
+	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
+	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
+	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
+	fire_->setDir(new_fire_dir);
+}
+
+void rotate_drgnfly_fire(){
+	dragonfly->rotation_matrix_ = rotation_;
 	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
 	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
 	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
@@ -206,19 +219,33 @@ void keyboard()
 
 }
 
+float joystick_transfer(AxisId id){
+	float input = joy->getAxisState(id);
+	if(input){
+		return pow((input / 40000.f), 5);
+	} else { return 0.0f;}
+}
+
 void joystick(){
-	if(joy->Update()){
+	joy->Update();
+	
+	if(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) == 0){
+		tilt_angle_ *= 0.98f;
+	} else if(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) > 0){
+		tilt_angle_ += 0.01f * (joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) / 32767.f);
+		tilt_angle_ = std::min(tilt_angle_, 1.0f);
+	} else {
+		tilt_angle_ += 0.01f * (joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) / 32767.f);
+		tilt_angle_ = std::max(tilt_angle_, -1.0f);
 
-        if (joy->hasButtonUpdate()){
-            update_buttons(joy, &keys_);
-        }
+	}
 
-        if (joy->hasAxisUpdate()){
-            update_axes(joy,&keys_);
-        }
+	rotation_ = glm::rotate(glm::fmat4{}, tilt_angle_, rot_axis_qe_);
+    rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_*(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) / 32767.f));
+    rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_*(joy->getAxisState(AXIS_LEFT_STICK_VERTICAL) / 32767.f));
+  	move_speed = 0.9f * ((joy->getAxisState(AXIS_RIGHT_TRIGGER) / 65534.f) + 0.5f);
 
-    keyboard();
-  }
+
 }
 
 void glut_timer(int32_t _e)
@@ -287,17 +314,19 @@ void display(void){
 	
 	if(render_obj){
 
-		if(move_obj){
+		if(move_speed > 0.001f){
 			glm::fvec3 dir_ = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}} ;
 	    	translate_drgnfly_fire(glm::fvec3{0.0f, dir_.y * move_speed, 0.0f});
 	    	terrainTransl += vec3(dir_.x * move_speed, 0.0, dir_.z * move_speed);
 		}
 		shader_->activate();
 	
+		dragonfly->rotation_matrix_ *= rotation_;
 		//upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
 		glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix()); 
 		glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix())); 
 		glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+		dragonfly->rotation_matrix_ *= glm::inverse(rotation_);
 		
 		//loader.MVP(camera, dragonfly->get_model_matrix(), camera->getViewMatrix(), camera->getProjectionMatrix());
 		loader.update(width, height);

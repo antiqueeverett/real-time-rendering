@@ -1,8 +1,8 @@
 #include <rtr/gamepad/updates.h>
 
-glm::vec3 rot_axis_ws_{1.0, 0.0, 0.0};
-glm::vec3 rot_axis_ad_{0.0, 1.0, 0.0};
-glm::vec3 rot_axis_qe_{0.0, 0.0, 1.0};
+glm::vec3 rot_axis_x_{1.0, 0.0, 0.0};
+glm::vec3 rot_axis_y_{0.0, 1.0, 0.0};
+glm::vec3 rot_axis_z_{0.0, 0.0, 1.0};
 
 // This bounds any input to within the range of a short
 short bound_short(int num)
@@ -27,7 +27,7 @@ short short_map(long x)
     return (x - SHRT_MIN) * (2*SHRT_MAX - 2*SHRT_MIN) / (SHRT_MAX - SHRT_MIN) + 2*SHRT_MIN;
 }
 
-void update_buttons(Joystick* joy, std::map<unsigned char, float>* map)
+void update_buttons(Joystick* joy, Object* obj)
 {
     ButtonId update = joy->getUpdatedButton();
     unsigned int value = joy->getButtonState(update);
@@ -57,7 +57,7 @@ void update_buttons(Joystick* joy, std::map<unsigned char, float>* map)
     }
 }
 
-void update_axes(Joystick* joy, std::map<unsigned char, float>* map)
+void update_axes(Joystick* joy, Object* obj)
 {
     AxisId update = joy->getUpdatedAxis();
     int16_t value = joy->getAxisState(update);
@@ -81,28 +81,10 @@ void update_axes(Joystick* joy, std::map<unsigned char, float>* map)
     case AXIS_DPAD_LEFT:
         std::cout << "\tDPAD LEFT" << std::endl;
     case AXIS_LEFT_STICK_HORIZONTAL:
-        if(value == 0){
-                map->at('a') = 0.0f;
-                map->at('d') = 0.0f;
-            } else if(value < 0 && value > -32766){
-                map->at('a') = -value / 32767.f;
-                map->at('d') = 0.0f;
-            } else if (value < 32766) {
-                map->at('a') = 0.0f;
-                map->at('d') = value / 32767.f;
-        }
+        obj->rotate(rot_axis_y_, -0.01f * (value / 32767.f));
         break;
     case AXIS_LEFT_STICK_VERTICAL:
-        if(value == 0){
-            map->at('w') = 0.0f;
-            map->at('s') = 0.0f;
-        } else if(value < 0 && value > -32766){
-            map->at('w') = -value / 32767.f;
-            map->at('s') = 0.0f;
-        } else if (value < 32766) {
-            map->at('w') = 0.0f;
-            map->at('s') = value / 32767.f;
-        }
+        obj->rotate(rot_axis_x_, 0.01f * (value / 32767.f));
         break;
     case AXIS_RIGHT_STICK_HORIZONTAL:
     case AXIS_RIGHT_STICK_VERTICAL:
