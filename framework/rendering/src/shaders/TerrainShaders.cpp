@@ -4,7 +4,7 @@
 
 using namespace glm;
 
-TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> texture_path, vec3 sunDirection, float amplitude, float frequency, int terrainResolution, int tileNumber, int subdivide) :
+TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> texture_path, vec4 sunDirection, float amplitude, float frequency, int terrainResolution, int tileNumber, int subdivide) :
 	mModelLocation(-1),
 	mModelInvTLocation(-1),
 	mViewLocation(-1),
@@ -18,8 +18,10 @@ TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> t
 	mTimeLocation(-1),
 	mTerrainResLocation(-1),
 	mTileNoLocation(-1),
+	mTimeDayLocation(-1),
 	mTexturePath(texture_path),
 	mSunDirection(sunDirection),
+	mRotationLocation(-1),
 	mAmplitude(amplitude),
 	mFrequency(frequency),
 	mTerrainResolution(terrainResolution),
@@ -57,7 +59,6 @@ void TerrainShaders::locateUniforms()
 		exit(0);
 	}
 
-
 	mModelInvTLocation = glGetUniformLocation(mShaderProgram, "modelInvT");
 	if (mModelInvTLocation == -1)
 		printf("[TerrainShaders] ModelInvT location not found\n");
@@ -75,7 +76,7 @@ void TerrainShaders::locateUniforms()
 	if (mWorldSunDirectionLocation == -1)
 		printf("[TerrainShaders] WorldSunDirection location not found\n");
 
-	glUniform3fv(mWorldSunDirectionLocation, 1, &mSunDirection[0]);
+	glUniform4fv(mWorldSunDirectionLocation, 1, &mSunDirection[0]);
 
 	mTextureSamplerLocation0 = glGetUniformLocation(mShaderProgram, "terrain0");
 	if (mTextureSamplerLocation0 == -1)
@@ -126,6 +127,14 @@ void TerrainShaders::locateUniforms()
 		printf("Subdivide not found\n");
 
 	glUniform1i(mSubdivideLocation, mSubdivide);
+
+	mTimeDayLocation = glGetUniformLocation(mShaderProgram, "time");
+	if (mTimeDayLocation == -1)
+		printf("[Terrain Shader] time location not found\n");
+
+	mRotationLocation = glGetUniformLocation(mShaderProgram, "sunRotation");
+	if (mRotationLocation == -1)
+		printf("[Terrain Shader] Sun rotation location not found\n");
 }
 
 
@@ -197,6 +206,21 @@ void TerrainShaders::setTime(const glm::vec3& timeTranslate)
 	glUniform3fv(mTimeLocation, 1, &timeTranslate[0]);
 }
 
+void TerrainShaders::setDayTime(float time)
+{
+	int timeInt = static_cast<int>(time) % 24000;
+	glUseProgram(mShaderProgram);
+	glUniform1f(mTimeDayLocation, static_cast<float> (timeInt));
+}
+
+void TerrainShaders::setSunRotation(const mat4& rotationMatrix)
+{
+	if (mRotationLocation == -1)
+		printf("[TerrainShaders] uniform location for 'sun rotation' not known\n");
+
+	glUseProgram(mShaderProgram);
+	glUniformMatrix4fv(mRotationLocation, 1, GL_FALSE, &rotationMatrix[0][0]);
+}
 // Load texture set all parameters
 GLuint TerrainShaders::generateTexture(int imageResolution, const char* path)
 {

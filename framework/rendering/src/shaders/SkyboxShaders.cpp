@@ -4,13 +4,17 @@
 using namespace glm;
 
 
-SkyboxShaders::SkyboxShaders(int textureResolution, std::vector<std::string> texture_path) :
+SkyboxShaders::SkyboxShaders(int textureResolution, std::vector<std::string> texture_path_day, std::vector<std::string> texture_path_night) :
 	mViewLocation(-1),
 	mProjectionLocation(-1),
-	mCubeSamplerLocation(-1),
-	mTexturePath(texture_path)
+	mCubeDaySamplerLocation(-1),
+	mTimeLocation(-1),
+	mTexturePathDay(texture_path_day),
+	mTexturePathNight(texture_path_night),
+	mRotation(0.0f)
 	{
-		mTextureID = generateSkyBox(textureResolution, mTexturePath);
+		mTextureID1 = generateSkyBox(textureResolution, mTexturePathDay);
+		mTextureID2 = generateSkyBox(textureResolution, mTexturePathNight);
 	}
 
 
@@ -21,7 +25,9 @@ SkyboxShaders::~SkyboxShaders()
 void SkyboxShaders::activate()
 {
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID2);
 	SimpleShaders::activate();
 }
 
@@ -31,27 +37,41 @@ void SkyboxShaders::locateUniforms()
 
 
 	mViewLocation = glGetUniformLocation(mShaderProgram, "view");
-	if (mViewLocation == -1)
-		printf("[TerrainShaders] View location not found\n");
+	if (mViewLocation == -1){
+		printf("[Skybox Shader] View location not found\n");
+		exit(0);
+	}
 
 
 	mProjectionLocation = glGetUniformLocation(mShaderProgram, "projection");
 	if (mProjectionLocation == -1)
-		printf("[TerrainShaders] Projection location not found\n");
+		printf("[Skybox Shader] Projection location not found\n");
 	
-	mCubeSamplerLocation = glGetUniformLocation(mShaderProgram, "skyboxSampler");
-	if (mCubeSamplerLocation == -1)
-		printf("[TerrainShaders] Skybox Sampler location not found\n");
-	glUniform1i(mCubeSamplerLocation, 0);
+	mCubeDaySamplerLocation = glGetUniformLocation(mShaderProgram, "skyboxDaySampler");
+	if (mCubeDaySamplerLocation == -1)
+		printf("[Skybox Shader] Skybox Day Sampler location not found\n");
+	glUniform1i(mCubeDaySamplerLocation, 0);
+
+	mCubeNightSamplerLocation = glGetUniformLocation(mShaderProgram, "skyboxNightSampler");
+	if (mCubeNightSamplerLocation == -1)
+		printf("[Skybox Shader] Skybox Night Sampler location not found\n");
+	glUniform1i(mCubeNightSamplerLocation, 1);
+
+	mTimeLocation = glGetUniformLocation(mShaderProgram, "time");
+	if (mTimeLocation == -1)
+		printf("[Skybox Shader] time location not found\n");
+
 }
 
 // View Matrix
-void SkyboxShaders::setViewMatrix(const glm::mat4& viewMatrix)
+void SkyboxShaders::setViewMatrix(const glm::mat4& viewMatrix, const float elapsedTime)
 {
 	if (mViewLocation < 0)
-		printf("[TerrainShaders] uniform location for 'view' not known\n");
+		printf("[Skybox Shader] uniform location for 'view' not known\n");
 
 	glUseProgram(mShaderProgram);
+	mRotation += mRotationSpeed*elapsedTime;
+	mat4 view = rotate(viewMatrix, mRotation, vec3(0.0f, 1.0f, 0.0f));
 	glUniformMatrix4fv(mViewLocation, 1, GL_FALSE, &viewMatrix[0][0]);
 
 }
@@ -64,6 +84,13 @@ void SkyboxShaders::setProjectionMatrix(const glm::mat4& projMatrix)
 
 	glUseProgram(mShaderProgram);
 	glUniformMatrix4fv(mProjectionLocation, 1, GL_FALSE, &projMatrix[0][0]);
+}
+
+void SkyboxShaders::setTime(float time)
+{
+	int timeInt = static_cast<int>(time) % 24000;
+	glUseProgram(mShaderProgram);
+	glUniform1f(mTimeLocation, static_cast<float> (timeInt));
 }
 
 GLuint SkyboxShaders::generateSkyBox(int resolution, std::vector<std::string> texture_path)

@@ -9,24 +9,32 @@ class SkyboxShaders : public SimpleShaders
 {
 public:
 	
-	SkyboxShaders(int textureResolution, std::vector<std::string> texture_path);
+	SkyboxShaders(int textureResolution,std::vector<std::string> texture_path_day, std::vector<std::string> texture_path_night);
 	~SkyboxShaders();
 	void locateUniforms();
 	void activate() override;
 
-	void setViewMatrix(const glm::mat4& viewMatrix);
+	void setViewMatrix(const glm::mat4& viewMatrix, const float elapsedTime);
 	void setProjectionMatrix(const glm::mat4& projMatrix);
+	void setTime(float time);
 
 private:
 
 	GLuint generateSkyBox(int resolution, std::vector<std::string> texture_path);
-
+	
 	GLint mViewLocation;
 	GLint mProjectionLocation;
-	GLint mCubeSamplerLocation;
-	GLint mTextureID;
+	GLint mCubeDaySamplerLocation;
+	GLint mCubeNightSamplerLocation;
+	GLint mTimeLocation;
+	GLint mTextureID1;
+	GLint mTextureID2;
 
-	std::vector<std::string> mTexturePath;
+	std::vector<std::string> mTexturePathDay;
+	std::vector<std::string> mTexturePathNight;
+	const float mRotationSpeed = 0.05f;
+	float mRotation;
+
 
 };
 

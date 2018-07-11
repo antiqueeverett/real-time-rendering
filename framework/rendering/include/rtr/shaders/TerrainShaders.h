@@ -11,7 +11,7 @@ using namespace glm;
 class TerrainShaders : public SimpleShaders
 {
 public:
-	explicit TerrainShaders(int textureResolution, std::vector<std::string> texture_path, vec3 sunDirection, float amplitude, float frequency, int terrainResolution, int tileNumber, int subdivide);
+	explicit TerrainShaders(int textureResolution, std::vector<std::string> texture_path, vec4 sunDirection, float amplitude, float frequency, int terrainResolution, int tileNumber, int subdivide);
 	virtual ~TerrainShaders() = default;
 
 	void locateUniforms();
@@ -23,8 +23,8 @@ public:
 	void setAmplitude(const float amplitude);
 	void setFrequency(const float frequency);
 	void setTime(const vec3& timeTranslate);
-
-	
+	void setDayTime(float time);
+	void setSunRotation(const mat4& rotationMatrix); 
 private:
 	GLuint generateTexture(int resolution, const char* path);
 
@@ -42,12 +42,14 @@ private:
 	GLint mTerrainResLocation;
 	GLint mTileNoLocation;
 	GLint mSubdivideLocation;
+	GLint mTimeDayLocation;
+	GLint mRotationLocation;
 	GLuint mTextureID0;
 	GLuint mTextureID1;
 	GLuint mTextureID2;
 
 	std::vector<std::string> mTexturePath;
-	vec3 mSunDirection;
+	vec4 mSunDirection;
 	float const mFrequency;
 	float const mAmplitude;
 	float const mTerrainResolution;

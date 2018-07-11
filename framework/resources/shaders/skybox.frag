@@ -2,23 +2,55 @@
 
 in vec4 fTexCoord;
 
-uniform samplerCube skyboxSampler;
+uniform samplerCube skyboxDaySampler;
+uniform samplerCube skyboxNightSampler;
+uniform float time;
 
 out vec4 fragmentColor;
 
-const float lowerLimit = -15.0f;
-const float upperLimit = 30.0f;
+const float lowerLimit = -10.0f;
+const float upperLimit = 25.0f;
+
 
 void main()
 {
- 	//vec4 fogColor = vec4(0.235294,0.266667,0.333333, 1.0);
-	vec4 fogColor = vec4(0.51372549,0.56862745,0.62745098, 1.0);
-	vec4 skyColor = texture(skyboxSampler, vec3(fTexCoord)).rgba;
+	float blendFactor;
+	int timeInt = int(time);
+
+	vec4 fogColorDay = vec4(0.5444,0.62,0.69, 1.0);
+	vec4 fogColorNight = vec4(0.0);
+	vec4 skyDayColor = texture(skyboxDaySampler, vec3(fTexCoord)).rgba;
+	vec4 skyNightColor = texture(skyboxNightSampler, vec3(fTexCoord)).rgba;
+	vec4 skyColor = vec4(0.0);
+	vec4 fogColor = vec4(0.0);
+
+	if(timeInt >= 0 && timeInt < 5000){
+		blendFactor = (float(timeInt) - 0.0)/(5000.0 - 0.0);
+		skyColor = mix(skyNightColor, skyNightColor, blendFactor);
+		fogColor = mix(fogColorNight, fogColorNight, blendFactor);
+	}
+	else if (timeInt >= 5000 && timeInt < 8000){
+		blendFactor = (float(timeInt) - 5000.0)/(8000.0 - 5000.0);
+		skyColor = mix(skyNightColor, skyDayColor, blendFactor);
+		fogColor = mix(fogColorNight, fogColorDay, blendFactor);
+	}
+	else if (time >= 8000 && timeInt < 21000){
+		blendFactor = (float(timeInt) - 8000.0)/(21000.0 - 8000.0);
+		skyColor = mix(skyDayColor, skyDayColor, blendFactor);
+		fogColor = mix(fogColorDay, fogColorDay, blendFactor);
+	}
+	else{
+		blendFactor = (float(timeInt) - 21000.0)/(24000.0 - 21000.0);
+		skyColor = mix(skyDayColor, skyNightColor, blendFactor); 
+		fogColor = mix(fogColorDay, fogColorNight, blendFactor);
+	}
+
+	
 	float fogFactor = (fTexCoord.y - lowerLimit) / (upperLimit - lowerLimit); 
 	fogFactor = clamp(fogFactor, 0.0, 1.0);
 	
 	fragmentColor = mix(fogColor, skyColor, fogFactor); 
 	
-	//fragmentColor = texture(skyboxSampler, vec3(fTexCoord)).rgba;
+	//fragmentColor = skyColor;
 	
 }

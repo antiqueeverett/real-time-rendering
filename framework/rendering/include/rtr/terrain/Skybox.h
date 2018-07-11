@@ -4,7 +4,7 @@
 class Skybox : public VertexArrayObject {
 
 public:
-	Skybox(float size);
+	Skybox(float size, int stretch);
 	~Skybox();
 private:
 	void drawVAOPostions();

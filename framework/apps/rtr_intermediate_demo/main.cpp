@@ -48,7 +48,7 @@ using namespace glm;
 
 const int stretch = 200;
 // TERRAINRESOLUTION TO 512 ON NORMAL PCS/LAPTOPS, 2048 ON VR LAB PCS
-const int terrainResolution = 512;	// Size of the terrain
+const int terrainResolution = 2048;	// Size of the terrain
 const int tileNumber = 20;			// No of tiles of terrain => 12 texture tiles
 const int subdivide = 1;
 float amplitude = 50.0f;			// Amplitude for noise function
@@ -56,22 +56,24 @@ float frequency = 0.0083f;			// frequency for noise function
 const int terrainTextureRes = 512;	// Resolution of the texture images
 
 float elapsedTime = 0.0;							// for moving the terrain, measure elapsed time
-const float speed = 2.0;			// Speed of moving terrain
+const float speed = 0.025;			// Speed of moving terrain
 vec3 terrainTransl;					// vector for translating terrain in the shader
 float oldTime = 0.0;
 float mSpeed = 0.0;
+float rotation = 0.0f;
 
 const char* terrainFrag = "../resources/shaders/TerrainShader.frag";
 const char* terrainVert = "../resources/shaders/TerrainShader.vert";
 const char* skyboxFrag = "../resources/shaders/skybox.frag";
 const char* skyboxVert = "../resources/shaders/skybox.vert";
 std::vector<std::string> textures = { "../resources/textures/Terrain/Mud.png", "../resources/textures/Terrain/grassSeemless.png", "../resources/textures/Terrain/Mountain1.png" };
-std::vector<std::string> skyboxTextures = {"../resources/textures/Skybox/right.png", "../resources/textures/Skybox/left.png", "../resources/textures/Skybox/top.png", "../resources/textures/Skybox/bottom.png", "../resources/textures/Skybox/back.png", "../resources/textures/Skybox/front.png" };
+std::vector<std::string> skyboxDayTextures = {"../resources/textures/Skybox/right.png", "../resources/textures/Skybox/left.png", "../resources/textures/Skybox/top.png", "../resources/textures/Skybox/bottom.png", "../resources/textures/Skybox/back.png", "../resources/textures/Skybox/front.png" };
+std::vector<std::string> skyboxNightTextures = {"../resources/textures/Skybox/nightRight.png", "../resources/textures/Skybox/nightLeft.png", "../resources/textures/Skybox/nightTop.png", "../resources/textures/Skybox/nightBottom.png", "../resources/textures/Skybox/nightBack.png", "../resources/textures/Skybox/nightFront.png" };
 
 const vec3 terrainCenter = vec3(static_cast<float>((terrainResolution + stretch) / 2.0), 0.0f, static_cast<float>((terrainResolution + stretch) / 2.0)); //center of terrain
 const vec3 cameraPosition = vec3(0.0f, 60.0f, -5.0f);
 
-const vec3 sunDirection = normalize(vec3(0.5f, 100.0f, 0.5f));	// Direction of sunlight in world space
+const vec4 sunDirection = normalize(vec4(0.5f, 100.0f, 0.5f, 0.0f));	// Direction of sunlight in world space
 
 Terrain* terrain = nullptr;
 TerrainShaders* terrainShaders = nullptr;
@@ -173,9 +175,15 @@ void display(void)
 
 	glDisable(GL_BLEND);
 
+	float timeinMS = glutGet(GLUT_ELAPSED_TIME);
+	float timeSinceStart = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000.0f); // time since glutInit in s
+	float mDeltaTime = timeSinceStart - oldTime;
+	oldTime = timeSinceStart;
+	rotation += speed* mDeltaTime;
+
 	// update camera
-	//camera->update();
-	camera->setViewDir(drgnfly_pos - cameraPosition);
+	camera->update();
+	//camera->setViewDir(drgnfly_pos - cameraPosition);
 	if(render_terrain){
 		
 		mat4 worldMatrix = calcTerrainTransformation(rotationXAngle, rotationYAngle);
@@ -184,17 +192,19 @@ void display(void)
 		terrainShaders->setModelMatrix(worldMatrix * mat4(1.0));	
 		terrainShaders->setViewMatrix(camera->getViewMatrix());
 		terrainShaders->setProjectionMatrix(camera->getProjectionMatrix());
-		terrainShaders->setAmplitude(amplitude);
-		terrainShaders->setFrequency(frequency);
-		
+	
 		terrainShaders->setTime(terrainTransl);
+		terrainShaders->setDayTime(timeinMS*0.5);
+		terrainShaders->setSunRotation(rotate(mat4(1.0), rotation, vec3(0.0f, 1.0f, 0.0f)));
 		terrainShaders->activate();
 		terrain->draw();
 	
 		glDepthFunc(GL_LEQUAL);								// change depth function so depth test passes when values are equal to depth buffer's content
 		mat4 viewMat = mat4(mat3(camera->getViewMatrix())); // remove translation from the view matrix
-		skyboxShaders->setViewMatrix(viewMat);
+		mat4 rotateView = rotate(viewMat, rotation, vec3(0.0f, 1.0f, 0.0f));
+		skyboxShaders->setViewMatrix(rotateView, mDeltaTime);
 		skyboxShaders->setProjectionMatrix(camera->getProjectionMatrix());
+		skyboxShaders->setTime(timeinMS*0.5);
 		skyboxShaders->activate();
 		skybox->draw();
 		glDepthFunc(GL_LESS);
@@ -384,7 +394,7 @@ int main(int argc, char** argv)
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(width, height);
 
-	if (glutCreateWindow("rtr_terrain") == 0)
+	if (glutCreateWindow("rtr_intermediate_demo") == 0)
 	{
 		printf("Glut init failed\n");
 		return -1;
@@ -428,8 +438,8 @@ int main(int argc, char** argv)
 	terrainTransl = vec3(0.0);
 
 	//Skybox
-	skybox = new Skybox(terrainResolution);
-	skyboxShaders = new SkyboxShaders(terrainTextureRes, skyboxTextures);
+	skybox = new Skybox(terrainResolution, stretch);
+	skyboxShaders = new SkyboxShaders(terrainTextureRes, skyboxDayTextures, skyboxNightTextures);
 	skyboxShaders->loadVertexFragmentShaders(skyboxVert, skyboxFrag);
 	skyboxShaders->locateUniforms();
 
