@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <iostream>
+#include <thread>
+#include <mutex>
 
 #include <rtr/animation/loader/loader.h>
 #include <rtr/animation/display/display.h>
@@ -95,11 +97,25 @@ glm::mat4 model_matrix;
 
 //what we need for character control
 glm::fvec3 move_dir_{0.0f, 0.0f, 1.0f};		//vector representing the direction in which we move
+
+float accumulated_movement_speed_ = 0.0f;
+uint64_t num_input_frames_passed = 0u;
+
 float move_speed = 0.01f;
 float rot_angle_ = 0.01f;
 float tilt_angle_ = 0.0f;
 float max_tilt_angle_ = 1.5f;
+
+std::mutex joypad_input_mutex;
+
+glm::fmat4 accumulated_rotation_{};
 glm::fmat4 rotation_ {};
+
+double accumulated_left_stick_horizontal_axis_state = 0.0;
+double accumulated_left_stick_vertical_axis_state = 0.0;
+
+std::chrono::time_point<std::chrono::system_clock> input_frame_time_end, input_frame_time_start;
+
 //rotation axis we need when using wasd
 glm::vec3 rot_axis_ws_{1.0, 0.0, 0.0};
 glm::vec3 rot_axis_ad_{0.0, 1.0, 0.0};
@@ -108,12 +124,13 @@ glm::vec3 rot_axis_qe_{0.0, 0.0, 1.0};
 
 SimpleShaders* shader_;
 TextureShaders* texture_shader_;
-FlameThrowerEffect* fire_;
+TrailEffect* fire_;
 
 float scale_ = 50.0f;
+float eagle_rotation_ = -1.f;
 glm::fvec3 drgnfly_pos{0.0f, 80.0f, 0.0f};
 glm::fvec3 fire_pos = {0.0f, 0.008f, 0.01f};
-glm::fvec3 fire_dir{0.0f, -0.5f, 1.0f};
+glm::fvec3 fire_dir = -move_dir_;
 
 bool render_obj = true, render_effect = true, render_terrain = true, move_obj = false;
 
@@ -141,7 +158,7 @@ void rotate_drgnfly_fire(glm::fvec3 rot_axis, float angle){
 	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
 	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
 	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
-	fire_->setDir(new_fire_dir);
+	//fire_->setDir(new_fire_dir);
 }
 
 void rotate_drgnfly_fire(){
@@ -149,7 +166,7 @@ void rotate_drgnfly_fire(){
 	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
 	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
 	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
-	fire_->setDir(new_fire_dir);
+	//fire_->setDir(new_fire_dir);
 }
 
 void translate_drgnfly_fire(glm::fvec3 transl){
@@ -162,10 +179,13 @@ void translate_drgnfly_fire(glm::fvec3 transl){
 // move terrain with WASD
 void keyboard()
 {
+
+	/*
 	//TODO: Set mSpeed = 0 when wasd is released
 	//time = static_cast<float>(glutGet(GLUT_ELAPSED_TIME) / 1000000.0);
 	elapsedTime += 0.001;
-	
+
+
 	if (keys_.at('w')){
     	rotate_drgnfly_fire(rot_axis_ws_, rot_angle_*keys_.at('w'));
 		//terrainTransl += vec3(0.0, 0.0, simulateMovement().z);
@@ -215,7 +235,7 @@ void keyboard()
 		terrainShaders->loadVertexFragmentShaders(terrainVert, terrainFrag);
 		terrainShaders->locateUniforms();
 	}		
-	
+	*/
 	glutPostRedisplay();
 
 }
@@ -223,37 +243,61 @@ void keyboard()
 float joystick_transfer(AxisId id){
 	float input = joy->getAxisState(id);
 	if(input){
-		return pow((input / 40000.f), 5);
+		return pow((input / 32767.f), 5);
 	} else { return 0.0f;}
 }
 
 void joystick(){
-	joy->Update();
-	
-	if(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) == 0){
-		tilt_angle_ *= 0.98f;
-	} else if(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) > 0){
-		tilt_angle_ += 0.01f * (joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) / 32767.f);
-		tilt_angle_ = std::min(tilt_angle_, 1.0f);
-	} else {
-		tilt_angle_ += 0.01f * (joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) / 32767.f);
-		tilt_angle_ = std::max(tilt_angle_, -1.0f);
+	input_frame_time_start = std::chrono::system_clock::now();
+	while(true) {
 
+    	float elapsed_microseconds_since_last_frame = std::chrono::duration_cast<std::chrono::milliseconds>
+                             							 (input_frame_time_end-input_frame_time_start).count();
+
+		input_frame_time_start = std::chrono::system_clock::now();
+		joy->Update();
+		
+		if(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) == 0 && tilt_angle_ != 0.0f){
+			tilt_angle_ *= 0.99f;
+			if(abs(tilt_angle_) < 0.0001f){tilt_angle_ = 0.0f;}
+		} else if(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) > 0){
+			tilt_angle_ += 0.004f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
+			tilt_angle_ = std::min(tilt_angle_, 1.0f);
+		} else {
+			tilt_angle_ += 0.004f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
+			tilt_angle_ = std::max(tilt_angle_, -1.0f);
+
+		}
+
+		joypad_input_mutex.lock();
+		accumulated_rotation_ = glm::rotate(glm::fmat4{}, 
+											elapsed_microseconds_since_last_frame*tilt_angle_, 
+											rot_axis_qe_);
+
+		accumulated_movement_speed_ += 0.9f * ((joy->getAxisState(AXIS_RIGHT_TRIGGER) / 65534.f) + 0.5f);
+
+		accumulated_left_stick_horizontal_axis_state += joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL);
+		accumulated_left_stick_vertical_axis_state 	 += joy->getAxisState(AXIS_LEFT_STICK_VERTICAL);
+		//rotation_ = glm::rotate(glm::fmat4{}, tilt_angle_, rot_axis_qe_);
+	    //rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_*(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) / 32767.f));
+	    //rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_*(joy->getAxisState(AXIS_LEFT_STICK_VERTICAL) / 32767.f));
+	  	//move_speed = 0.9f * ((joy->getAxisState(AXIS_RIGHT_TRIGGER) / 65534.f) + 0.5f);
+
+
+		++num_input_frames_passed;
+
+	  	joypad_input_mutex.unlock();
+ 		std::this_thread::sleep_for(1ms);
+		input_frame_time_end = std::chrono::system_clock::now();
 	}
-
-	rotation_ = glm::rotate(glm::fmat4{}, tilt_angle_, rot_axis_qe_);
-    rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_*(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) / 32767.f));
-    rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_*(joy->getAxisState(AXIS_LEFT_STICK_VERTICAL) / 32767.f));
-  	move_speed = 0.9f * ((joy->getAxisState(AXIS_RIGHT_TRIGGER) / 65534.f) + 0.5f);
-
 
 }
 
 void glut_timer(int32_t _e)
 {
   	glutPostRedisplay();
-  	glutTimerFunc(16, glut_timer, 1);
-  	elapsed_ms_ += 16;
+  	glutTimerFunc(1, glut_timer, 1);
+  	elapsed_ms_ += 1;
 }
 
 //on resize window, re-create projection matrix
@@ -276,7 +320,7 @@ mat4 calcTerrainTransformation(float rotationXAngle, float rotationYAngle)
 
 
 void display(void){
-  joystick();
+  //joystick();
 
   glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
@@ -287,7 +331,8 @@ void display(void){
 
 	// update camera
 	//camera->update();
-	camera->setViewDir(drgnfly_pos - cameraPosition);
+	camera->setPosition(drgnfly_pos - 5.0f * glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}} + glm::fvec3{0.0f, 5.0f, 0.0f});
+	camera->setViewDir((drgnfly_pos + 2.f*glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{rot_axis_qe_, 1.0f}}) - camera->getPosition());
 	if(render_terrain){
 		
 		mat4 worldMatrix = calcTerrainTransformation(rotationXAngle, rotationYAngle);
@@ -313,6 +358,32 @@ void display(void){
 	}  
 									// set depth function back to default 
 	
+
+	joypad_input_mutex.lock();
+	//update dragonfly roll
+	rotation_ = accumulated_rotation_;
+	accumulated_rotation_ = glm::fmat4{};
+
+	//update dragonfly speed (average)
+	if(0 != num_input_frames_passed) {
+		move_speed = accumulated_movement_speed_ / num_input_frames_passed;
+		accumulated_left_stick_horizontal_axis_state /= num_input_frames_passed;
+		accumulated_left_stick_vertical_axis_state /= num_input_frames_passed;
+	} else {
+		move_speed = 0;
+	}
+
+	rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_* accumulated_left_stick_horizontal_axis_state / 32767.f);
+	rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_* accumulated_left_stick_vertical_axis_state / 32767.f);
+
+	accumulated_left_stick_horizontal_axis_state = 0.0;
+	accumulated_left_stick_vertical_axis_state = 0.0;
+	accumulated_movement_speed_ = 0.0f;
+	
+	num_input_frames_passed = 0;
+	
+	joypad_input_mutex.unlock();
+
 	if(render_obj){
 
 		if(move_speed > 0.001f){
@@ -323,11 +394,12 @@ void display(void){
 		shader_->activate();
 	
 		dragonfly->rotation_matrix_ *= rotation_;
+		dragonfly->rotate(glm::fvec3(1.0f, 0.0f, 0.0f), eagle_rotation_);
+
 		//upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-		glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix()); 
-		glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix())); 
-		glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
-		dragonfly->rotation_matrix_ *= glm::inverse(rotation_);
+		//glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, dragonfly->get_model_matrix()); 
+		//glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix())); 
+		//glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
 		
 		//loader.MVP(camera, dragonfly->get_model_matrix(), camera->getViewMatrix(), camera->getProjectionMatrix());
 		// --- depricating .....loader.update(width, height);
@@ -335,17 +407,23 @@ void display(void){
 		dragonfly->get_model_matrix();
 
 		loader.update(width, height, *camera, dragonfly->model_matrix_, camera->getViewMatrix(), camera->getProjectionMatrix());
+		loader.render();
 
+		dragonfly->rotate(glm::fvec3(1.0f, 0.0f, 0.0f), -eagle_rotation_);
+		dragonfly->rotation_matrix_ *= glm::inverse(rotation_);
 		//bind the VBO of the model such that the next draw call will render with these vertices
-		dragonfly->activate();
+		//dragonfly->activate();
 	
 		//draw triangles from the currently bound buffer
-		dragonfly->draw();
-		dragonfly->deactivate();
+		//dragonfly->draw();
+		//dragonfly->deactivate();
 
 	}
 
 	if(render_effect){
+		fire_dir = -glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}};
+		fire_dir.y = -fire_dir.y;
+		fire_->setDir(fire_dir);
 		glEnable(GL_BLEND);
 	
 		texture_shader_->activate();
@@ -360,7 +438,6 @@ void display(void){
 		glDisable(GL_BLEND);
 	}
 	
-	//loader.render();
 	glutSwapBuffers();
 }
 
@@ -439,8 +516,14 @@ void keyboardup(unsigned char key, int x, int y)
 int main(int argc, char** argv)
 {
 
+	input_frame_time_end = std::chrono::system_clock::now();
+
 	init_keys();
+
 	joy->Update();
+
+	std::thread input_thread(joystick);
+
 
 	// Initialize GLUT
 	glutInit(&argc, argv);
@@ -508,10 +591,10 @@ int main(int argc, char** argv)
   	dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
 	
 	dragonfly->translate(drgnfly_pos);
-	//dragonfly->rotate(glm::fvec3(1.0f, 0.0f, 0.0f), 1.5f);
-	dragonfly->scale(scale_);
+	//move_dir_ = glm::fvec3{glm::rotate(glm::fmat4{}, -eagle_rotation_, glm::fvec3(1.0f, 0.0f, 0.0f)) * glm::fvec4{move_dir_, 1.0f}};
+	dragonfly->scale(0.7f);
 
-	fire_ = new FlameThrowerEffect();
+	fire_ = new TrailEffect();
 	fire_->init(10000, camera);
 	fire_->initRenderer();
 

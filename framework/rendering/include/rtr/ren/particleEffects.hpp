@@ -87,6 +87,32 @@ private:
 	std::shared_ptr<BasicTimeUpdater> m_timeUp;
 
 };
+class TrailEffect : public ParticleEffect {
+public:
+	TrailEffect(){}
+	~TrailEffect(){}
+
+	void init(size_t numParticles, Camera* cam) override;
+	void update(float dt) override;
+
+	void setPos(glm::fvec3 pos);
+	void setDir(glm::fvec3 dir);
+
+private:
+	//generators
+	std::shared_ptr<SpherePosGen> m_posGen;
+	std::shared_ptr<ConeVelGen> m_velGen;
+	std::shared_ptr<BasicColorGen> m_colGen;
+	std::shared_ptr<GaussTimeGen> m_timeGen;
+	//updaters
+	std::shared_ptr<BasicAccUpdater> m_accUp;
+	std::shared_ptr<BasicVelUpdater> m_velUp;
+	std::shared_ptr<NoiseVelocityUpdater> m_noiseUp;
+	std::shared_ptr<BasicPosUpdater> m_posUp;
+	std::shared_ptr<BasicColorUpdater> m_colUp;
+	std::shared_ptr<BasicTimeUpdater> m_timeUp;
+
+};
 
 class BlackHoleEffect : public ParticleEffect {
 public:
