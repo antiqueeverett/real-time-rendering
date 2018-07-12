@@ -108,6 +108,9 @@ float rot_angle_ = 0.01f;
 float tilt_angle_ = 0.0f;
 float max_tilt_angle_ = 1.5f;
 
+bool gear_button_pressed = false;
+int gear = 1;
+
 std::mutex joypad_input_mutex;
 
 glm::fmat4 accumulated_rotation_{};
@@ -134,7 +137,7 @@ glm::fvec3 drgnfly_pos{0.0f, 80.0f, 0.0f};
 glm::fvec3 fire_pos = {0.0f, 0.008f, 0.01f};
 glm::fvec3 fire_dir = -move_dir_;
 
-bool render_obj = true, render_effect = true, render_terrain = true, move_obj = false;
+bool render_obj = true, render_effect = false, render_terrain = true, move_obj = false;
 
 //controls
 std::map<unsigned char, float> keys_;
@@ -270,17 +273,25 @@ void joystick(){
 			tilt_angle_ += 0.004f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
 			tilt_angle_ = std::min(tilt_angle_, 1.0f);
 		} else {
-			tilt_angle_ += 0.004f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
+			tilt_angle_ += 0.04f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
 			tilt_angle_ = std::max(tilt_angle_, -1.0f);
 
 		}
+
+		/*if(joy->getButtonState(BUTTON_LEFT_BUMPER) == 1){
+			gear_button_pressed = true;
+			++gear;
+			gear = gear % 3;
+			if(gear == 0)
+				gear = 1;
+		} */
 
 		joypad_input_mutex.lock();
 		accumulated_rotation_ = glm::rotate(glm::fmat4{}, 
 											elapsed_microseconds_since_last_frame*tilt_angle_, 
 											rot_axis_qe_);
 
-		accumulated_movement_speed_ += 0.9f * ((joy->getAxisState(AXIS_RIGHT_TRIGGER) / 65534.f) + 0.5f);
+		accumulated_movement_speed_ += gear * 0.9f * ((joy->getAxisState(AXIS_RIGHT_TRIGGER) / 65534.f) + 0.5f);
 
 		accumulated_left_stick_horizontal_axis_state += joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL);
 		accumulated_left_stick_vertical_axis_state 	 += joy->getAxisState(AXIS_LEFT_STICK_VERTICAL);
@@ -293,7 +304,7 @@ void joystick(){
 		++num_input_frames_passed;
 
 	  	joypad_input_mutex.unlock();
- 		std::this_thread::sleep_for(1ms);
+ 		std::this_thread::sleep_for(10ms);
 		input_frame_time_end = std::chrono::system_clock::now();
 	}
 
@@ -341,9 +352,10 @@ void display(void){
 	oldTime = timeSinceStart;
 	rotation += speed* mDeltaTime;
 
+
 	// update camera
 	//camera->update();
-	camera->setPosition(drgnfly_pos - 5.0f * glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}} + glm::fvec3{0.0f, 5.0f, 0.0f});
+	camera->setPosition(drgnfly_pos - 10.0f * glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}} + glm::fvec3{0.0f, 7.0f, 0.0f});
 	camera->setViewDir((drgnfly_pos + 2.f*glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{rot_axis_qe_, 1.0f}}) - camera->getPosition());
 
 	if(render_terrain){
@@ -378,6 +390,19 @@ void display(void){
 	//update dragonfly roll
 	rotation_ = accumulated_rotation_;
 	accumulated_rotation_ = glm::fmat4{};
+
+/*	int temp = (int)(timeinMS/10)% 2;
+	std::cout << temp << std::endl;
+	if(temp  == 0){
+		if(gear_button_pressed == true){
+			++gear;
+			gear = gear % 3;
+			if(gear == 0)
+				gear = 1;
+		std::cout << timeinMS << "," << gear_button_pressed << "," << gear << std::endl;	
+		gear_button_pressed = false;
+		}
+	} */
 
 	//update dragonfly speed (average)
 	if(0 != num_input_frames_passed) {
