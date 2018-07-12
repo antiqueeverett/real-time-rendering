@@ -18,11 +18,6 @@ ParticleSystem::ParticleSystem(size_t maxCount, Camera* cam)
 
 void ParticleSystem::update(float dt){
 	if(do_update) {
-		if(do_emit) {
-			for (auto& em: m_emitters){
-					em->emit(dt, &m_particles);
-				}
-		}
 
 		if(getAliveCount() > 0){
 			for (size_t i = 0; i < m_count; ++i){
@@ -35,6 +30,12 @@ void ParticleSystem::update(float dt){
 			}
 
 			if(do_sort) {sort();}
+		}
+		
+		if(do_emit) {
+			for (auto& em: m_emitters){
+					em->emit(dt, &m_particles);
+				}
 		}
 	}
 	

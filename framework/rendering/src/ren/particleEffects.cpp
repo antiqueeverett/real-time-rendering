@@ -9,7 +9,7 @@
 void FlameEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
 	//Generators
-	m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.f, 0.f, 0.0f}));
+	m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 80.0f, 10.f, 1.0f}));
 	m_velGen = std::make_shared<SphereVelGen>(SphereVelGen(0.01f, 0.2f));
 	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.5f, 0.02f, 0.001f, 0.0f}, 
 											   				 glm::fvec4{0.8f, 0.1f, 0.002f, 0.0f}, 
@@ -17,23 +17,25 @@ void FlameEffect::init(size_t numParticles, Camera* cam) {
 											   	 			 glm::fvec4{0.3f, 0.0f, 0.0f, 0.0f}));
 	m_timeGen = std::make_shared<VelTimeGen>(VelTimeGen(0.8f, 0.4f, glm::fvec4{0.0, 3.0, 0.0, 0.0}));
 	//create emiiter
-	auto emmit = std::make_shared<ParticleEmitter>(100.f);
+	auto emmit = std::make_shared<ParticleEmitter>(10.f);
 	emmit->addGenerator(m_posGen);
 	emmit->addGenerator(m_velGen);
 	emmit->addGenerator(m_colGen);
 	emmit->addGenerator(m_timeGen);
 	//Updaters
-	m_accUp = std::make_shared<BasicAccUpdater>(glm::fvec4{0.0f, 8.f, 0.0f, 0.0f});
+	m_accUp = std::make_shared<BasicAccUpdater>(glm::fvec4{0.0f, 12.f, 0.0f, 0.0f});
 	m_velUp = std::make_shared<BasicVelUpdater>();
 	m_noiseUp = std::make_shared<NoiseVelocityUpdater>(0.6f, 2.0f);
 	m_posUp = std::make_shared<BasicPosUpdater>();
 	m_colUp = std::make_shared<BasicColorUpdater>();
 	m_timeUp = std::make_shared<BasicTimeUpdater>();
+	m_transUp = std::make_shared<TranslationUpdater>();
 
 	m_sys->addUpdater(m_accUp);
 	m_sys->addUpdater(m_velUp);
 	m_sys->addUpdater(m_noiseUp);
 	m_sys->addUpdater(m_posUp);
+	m_sys->addUpdater(m_transUp);
 	m_sys->addUpdater(m_colUp);
 	m_sys->addUpdater(m_timeUp);
 
@@ -46,6 +48,13 @@ void FlameEffect::init(size_t numParticles, Camera* cam) {
 void FlameEffect::update(float dt) {
 	return;
 }
+
+void FlameEffect::setPos(glm::fvec3 pos){
+	//m_sys->reset();
+	m_transUp->m_translate = glm::fvec4(pos, 0.0f);
+	m_posGen->m_pos += glm::fvec4{pos, 0.0f}; 
+}
+
 
 void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
@@ -61,7 +70,7 @@ void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
 	//create emiiter
 	auto emmit = std::make_shared<ParticleEmitter>(100.f);
 	emmit->addGenerator(m_posGen);
-	emmit->addGenerator(m_velGen);
+	//emmit->addGenerator(m_velGen);
 	emmit->addGenerator(m_colGen);
 	emmit->addGenerator(m_timeGen);
 	//Updaters
@@ -71,6 +80,7 @@ void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
 	m_posUp = std::make_shared<BasicPosUpdater>();
 	m_colUp = std::make_shared<BasicColorUpdater>();
 	m_timeUp = std::make_shared<BasicTimeUpdater>();
+
 
 	m_sys->addUpdater(m_accUp);
 	m_sys->addUpdater(m_velUp);
@@ -100,7 +110,9 @@ void FlameThrowerEffect::setDir(glm::fvec3 dir){
 void TrailEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
 	//Generators
-	m_posGen = std::make_shared<SpherePosGen>(SpherePosGen(0.1f));
+	m_posGen = std::make_shared<RotatingPosGen>(RotatingPosGen());
+	m_posGen->m_pos = glm::fvec4{0.0f, 80.0f, 10.0f, 1.0f};
+	m_posGen->m_min_r = 5.0f; m_posGen->m_max_r = 7.0f;
 	m_velGen = std::make_shared<ConeVelGen>(ConeVelGen(1.0f, 3.0f, glm::fvec3{0.0, -3.0, -1.0}, 0.032f));
 
 	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.5f, 0.02f, 0.005f, 0.0f}, 
@@ -109,9 +121,9 @@ void TrailEffect::init(size_t numParticles, Camera* cam) {
 											   	 			 glm::fvec4{0.3f, 0.0f, 0.0f, 0.0f}));
 	m_timeGen = std::make_shared<GaussTimeGen>(GaussTimeGen(1.f, 1.5f));
 	//create emiiter
-	auto emmit = std::make_shared<ParticleEmitter>(100.f);
+	auto emmit = std::make_shared<ParticleEmitter>(2.f);
 	emmit->addGenerator(m_posGen);
-	emmit->addGenerator(m_velGen);
+	//emmit->addGenerator(m_velGen);
 	emmit->addGenerator(m_colGen);
 	emmit->addGenerator(m_timeGen);
 	//Updaters
@@ -140,11 +152,11 @@ void TrailEffect::update(float dt) {
 }
 
 void TrailEffect::setPos(glm::fvec3 pos){
-	m_posGen->m_pos = glm::fvec4(pos, 1.0f);
+	//m_posGen->m_pos = glm::fvec4(pos, 1.0f);
 }
 
 void TrailEffect::setDir(glm::fvec3 dir){
-	m_velGen->set_dir(dir);
+	//m_velGen->set_dir(dir);
 }
 
 void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
@@ -239,8 +251,8 @@ void WheatherEffect::init(size_t numParticles, Camera* cam) {
 	m_sys->addUpdater(m_accUp);
 	m_sys->addUpdater(m_velUp);
 	m_sys->addUpdater(m_posUp);
-	m_sys->addUpdater(m_transUp);
-	m_sys->addUpdater(m_remUp);
+	//m_sys->addUpdater(m_transUp);
+	//m_sys->addUpdater(m_remUp);
 
 	m_sys->addEmitter(emmit);
 
@@ -253,4 +265,73 @@ void WheatherEffect::move(glm::fvec3 mov){
 
 void WheatherEffect::update(float dt) {
 	return;
+}
+
+
+void FireRing::init(size_t numParticles, Camera* cam) {
+	glm::fvec3 pos;
+	int numParticlesPerFlame = numParticles / 36;
+	for (int i = 0; i < 36; i ++){
+		m_flames.push_back(std::make_shared<FlameEffect>(FlameEffect()));
+		m_flames.at(i)->init(numParticlesPerFlame, cam);
+		pos = 8.f * glm::fvec3{glm::cos((i * M_PI)/18), glm::sin((i * M_PI)/18), 0.0f};
+		m_flames.at(i)->setPos(pos);
+	}
+
+}
+
+void FireRing::move(glm::fvec3 mov){
+	m_pos += mov;
+	glm::fvec3 pos;
+	for (int i = 0; i < 36; i ++){
+		m_flames.at(i)->setPos(mov);
+	}
+}
+
+
+void FireRing::update(float dt) {
+	return;
+}
+
+void FireRing::initRenderer(){
+	for(auto i : m_flames){
+		i->initRenderer();
+	}
+}
+
+void FireRing::reset(){
+	for(auto i : m_flames){
+		i->reset();
+	}
+}
+void FireRing::clean(){
+	for(auto i : m_flames){
+		i->clean();
+	}
+}
+void FireRing::toggleUpdate(){
+	for(auto i : m_flames){
+		i->toggleUpdate();
+	}
+}
+void FireRing::toggleEmit(){
+	for(auto i : m_flames){
+		i->toggleEmit();
+	}
+}
+
+void FireRing::cpuUpdate(float dt){
+	for(auto i : m_flames){
+		i->cpuUpdate(dt);
+	}
+}
+void FireRing::gpuUpdate(){
+	for(auto i : m_flames){
+		i->gpuUpdate();
+	}
+}
+void FireRing::render(){
+	for(auto i : m_flames){
+		i->render();
+	}
 }

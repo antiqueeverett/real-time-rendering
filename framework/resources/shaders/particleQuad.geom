@@ -16,7 +16,7 @@ out vec4 pass_color;
 void main()
 {	
   vec4 P = gl_in[0].gl_Position;
-  float particle_size = 0.008f;
+  float particle_size = 0.3;
 
   // a: left-bottom 
   vec2 va = P.xy + vec2(-0.5, -0.5) * particle_size;

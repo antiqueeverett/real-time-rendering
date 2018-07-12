@@ -108,7 +108,7 @@ float rot_angle_ = 0.01f;
 float tilt_angle_ = 0.0f;
 float max_tilt_angle_ = 1.5f;
 
-bool gear_button_pressed = false;
+bool gear_button_pressed = false, gear_button_released = false;
 int gear = 1;
 
 std::mutex joypad_input_mutex;
@@ -129,7 +129,12 @@ glm::vec3 rot_axis_qe_{0.0, 0.0, 1.0};
 
 SimpleShaders* shader_;
 TextureShaders* texture_shader_;
-TrailEffect* fire_;
+ParticleShaders* particle_shader_;
+FireRing* fire_;
+std::vector<FireRing*> rings_(50, new FireRing());
+
+glm::fvec3 min_pos_rings_ {-700.0f, -70.f, -700.f},
+           max_pos_rings_ {700.0f, 200.f, 700.f};
 
 float scale_ = 50.0f;
 float eagle_rotation_ = -1.f;
@@ -137,7 +142,7 @@ glm::fvec3 drgnfly_pos{0.0f, 80.0f, 0.0f};
 glm::fvec3 fire_pos = {0.0f, 0.008f, 0.01f};
 glm::fvec3 fire_dir = -move_dir_;
 
-bool render_obj = true, render_effect = false, render_terrain = true, move_obj = false;
+bool render_obj = true, render_effect = true, render_terrain = true, move_obj = false;
 
 //controls
 std::map<unsigned char, float> keys_;
@@ -158,27 +163,11 @@ void mouse(int button, int state, int x, int y)
 	glutPostRedisplay();
 }
 
-void rotate_drgnfly_fire(glm::fvec3 rot_axis, float angle){
-	dragonfly->rotate(rot_axis, angle);
-	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
-	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
-	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
-	//fire_->setDir(new_fire_dir);
-}
-
-void rotate_drgnfly_fire(){
-	dragonfly->rotation_matrix_ = rotation_;
-	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
-	glm::fvec3 new_fire_dir = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_dir, 1.0f}};
-	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
-	//fire_->setDir(new_fire_dir);
-}
-
 void translate_drgnfly_fire(glm::fvec3 transl){
 	dragonfly->translate(transl);
 	drgnfly_pos += transl;
-	glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
-	fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
+	//glm::fvec3 new_fire_pos = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{fire_pos, 1.0f}};
+	//fire_->setPos(new_fire_pos * scale_ + drgnfly_pos);
 }
 
 // move terrain with WASD
@@ -267,31 +256,29 @@ void joystick(){
 		joy->Update();
 		
 		if(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) == 0 && tilt_angle_ != 0.0f){
-			tilt_angle_ *= 0.99f;
-			if(abs(tilt_angle_) < 0.0001f){tilt_angle_ = 0.0f;}
+			tilt_angle_ *= 0.97f;
+			if(abs(tilt_angle_) < 0.01f){tilt_angle_ = 0.0f;}
 		} else if(joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL) > 0){
-			tilt_angle_ += 0.004f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
+			tilt_angle_ += 0.02f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
 			tilt_angle_ = std::min(tilt_angle_, 1.0f);
 		} else {
-			tilt_angle_ += 0.04f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
+			tilt_angle_ += 0.02f * joystick_transfer(AXIS_LEFT_STICK_HORIZONTAL);
 			tilt_angle_ = std::max(tilt_angle_, -1.0f);
 
 		}
 
-		/*if(joy->getButtonState(BUTTON_LEFT_BUMPER) == 1){
+		if(joy->getButtonState(BUTTON_LEFT_BUMPER) == 1){
 			gear_button_pressed = true;
-			++gear;
-			gear = gear % 3;
-			if(gear == 0)
-				gear = 1;
-		} */
+		} else if (gear_button_pressed){
+      gear_button_released = true;
+    }
 
 		joypad_input_mutex.lock();
 		accumulated_rotation_ = glm::rotate(glm::fmat4{}, 
-											elapsed_microseconds_since_last_frame*tilt_angle_, 
+											tilt_angle_, 
 											rot_axis_qe_);
 
-		accumulated_movement_speed_ += gear * 0.9f * ((joy->getAxisState(AXIS_RIGHT_TRIGGER) / 65534.f) + 0.5f);
+		accumulated_movement_speed_ += ((joy->getAxisState(AXIS_RIGHT_TRIGGER) / 65534.f) + 0.5f);
 
 		accumulated_left_stick_horizontal_axis_state += joy->getAxisState(AXIS_LEFT_STICK_HORIZONTAL);
 		accumulated_left_stick_vertical_axis_state 	 += joy->getAxisState(AXIS_LEFT_STICK_VERTICAL);
@@ -391,30 +378,27 @@ void display(void){
 	rotation_ = accumulated_rotation_;
 	accumulated_rotation_ = glm::fmat4{};
 
-/*	int temp = (int)(timeinMS/10)% 2;
-	std::cout << temp << std::endl;
-	if(temp  == 0){
-		if(gear_button_pressed == true){
+	if(gear_button_pressed && gear_button_released){
 			++gear;
-			gear = gear % 3;
+			gear = gear % 6;
 			if(gear == 0)
 				gear = 1;
-		std::cout << timeinMS << "," << gear_button_pressed << "," << gear << std::endl;	
 		gear_button_pressed = false;
-		}
-	} */
+    gear_button_released = false;
+	}
+
 
 	//update dragonfly speed (average)
 	if(0 != num_input_frames_passed) {
-		move_speed = accumulated_movement_speed_ / num_input_frames_passed;
+		move_speed = gear* (accumulated_movement_speed_ / num_input_frames_passed);
 		accumulated_left_stick_horizontal_axis_state /= num_input_frames_passed;
 		accumulated_left_stick_vertical_axis_state /= num_input_frames_passed;
 	} else {
 		move_speed = 0;
 	}
 
-	rotate_drgnfly_fire(rot_axis_ad_, -rot_angle_* accumulated_left_stick_horizontal_axis_state / 32767.f);
-	rotate_drgnfly_fire(rot_axis_ws_, -rot_angle_* accumulated_left_stick_vertical_axis_state / 32767.f);
+	dragonfly->rotate(rot_axis_ad_, -rot_angle_* accumulated_left_stick_horizontal_axis_state / 32767.f);
+	dragonfly->rotate(rot_axis_ws_, -rot_angle_* accumulated_left_stick_vertical_axis_state / 32767.f);
 
 	accumulated_left_stick_horizontal_axis_state = 0.0;
 	accumulated_left_stick_vertical_axis_state = 0.0;
@@ -430,6 +414,9 @@ void display(void){
 			glm::fvec3 dir_ = glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}} ;
 	    	translate_drgnfly_fire(glm::fvec3{0.0f, dir_.y * move_speed, 0.0f});
 	    	terrainTransl += vec3(dir_.x * move_speed, 0.0, dir_.z * move_speed);
+        for(auto i : rings_){ 
+          i->move(-glm::fvec3(dir_.x * move_speed, 0.0, dir_.z * move_speed));
+        }
 		}
 		shader_->activate();
 	
@@ -461,20 +448,20 @@ void display(void){
 	}
 
 	if(render_effect){
-		fire_dir = -glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}};
-		fire_dir.y = -fire_dir.y;
-		fire_->setDir(fire_dir);
+		//fire_dir = -glm::fvec3{dragonfly->rotation_matrix_ * glm::fvec4{move_dir_, 1.0f}};
+		//fire_dir.y = -fire_dir.y;
+		//fire_->setDir(fire_dir);
 		glEnable(GL_BLEND);
 	
-		texture_shader_->activate();
-		texture_shader_->setCameraMatrix(camera->getViewMatrix());
-		texture_shader_->setProjectionMatrix(camera->getProjectionMatrix());
-		texture_shader_->setAtlasDim();
-	
-		fire_->cpuUpdate(16.f/1000.f);
-		fire_->gpuUpdate();
-		fire_->render();
-	
+		particle_shader_->activate();
+		particle_shader_->setCameraMatrix(camera->getViewMatrix());
+		particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
+		//texture_shader_->setAtlasDim();
+	  for(auto i : rings_){
+  		i->cpuUpdate(16.f/1000.f);
+  		i->gpuUpdate();
+  		i->render();
+	  }
 		glDisable(GL_BLEND);
 	}
 	
@@ -624,9 +611,13 @@ int main(int argc, char** argv)
 	shader_->addUniform("camera_matrix");
 	shader_->addUniform("projection_matrix");
 
-  	texture_shader_ = new TextureShaders(400, "../resources/textures/explosion.png", 8);
+  texture_shader_ = new TextureShaders(400, "../resources/textures/explosion.png", 8);
 	texture_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleFire.geom", "../resources/shaders/particleFire.frag");
-  	texture_shader_->locateUniforms();
+  texture_shader_->locateUniforms();
+
+  particle_shader_ = new ParticleShaders();
+  particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag"); 
+  particle_shader_->locateUniforms();
   	
   	dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
 	
@@ -634,12 +625,23 @@ int main(int argc, char** argv)
 	//move_dir_ = glm::fvec3{glm::rotate(glm::fmat4{}, -eagle_rotation_, glm::fvec3(1.0f, 0.0f, 0.0f)) * glm::fvec4{move_dir_, 1.0f}};
 	dragonfly->scale(0.7f);
 
-	fire_ = new TrailEffect();
-	fire_->init(10000, camera);
+	fire_ = new FireRing();
+	fire_->init(100000, camera);
 	fire_->initRenderer();
 
-	fire_->setPos(fire_pos * scale_ + drgnfly_pos);
-	fire_->setDir(fire_dir);
+  for(auto& i : rings_){
+    i = new FireRing();
+    i->init(1000, camera);
+    i->initRenderer();
+    float x = glm::linearRand(min_pos_rings_.x, max_pos_rings_.x);
+    float y = glm::linearRand(min_pos_rings_.y, max_pos_rings_.y);
+    float z = glm::linearRand(min_pos_rings_.z, max_pos_rings_.z);
+
+    i->move(glm::fvec3(x,y,z));
+  }
+
+	//fire_->setPos(fire_pos * scale_ + drgnfly_pos);
+	//fire_->setDir(fire_dir);
 	
 	// Camera 
 	glutMotionFunc(mouseMotion);

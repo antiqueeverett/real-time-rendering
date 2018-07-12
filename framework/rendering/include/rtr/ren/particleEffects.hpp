@@ -43,6 +43,7 @@ public:
 
 	void init(size_t numParticles, Camera* cam) override;
 	void update(float dt) override;
+	void setPos(glm::fvec3 pos);
 
 private:
 	//generators
@@ -57,6 +58,9 @@ private:
 	std::shared_ptr<BasicPosUpdater> m_posUp;
 	std::shared_ptr<BasicColorUpdater> m_colUp;
 	std::shared_ptr<BasicTimeUpdater> m_timeUp;
+	std::shared_ptr<TranslationUpdater> m_transUp;
+
+
 
 };
 
@@ -100,7 +104,7 @@ public:
 
 private:
 	//generators
-	std::shared_ptr<SpherePosGen> m_posGen;
+	std::shared_ptr<RotatingPosGen> m_posGen;
 	std::shared_ptr<ConeVelGen> m_velGen;
 	std::shared_ptr<BasicColorGen> m_colGen;
 	std::shared_ptr<GaussTimeGen> m_timeGen;
@@ -157,5 +161,30 @@ private:
 	std::shared_ptr<BasicVelUpdater> m_velUp;
 	std::shared_ptr<BasicPosUpdater> m_posUp;
 	std::shared_ptr<CubeRemover> m_remUp;
+};
+
+class FireRing : public ParticleEffect {
+public:
+	FireRing(){}
+	~FireRing(){}
+
+	void init(size_t numParticles, Camera* cam) override;
+	void update(float dt) override;
+	void move(glm::fvec3 mov);
+	void randPos(glm::fvec3 min, glm::fvec3 max);
+
+	void initRenderer() ;
+	void reset() ;
+	void clean() ;
+	void toggleUpdate() ;
+	void toggleEmit() ;
+	
+	void cpuUpdate(float dt) ;
+	void gpuUpdate() ;
+	void render() ;
+
+	glm::fvec3 m_pos = glm::fvec3{0.0f};
+private:
+	std::vector<std::shared_ptr<FlameEffect>> m_flames;
 };
 #endif

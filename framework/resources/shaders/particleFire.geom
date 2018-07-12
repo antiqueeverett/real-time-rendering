@@ -31,7 +31,7 @@ void main()
 {	
   float opacity = (1.0 - vertex[0].life.z) * 0.9;
   vec4 P = gl_in[0].gl_Position;
-  float particle_size = 0.1;
+  float particle_size = 1.0f;
 
   // a: left-bottom 
   vec2 va = P.xy + vec2(-0.5, -0.5) * particle_size;

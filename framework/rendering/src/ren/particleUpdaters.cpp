@@ -102,6 +102,8 @@ void TranslationUpdater::update(float dt, ParticleData *p){
 	for (size_t i = 0; i < end_id; ++i) {
 		pos[i] += m_translate;
 	}
+
+	m_translate = glm::fvec4{0.0f};
 }
 
 void PositionRemover::update(float dt, ParticleData *p){

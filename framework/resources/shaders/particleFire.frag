@@ -8,10 +8,10 @@ layout (location = 0) out vec4 fragment_color;
 
 void main() {
 	vec4 looked_up_color = texture(sampler, vertex_uv);
-	if (0.0 == looked_up_color.a) {
-		discard;
-	}
+	//if (0.0 == looked_up_color.a) {
+	//	discard;
+	//}
 
 	//fragment_color = vec4(looked_up_color.rgb, looked_up_color.a * vertex_color.a);
-	fragment_color = vertex_color * 0.9 + looked_up_color * 0.1;
+	fragment_color = vertex_color;
 }

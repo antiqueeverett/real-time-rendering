@@ -59,7 +59,7 @@ void SpherePosGen::generate(float dt, ParticleData *p, size_t start_id, size_t e
 
 void RotatingPosGen::generate(float dt, ParticleData *p, size_t start_id, size_t end_id){
 	float angle = m_ticks * M_PI;
-	m_ticks += dt/15;
+	m_ticks += dt * 10;
 	for (size_t i = start_id; i < end_id; ++i) {
 		float r = glm::linearRand(m_min_r, m_max_r);
 
