@@ -44,6 +44,7 @@ public:
 	void init(size_t numParticles, Camera* cam) override;
 	void update(float dt) override;
 	void setPos(glm::fvec3 pos);
+	void setColor(glm::fvec3 col);
 
 private:
 	//generators
@@ -172,6 +173,7 @@ public:
 	void update(float dt) override;
 	void move(glm::fvec3 mov);
 	void randPos(glm::fvec3 min, glm::fvec3 max);
+	void setColor(glm::fvec3 col);
 
 	void initRenderer() ;
 	void reset() ;

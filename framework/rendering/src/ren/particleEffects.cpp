@@ -9,7 +9,7 @@
 void FlameEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
 	//Generators
-	m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 80.0f, 10.f, 1.0f}));
+	m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.0f, 0.f, 1.0f}));
 	m_velGen = std::make_shared<SphereVelGen>(SphereVelGen(0.01f, 0.2f));
 	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.5f, 0.02f, 0.001f, 0.0f}, 
 											   				 glm::fvec4{0.8f, 0.1f, 0.002f, 0.0f}, 
@@ -54,6 +54,15 @@ void FlameEffect::setPos(glm::fvec3 pos){
 	m_transUp->m_translate = glm::fvec4(pos, 0.0f);
 	m_posGen->m_pos += glm::fvec4{pos, 0.0f}; 
 }
+
+void FlameEffect::setColor(glm::fvec3 col){
+	m_colGen->m_min_start_col = glm::fvec4{col, 1.0f};
+	m_colGen->m_max_start_col = glm::fvec4{col, 1.0f};
+	m_colGen->m_min_end_col = glm::fvec4{col, 1.0f};
+	m_colGen->m_max_end_col = glm::fvec4{col, 1.0f};
+
+}
+
 
 
 void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
@@ -333,5 +342,11 @@ void FireRing::gpuUpdate(){
 void FireRing::render(){
 	for(auto i : m_flames){
 		i->render();
+	}
+}
+
+void FireRing::setColor(glm::fvec3 col){
+	for(auto i : m_flames){
+		i->setColor(col);
 	}
 }
