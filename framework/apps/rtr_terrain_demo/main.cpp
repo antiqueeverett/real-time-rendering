@@ -21,10 +21,10 @@ int width = 1280;
 int height = 720;
 
 // CHANGE terrainResolution TO 512: normal PC / laptop, 2048: VR lab PC
-const int stretch = 200;
+const int stretch = 0;
 
 const int terrainResolution = 2048;	// Size of the terrain
-const int tileNumber = 20;			// No of tiles of terrain => 12 texture tiles
+const int tileNumber = 32;			// No of tiles of terrain => 12 texture tiles
 const int subdivide = 1;
 float amplitude = 50.0f;			// Amplitude for noise function
 float frequency = 0.0083f;			// frequency for noise function
@@ -49,7 +49,7 @@ std::vector<std::string> skyboxNightTextures = {"../resources/textures/Skybox/ni
 const vec3 terrainCenter = vec3(static_cast<float>((terrainResolution + stretch) / 2.0), 0.0f, static_cast<float>((terrainResolution + stretch) / 2.0)); //center of terrain
 const vec3 cameraPosition = vec3(0.0f, 60.0f, -5.0f);
 
-const vec4 sunDirection = normalize(vec4(-1.0f, 100.0f, 0.5f, -1.0f));	// Direction of sunlight in world space
+const vec4 sunDirection = normalize(vec4(-1.0f, 100.0f, -1.0f, 0.0f));	// Direction of sunlight in world space
 
 Terrain* terrain = nullptr;
 TerrainShaders* terrainShaders = nullptr;

@@ -66,7 +66,7 @@ void main()
 
 	// Fog
 	float dist = length(fViewPos);
-	float fogFactor = exp(-pow(dist*0.004, 3.0));
+	float fogFactor = exp(-pow(dist*0.003, 4.0));
 	fogFactor = clamp(fogFactor, 0.0, 1.0);
 	float blendFactor = 0.0f;
 	int timeInt = int(time);

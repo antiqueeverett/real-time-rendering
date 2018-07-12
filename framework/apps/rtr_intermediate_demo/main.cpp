@@ -53,7 +53,7 @@ using namespace glm;
  int width = 1280;
  int height = 720;
 
-const int stretch = 200;
+const int stretch = 0;
 // TERRAINRESOLUTION TO 512 ON NORMAL PCS/LAPTOPS, 2048 ON VR LAB PCS
 const int terrainResolution = 2048;	// Size of the terrain
 const int tileNumber = 20;			// No of tiles of terrain => 12 texture tiles
@@ -80,7 +80,7 @@ std::vector<std::string> skyboxNightTextures = {"../resources/textures/Skybox/ni
 const vec3 terrainCenter = vec3(static_cast<float>((terrainResolution + stretch) / 2.0), 0.0f, static_cast<float>((terrainResolution + stretch) / 2.0)); //center of terrain
 const vec3 cameraPosition = vec3(0.0f, 60.0f, -5.0f);
 
-const vec4 sunDirection = normalize(vec4(0.5f, 100.0f, 0.5f, 0.0f));	// Direction of sunlight in world space
+const vec4 sunDirection = normalize(vec4(-1.0f, 100.0f, 0-1.0f, 0.0f));	// Direction of sunlight in world space
 
 Terrain* terrain = nullptr;
 TerrainShaders* terrainShaders = nullptr;
