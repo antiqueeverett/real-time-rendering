@@ -2,9 +2,9 @@
 
 
 
-Skybox::Skybox(float size):
-	mSize(size)
+Skybox::Skybox(float size, int stretch)
 {
+	mSize = size + static_cast<float>(stretch);
 	drawVAOPostions();
 }
 
