@@ -64,12 +64,31 @@ public:
 	virtual void update(float dt, ParticleData *p) override;
 };
 
+class TranslationUpdater : public ParticleUpdater {
+public:
+	glm::fvec4 m_translate;
+
+	TranslationUpdater() : m_translate(glm::fvec4{0.0f}) {}
+	TranslationUpdater(glm::fvec3 dist) : m_translate(glm::fvec4{dist, 1.0f}) {}
+
+	virtual void update(float dt, ParticleData *p) override;
+};
+
 class PositionRemover : public ParticleUpdater {
 public:
 	float m_dist;
 
 	PositionRemover() : m_dist(1.0f) {}
 	PositionRemover(float dist) : m_dist(dist) {}
+
+	virtual void update(float dt, ParticleData *p) override;
+	
+};
+
+class CubeRemover : public ParticleUpdater {
+public:
+	glm::fvec4 m_min;
+	glm::fvec4 m_max;
 
 	virtual void update(float dt, ParticleData *p) override;
 	

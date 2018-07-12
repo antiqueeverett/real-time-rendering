@@ -34,7 +34,7 @@ public:
 	float m_rad;
 
 	PlanePosGen() : m_pos(glm::fvec4{0.0, 0.0, 0.0, 0.0}), m_norm(glm::fvec4{0.0, 1.0, 0.0, 0.0}), m_rad{1.0f} {}
-	PlanePosGen(glm::fvec4 pos, glm::fvec4 norm) : m_pos{pos}, m_norm{glm::normalize(norm)}, m_rad{1.0f} {}
+	PlanePosGen(glm::fvec3 pos, glm::fvec3 norm) : m_pos{glm::fvec4{pos, 1.0f}}, m_norm{glm::fvec4{glm::normalize(norm), 1.0f}}, m_rad{1.0f} {}
 	
 
 	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;

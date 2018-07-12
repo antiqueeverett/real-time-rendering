@@ -94,6 +94,16 @@ void BasicPosUpdater::update(float dt, ParticleData *p){
 	}
 }
 
+void TranslationUpdater::update(float dt, ParticleData *p){
+	size_t end_id = p->m_count_alive;
+
+	glm::fvec4* pos = p->m_pos.get();
+	
+	for (size_t i = 0; i < end_id; ++i) {
+		pos[i] += m_translate;
+	}
+}
+
 void PositionRemover::update(float dt, ParticleData *p){
 	size_t end_id = p->m_count_alive;
 
@@ -101,6 +111,22 @@ void PositionRemover::update(float dt, ParticleData *p){
 	
 	for (size_t i = 0; i < end_id; ++i) {
 		if (glm::length(glm::fvec3{pos[i]})<m_dist){
+			p->kill(i);
+		}
+	}
+}
+
+void CubeRemover::update(float dt, ParticleData *p){
+	size_t end_id = p->m_count_alive;
+
+	glm::fvec4* pos = p->m_pos.get();
+	
+	for (size_t i = 0; i < end_id; ++i) {
+		if (pos[i].x < m_min.x || pos[i].x > m_max.x){
+			p->kill(i);
+		} else if (pos[i].y < m_min.y || pos[i].y > m_max.y){
+			p->kill(i);
+		} else if (pos[i].z < m_min.z || pos[i].z > m_max.z){
 			p->kill(i);
 		}
 	}
