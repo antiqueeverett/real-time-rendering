@@ -62,7 +62,7 @@ float amplitude = 50.0f;			// Amplitude for noise function
 float frequency = 0.0083f;			// frequency for noise function
 const int terrainTextureRes = 512;	// Resolution of the texture images
 
-float elapsedTime = 0.0;							// for moving the terrain, measure elapsed time
+float elapsedTime = 0.0;			// for moving the terrain, measure elapsed time
 const float speed = 0.015;			// Speed of moving terrain
 vec3 terrainTransl;					// vector for translating terrain in the shader
 float oldTime = 0.0;
@@ -107,6 +107,7 @@ float tilt_angle_ = 0.0f;
 float max_tilt_angle_ = 1.5f;
 
 bool gear_button_pressed = false, gear_button_released = false;
+bool break_button_pressed = false, break_button_released = false;
 int gear = 1;
 
 std::mutex joypad_input_mutex;
@@ -197,6 +198,12 @@ void joystick(){
 			gear_button_pressed = true;
 		} else if (gear_button_pressed){
       gear_button_released = true;
+    }
+
+    if(joy->getButtonState(BUTTON_RIGHT_BUMPER) == 1){
+			break_button_pressed = true;
+		} else if (break_button_pressed){
+      		break_button_released = true;
     }
 
 		joypad_input_mutex.lock();
@@ -319,6 +326,15 @@ void display(void){
         gear = 1;
     gear_button_pressed = false;
     gear_button_released = false;
+  }
+
+  if(break_button_pressed && break_button_released){
+      --gear;
+      gear = gear % 6;
+      if(gear == 0)
+        gear = 1;
+    break_button_pressed = false;
+    break_button_released = false;
   }
 
 
