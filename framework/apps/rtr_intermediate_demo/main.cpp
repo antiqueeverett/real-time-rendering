@@ -132,8 +132,8 @@ ParticleShaders* particle_shader_;
 FireRing* fire_;
 std::vector<FireRing*> rings_(50, new FireRing());
 
-const glm::fvec3 min_pos_rings_ {-700.0f, -70.f, -700.f},
-           max_pos_rings_ {700.0f, 200.f, 700.f};
+const glm::fvec3 min_pos_rings_ {-700.0f, -40.f, -700.f},
+           		 max_pos_rings_ {700.0f, 150.f, 700.f};
 
 float scale_ = 50.0f;
 float eagle_rotation_ = -1.f;
@@ -159,8 +159,12 @@ void mouse(int button, int state, int x, int y)
 }
 
 void translate_drgnfly_fire(glm::fvec3 transl){
-	dragonfly->translate(transl);
 	drgnfly_pos += transl;
+	if(drgnfly_pos.y < 20.0f || drgnfly_pos.y > 200.f){
+		drgnfly_pos -= glm::fvec3{0.0f, transl.y, 0.0f};
+		transl = glm::fvec3{transl.x, 0.0f, transl.z};
+	}
+	dragonfly->translate(transl);
 }
 
 
@@ -250,7 +254,6 @@ mat4 calcTerrainTransformation(float rotationXAngle, float rotationYAngle)
 }
 
 void checkBoundOfRings(FireRing* ring){
-  glm::fvec3 position = glm::fvec3{dragonfly->translation_matrix_ * glm::fvec4{drgnfly_pos, 1.0f}};
   if(ring->m_pos.x < min_pos_rings_.x||ring->m_pos.x > max_pos_rings_.x || ring->m_pos.z < min_pos_rings_.z||ring->m_pos.z > max_pos_rings_.z){
     float x = glm::linearRand(min_pos_rings_.x, max_pos_rings_.x);
     float y = glm::linearRand(min_pos_rings_.y, max_pos_rings_.y);
@@ -259,10 +262,11 @@ void checkBoundOfRings(FireRing* ring){
     ring->move(-(ring->m_pos));
     ring->move(glm::fvec3(x,y,z));
     ring->m_pos = glm::fvec3(x,y,z);
-  } else if(glm::length(position - ring->m_pos) < 50.0f) {
+    ring->setColor(glm::fvec3{0.9f, 0.1f, 0.01f});
+  } else if(glm::distance(drgnfly_pos, ring->m_pos) < 6.0f) {
     ring->setColor(glm::fvec3{0.0f, 0.1f, 1.0f});
   }
-  std::cout << glm::length(position - ring->m_pos) << " , " << ring->m_pos.x << " , " << ring->m_pos.z << std::endl;
+  std::cout << glm::distance(drgnfly_pos, ring->m_pos) << " , " << ring->m_pos.x << " , " << ring->m_pos.z << std::endl;
 }
 
 void display(void){
@@ -466,6 +470,10 @@ void init_scene(){
   dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
   dragonfly->translate(drgnfly_pos);
   dragonfly->scale(0.7f);
+
+  for (auto i : rings_){
+    i->setColor(glm::fvec3{0.9f, 0.1f, 0.01f});
+  }
 
   joypad_input_mutex.unlock();
 

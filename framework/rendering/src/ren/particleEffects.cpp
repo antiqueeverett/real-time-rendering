@@ -11,10 +11,8 @@ void FlameEffect::init(size_t numParticles, Camera* cam) {
 	//Generators
 	m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.0f, 0.f, 1.0f}));
 	m_velGen = std::make_shared<SphereVelGen>(SphereVelGen(0.01f, 0.2f));
-	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.5f, 0.02f, 0.001f, 0.0f}, 
-											   				 glm::fvec4{0.8f, 0.1f, 0.002f, 0.0f}, 
-											   				 glm::fvec4{0.2f, 0.0f, 0.0f, 0.0f},
-											   	 			 glm::fvec4{0.3f, 0.0f, 0.0f, 0.0f}));
+	m_colGen = std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.9f, 0.1f, 0.01f, 1.0f}, 
+											   				 glm::fvec4{0.9f, 0.1f, 0.01f, 1.0f}));
 	m_timeGen = std::make_shared<VelTimeGen>(VelTimeGen(0.8f, 0.4f, glm::fvec4{0.0, 3.0, 0.0, 0.0}));
 	//create emiiter
 	auto emmit = std::make_shared<ParticleEmitter>(10.f);
@@ -178,8 +176,8 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_velGen.push_back(std::make_shared<ConeVelGen>(ConeVelGen(0.5f, 2.0f, glm::fvec3{0.0, 1.0, -1.0}, 0.032f)));
 
 
-	m_colGen.push_back(std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{1.0f, 0.0f, 0.0f, 1.0f}, glm::fvec4{0.1f, 0.0f, 0.0f, 1.0f})));
-	m_colGen.push_back(std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.0f, 1.0f, 0.0f, 1.0f}, glm::fvec4{0.0f, 0.1f, 0.0f, 1.0f})));
+	m_colGen.push_back(std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{1.0f, 0.0f, 0.0f, 1.0f}, glm::fvec4{1.f, 0.0f, 0.0f, 1.0f})));
+	m_colGen.push_back(std::make_shared<BasicColorGen>(BasicColorGen(glm::fvec4{0.0f, 1.0f, 0.0f, 1.0f}, glm::fvec4{0.0f, 1.f, 0.0f, 1.0f})));
 
 	m_posGen.push_back(std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.f, 0.f, 1.0f})));
 
@@ -188,7 +186,7 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	
 	m_timeGen = std::make_shared<BasicTimeGen>(BasicTimeGen(20.f, 20.f));
 	//create emiiter
-	/*
+	
 	auto emmit = std::make_shared<ParticleEmitter>(10.f);
 	emmit->addGenerator(m_posGen[0]);
 	emmit->addGenerator(m_velGen[0]);
@@ -200,7 +198,7 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	emmit2->addGenerator(m_velGen[1]);
 	emmit2->addGenerator(m_colGen[1]);
 	emmit2->addGenerator(m_timeGen);
-	*/
+	
 
 	auto emmit3 = std::make_shared<ParticleEmitter>(numParticles);
 	emmit3->addGenerator(sphere);
@@ -213,10 +211,10 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_posUp = std::make_shared<BasicPosUpdater>();
 	m_remUp = std::make_shared<PositionRemover>();
 	m_timeUp = std::make_shared<BasicTimeUpdater>();
-	m_colUp = std::make_shared<VelColorUpdater>(glm::fvec4{-0.5f, -0.5f, -0.5f, 0.0f}, glm::fvec4{2.0f});
+	m_colUp = std::make_shared<VelColorUpdater>(glm::fvec4{-2.0f, -2.0f, -2.0f, 2.0f}, glm::fvec4{2.0f});
 	m_attUp = std::make_shared<AttractorUpdater>();
 
-	m_attUp->m_attractors.push_back(glm::fvec4{0.0f, 0.0f, 0.0f, 1.f});
+	m_attUp->m_attractors.push_back(glm::fvec4{0.0f, 0.0f, 0.0f, 2.f});
 
 
 	m_sys->addUpdater(m_attUp);
@@ -227,9 +225,9 @@ void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
 	m_sys->addUpdater(m_colUp);
 
 
-	//m_sys->addEmitter(emmit2);
-	//m_sys->addEmitter(emmit);
-	m_sys->addEmitter(emmit3);
+	m_sys->addEmitter(emmit2);
+	m_sys->addEmitter(emmit);
+	//m_sys->addEmitter(emmit3);
 
 }
 

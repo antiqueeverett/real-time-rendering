@@ -47,7 +47,7 @@ void glut_display() {
 
   //set the viewport, background color, and reset default framebuffer
   glViewport(0, 0, (GLsizei)window_width_, (GLsizei)window_height_);
-  glClearColor(0.5f, 0.5f, 0.55f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // update camera
@@ -120,6 +120,10 @@ void glut_keyboard(uint8_t _key, int32_t _x, int32_t _y) {
       break;
     case 'e':
       effect_->toggleEmit();
+      break;
+    case 'w':
+      effect_->reset();
+      break;
     default:
       break;
 
