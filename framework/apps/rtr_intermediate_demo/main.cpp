@@ -56,14 +56,14 @@ using namespace glm;
 const int stretch = 0;
 // TERRAINRESOLUTION TO 512 ON NORMAL PCS/LAPTOPS, 2048 ON VR LAB PCS
 const int terrainResolution = 2048;	// Size of the terrain
-const int tileNumber = 20;			// No of tiles of terrain => 12 texture tiles
+const int tileNumber = 32;			// No of tiles of terrain => 12 texture tiles
 const int subdivide = 1;
 float amplitude = 50.0f;			// Amplitude for noise function
 float frequency = 0.0083f;			// frequency for noise function
 const int terrainTextureRes = 512;	// Resolution of the texture images
 
 float elapsedTime = 0.0;							// for moving the terrain, measure elapsed time
-const float speed = 0.025;			// Speed of moving terrain
+const float speed = 0.015;			// Speed of moving terrain
 vec3 terrainTransl;					// vector for translating terrain in the shader
 float oldTime = 0.0;
 float mSpeed = 0.0;
@@ -289,17 +289,17 @@ void display(void){
     terrainShaders->setProjectionMatrix(camera->getProjectionMatrix());
   
     terrainShaders->setTime(terrainTransl);
-    terrainShaders->setDayTime(timeinMS*0.5);
+    terrainShaders->setDayTime(timeinMS*0.33);
     terrainShaders->setSunRotation(rotate(mat4(1.0), rotation, vec3(0.0f, 1.0f, 0.0f)));
     terrainShaders->activate();
     terrain->draw();
   
     glDepthFunc(GL_LEQUAL);               // change depth function so depth test passes when values are equal to depth buffer's content
     mat4 viewMat = mat4(mat3(camera->getViewMatrix())); // remove translation from the view matrix
-    mat4 rotateView = rotate(viewMat, rotation, vec3(0.0f, 1.0f, 0.0f));
-    skyboxShaders->setViewMatrix(rotateView, mDeltaTime);
+    mat4 rotateView = rotate(mat4(1.0f), rotation, vec3(0.0f, 1.0f, 0.0f));
+    skyboxShaders->setViewMatrix(viewMat, rotateView);
     skyboxShaders->setProjectionMatrix(camera->getProjectionMatrix());
-    skyboxShaders->setTime(timeinMS*0.5);
+    skyboxShaders->setTime(timeinMS*0.33);
     skyboxShaders->activate();
     skybox->draw();
     glDepthFunc(GL_LESS);

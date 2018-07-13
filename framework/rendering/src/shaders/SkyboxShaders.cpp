@@ -6,6 +6,7 @@ using namespace glm;
 
 SkyboxShaders::SkyboxShaders(int textureResolution, std::vector<std::string> texture_path_day, std::vector<std::string> texture_path_night) :
 	mViewLocation(-1),
+	mRotateViewLocation(-1),
 	mProjectionLocation(-1),
 	mCubeDaySamplerLocation(-1),
 	mTimeLocation(-1),
@@ -42,6 +43,9 @@ void SkyboxShaders::locateUniforms()
 		exit(0);
 	}
 
+	mRotateViewLocation = glGetUniformLocation(mShaderProgram, "rotateView");
+	if(mRotateViewLocation == -1)
+		printf("[Skybox Shader] Rotate view location not found\n");
 
 	mProjectionLocation = glGetUniformLocation(mShaderProgram, "projection");
 	if (mProjectionLocation == -1)
@@ -64,15 +68,14 @@ void SkyboxShaders::locateUniforms()
 }
 
 // View Matrix
-void SkyboxShaders::setViewMatrix(const glm::mat4& viewMatrix, const float elapsedTime)
+void SkyboxShaders::setViewMatrix(const glm::mat4& viewMatrix, const glm::mat4& rotateViewMat)
 {
 	if (mViewLocation < 0)
 		printf("[Skybox Shader] uniform location for 'view' not known\n");
 
 	glUseProgram(mShaderProgram);
-	mRotation += mRotationSpeed*elapsedTime;
-	mat4 view = rotate(viewMatrix, mRotation, vec3(0.0f, 1.0f, 0.0f));
 	glUniformMatrix4fv(mViewLocation, 1, GL_FALSE, &viewMatrix[0][0]);
+	glUniformMatrix4fv(mRotateViewLocation, 1, GL_FALSE, &rotateViewMat[0][0]);
 
 }
 

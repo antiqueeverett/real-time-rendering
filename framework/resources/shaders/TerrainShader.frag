@@ -77,14 +77,12 @@ void main()
 		diffuseSunLight = max(0.0, dot(N, L_Moon));
 		Strength_Sun = 0.0;
 		Strength_Moon = 0.5;
-
 	}
 	else if (timeInt >= 5000 && timeInt < 8000){
 		blendFactor = (float(timeInt) - 5000.0)/(8000.0 - 5000.0);
 		fogColor = mix(fogColorNight, fogColorDay, blendFactor);
 		Strength_Sun = mix(0.0, 0.9, blendFactor);
 		Strength_Moon = mix(0.5, 0.0, blendFactor);
-
 	}
 	else if (time >= 8000 && timeInt < 21000){
 		blendFactor = (float(timeInt) - 8000.0)/(21000.0 - 8000.0);

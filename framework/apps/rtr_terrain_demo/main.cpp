@@ -31,7 +31,7 @@ float frequency = 0.0083f;			// frequency for noise function
 const int terrainTextureRes = 512;	// Resolution of the texture images
 
 float elapsedTime = 0.0;							// for moving the terrain, measure elapsed time
-const float speed = 0.025;			// Speed of moving terrain
+const float speed = 0.015;			// Speed of moving terrain
 float rotation = 0.0f;
 vec3 terrainTransl;					// vector for translating terrain in the shader
 float oldTime = 0.0;
@@ -119,8 +119,8 @@ void display(void)
 	
 	glDepthFunc(GL_LEQUAL);								// change depth function so depth test passes when values are equal to depth buffer's content
 	mat4 viewMat = mat4(mat3(camera->getViewMatrix())); // remove translation from the view matrix
-	mat4 rotateView = rotate(viewMat, rotation, vec3(0.0f, 1.0f, 0.0f));
-	skyboxShaders->setViewMatrix(rotateView, mDeltaTime);
+    mat4 rotateView = rotate(mat4(1.0f), rotation, vec3(0.0f, 1.0f, 0.0f));
+    skyboxShaders->setViewMatrix(viewMat, rotateView);
 	skyboxShaders->setProjectionMatrix(camera->getProjectionMatrix());
 	skyboxShaders->setTime(timeinMS*0.5);
 	skyboxShaders->activate();

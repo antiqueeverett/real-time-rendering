@@ -14,7 +14,7 @@ public:
 	void locateUniforms();
 	void activate() override;
 
-	void setViewMatrix(const glm::mat4& viewMatrix, const float elapsedTime);
+	void setViewMatrix(const glm::mat4& viewMatrix, const glm::mat4& rotateViewMat);
 	void setProjectionMatrix(const glm::mat4& projMatrix);
 	void setTime(float time);
 
@@ -23,6 +23,7 @@ private:
 	GLuint generateSkyBox(int resolution, std::vector<std::string> texture_path);
 	
 	GLint mViewLocation;
+	GLint mRotateViewLocation;
 	GLint mProjectionLocation;
 	GLint mCubeDaySamplerLocation;
 	GLint mCubeNightSamplerLocation;
