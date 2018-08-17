@@ -31,7 +31,6 @@ Finally, we started implementing chosen features which we unite in this framewor
 * [General Usage](framework/README.md)
 * Particle System:
   * [Demo](framework/apps/rtr_physics_demo/README.md)
-  * [Source Code](framework/rendering/include/rtr/ren/README.md)
 * links for Animation
 * links for Terrain
 * [Gamepad](framework/rendering/include/rtr/gamepad/README.md)
