@@ -237,44 +237,6 @@ void BlackHoleEffect::update(float dt) {
 	return;
 }
 
-
-void WheatherEffect::init(size_t numParticles, Camera* cam) {
-	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
-	//Generators
-	m_posGen = std::make_shared<PlanePosGen>(PlanePosGen(glm::fvec3{0.0f, 100.0f, 0.0f}, glm::fvec3{0.0f, 1.0f, 0.0f}));
-	m_posGen->m_rad = 40.0f;
-	auto emmit = std::make_shared<ParticleEmitter>(100);
-	emmit->addGenerator(m_posGen);
-	//Updaters
-	m_accUp = std::make_shared<GravityUpdater>();
-	m_velUp = std::make_shared<BasicVelUpdater>();
-	m_posUp = std::make_shared<BasicPosUpdater>();
-	m_remUp = std::make_shared<CubeRemover>();
-	m_transUp = std::make_shared<TranslationUpdater>();
-
-	m_remUp->m_min = glm::fvec4{-50.0f, -50.0f, -50.0f, 1.0f};
-	m_remUp->m_max = glm::fvec4{50.0f, 101.0f, 50.0f, 1.0f};
-
-	m_sys->addUpdater(m_accUp);
-	m_sys->addUpdater(m_velUp);
-	m_sys->addUpdater(m_posUp);
-	//m_sys->addUpdater(m_transUp);
-	//m_sys->addUpdater(m_remUp);
-
-	m_sys->addEmitter(emmit);
-
-}
-
-void WheatherEffect::move(glm::fvec3 mov){
-	m_transUp->m_translate = glm::fvec4(mov, 0.0f);
-}
-
-
-void WheatherEffect::update(float dt) {
-	return;
-}
-
-
 void FireRing::init(size_t numParticles, Camera* cam) {
 	glm::fvec3 pos;
 	int numParticlesPerFlame = numParticles / 36;

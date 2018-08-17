@@ -50,8 +50,6 @@ void ParticleData::swapData(size_t a, size_t b){
 	m_vel[a] = m_vel[b];
 	m_acc[a] = m_acc[b];
 	m_time[a] = m_time[b];
-	//m_alive[a] = true;
-	//m_alive[b] = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -145,25 +145,6 @@ private:
 
 };
 
-class WheatherEffect : public ParticleEffect {
-public:
-	WheatherEffect(){}
-	~WheatherEffect(){}
-
-	void init(size_t numParticles, Camera* cam) override;
-	void update(float dt) override;
-	void move(glm::fvec3 mov);
-
-private:
-	std::shared_ptr<PlanePosGen> m_posGen;
-
-	std::shared_ptr<GravityUpdater> m_accUp;
-	std::shared_ptr<TranslationUpdater> m_transUp;
-	std::shared_ptr<BasicVelUpdater> m_velUp;
-	std::shared_ptr<BasicPosUpdater> m_posUp;
-	std::shared_ptr<CubeRemover> m_remUp;
-};
-
 class FireRing : public ParticleEffect {
 public:
 	FireRing(){}
