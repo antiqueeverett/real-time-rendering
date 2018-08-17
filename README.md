@@ -29,8 +29,7 @@ After familiarizing ourselfes with the aspects of real-time rendering, we invest
 Finally, we started implementing chosen features which we unite in this framework. A intermediate demo includes parts of everything we had done during the first half of the project.
 
 * [General Usage](framework/README.md)
-* Particle System:
-  * [Demo](framework/apps/rtr_physics_demo/README.md)
+* [Particle System](framework/apps/rtr_physics_demo/README.md)
 * links for Animation
 * links for Terrain
 * [Gamepad](framework/rendering/include/rtr/gamepad/README.md)
