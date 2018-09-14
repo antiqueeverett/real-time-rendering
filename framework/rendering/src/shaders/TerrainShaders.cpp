@@ -5,23 +5,8 @@
 using namespace glm;
 
 TerrainShaders::TerrainShaders(int textureResolution, std::vector<std::string> texture_path, vec4 sunDirection, float amplitude, float frequency, int terrainResolution, int tileNumber, int subdivide) :
-	mModelLocation(-1),
-	mModelInvTLocation(-1),
-	mViewLocation(-1),
-	mProjectionLocation(-1),
-	mWorldSunDirectionLocation(-1),
-	mTextureSamplerLocation0(-1),
-	mTextureSamplerLocation1(-1),
-	mTextureSamplerLocation2(-1),
-	mAmplitudeLocation(-1),
-	mFrequencyLocation(-1),
-	mTimeLocation(-1),
-	mTerrainResLocation(-1),
-	mTileNoLocation(-1),
-	mTimeDayLocation(-1),
 	mTexturePath(texture_path),
 	mSunDirection(sunDirection),
-	mRotationLocation(-1),
 	mAmplitude(amplitude),
 	mFrequency(frequency),
 	mTerrainResolution(terrainResolution),
@@ -56,7 +41,6 @@ void TerrainShaders::locateUniforms()
 	mModelLocation = glGetUniformLocation(mShaderProgram, "model");
 	if (mModelLocation == -1){
 		printf("[TerrainShaders] Model location not found\n");
-		exit(0);
 	}
 
 	mModelInvTLocation = glGetUniformLocation(mShaderProgram, "modelInvT");
@@ -80,61 +64,60 @@ void TerrainShaders::locateUniforms()
 
 	mTextureSamplerLocation0 = glGetUniformLocation(mShaderProgram, "terrain0");
 	if (mTextureSamplerLocation0 == -1)
-		printf("Texture sampler 0 not found\n");
+		printf("[TerrainShaders] Texture sampler 0 not found\n");
 	glUniform1i(mTextureSamplerLocation0, 0);
 
 	mTextureSamplerLocation1 = glGetUniformLocation(mShaderProgram, "terrain1");
 	if (mTextureSamplerLocation1 == -1)
-		printf("Texture sampler 1 not found\n");
+		printf("[TerrainShaders] Texture sampler 1 not found\n");
 	glUniform1i(mTextureSamplerLocation1, 1);
 
 	mTextureSamplerLocation2 = glGetUniformLocation(mShaderProgram, "terrain2");
 	if (mTextureSamplerLocation2 == -1)
-		printf("Texture sampler 2 not found\n");
+		printf("[TerrainShaders] Texture sampler 2 not found\n");
 	glUniform1i(mTextureSamplerLocation2, 2);
 
 	mAmplitudeLocation = glGetUniformLocation(mShaderProgram, "amplitude");
 	if (mAmplitudeLocation == -1)
-		printf("Amplitude not found\n");
+		printf("[TerrainShaders] Amplitude not found\n");
 	
 	glUniform1f(mAmplitudeLocation, mAmplitude);
 
 	mFrequencyLocation = glGetUniformLocation(mShaderProgram, "frequency");
 	if (mFrequencyLocation == -1)
-		printf("Frequency not found\n");
+		printf("[TerrainShaders] Frequency not found\n");
 
 	glUniform1f(mFrequencyLocation, mFrequency);
 
 	mTimeLocation = glGetUniformLocation(mShaderProgram, "timeTranslate");
 	if (mTimeLocation == -1)
-		printf("Time not found\n");
+		printf("[TerrainShaders] Time not found\n");
 
 	mTerrainResLocation = glGetUniformLocation(mShaderProgram, "terrainResolution");
 	if (mTimeLocation == -1)
-		printf("TerrainResolution not found\n");
+		printf("[TerrainShaders] TerrainResolution not found\n");
 	
 	glUniform1i(mTerrainResLocation, mTerrainResolution);
 
-
 	mTileNoLocation = glGetUniformLocation(mShaderProgram, "textureTileNumber");
 	if (mTileNoLocation == -1)
-		printf("Tilenumber not found\n");
+		printf("[TerrainShaders] Tilenumber not found\n");
 
 	glUniform1i(mTileNoLocation, mTileNumber);
 
 	mSubdivideLocation = glGetUniformLocation(mShaderProgram, "subdivide");
 	if (mSubdivideLocation == -1)
-		printf("Subdivide not found\n");
+		printf("[TerrainShaders] Subdivide not found\n");
 
 	glUniform1i(mSubdivideLocation, mSubdivide);
 
 	mTimeDayLocation = glGetUniformLocation(mShaderProgram, "time");
 	if (mTimeDayLocation == -1)
-		printf("[Terrain Shader] time location not found\n");
+		printf("[TerrainShader] time location not found\n");
 
 	mRotationLocation = glGetUniformLocation(mShaderProgram, "sunRotation");
 	if (mRotationLocation == -1)
-		printf("[Terrain Shader] Sun rotation location not found\n");
+		printf("[TerrainShader] Sun rotation location not found\n");
 }
 
 
@@ -208,6 +191,8 @@ void TerrainShaders::setTime(const glm::vec3& timeTranslate)
 
 void TerrainShaders::setDayTime(float time)
 {
+	if(mTimeDayLocation < 0)
+		printf("[TerrainShaders] uniform location for 'timeDay' not known\n");
 	int timeInt = static_cast<int>(time) % 24000;
 	glUseProgram(mShaderProgram);
 	glUniform1f(mTimeDayLocation, static_cast<float> (timeInt));

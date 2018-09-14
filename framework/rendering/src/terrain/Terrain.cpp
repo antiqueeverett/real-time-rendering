@@ -63,23 +63,6 @@ void Terrain::setVAOPositions()
 	end();
 }
 
-// Will later be used for creating noise on the collision mesh, dummy function for now
-float Terrain::noise(int x, int z)
-{
-	return rand() % 100;
-}
-
-// Will set height of a low-res terrain mesh for collision
-std::vector<float>  Terrain::makeCollisionMesh()
-{
-	for (int z = 1; z < mResolution - 1; z++) {
-		for (int x = 1; x < mResolution - 1; x++) {
-			noise(x, z);
-		}
-	}
-	return mHeight;
-}
-
 void Terrain::setHeight(float x, float z, float height)
 {
 	if (getHeight(x, z) == 0)

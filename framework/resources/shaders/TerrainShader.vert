@@ -152,15 +152,18 @@ float fbm_9( in vec2 x )
     return a;
 }
 
-//------------------------------------------------------------------------------------------------------------------
-// MAIN 
-//------------------------------------------------------------------------------------------------------------------
 // parameters for fractals
 double H = 1.4;
 double lacunarity = 3.2;
 double octaves = 10.0;
-double offset = 0.7;
 
+float getHeightValue(vec2 v)
+{
+	return (fBm(v.xy*frequency, H, lacunarity, octaves)*amplitude);
+}
+//------------------------------------------------------------------------------------------------------------------
+// MAIN 
+//------------------------------------------------------------------------------------------------------------------
 vec4 vNormal = vec4(0.0);
 
 void main()
@@ -168,9 +171,9 @@ void main()
 
     vec4 position = vPos + vec4(timeTranslate, 0.0); // translate terrain when it moves to make terrain look infinite
     //position.y = 0.25 * noise(position.xz*frequency) + 0.125 * fBm((position.xz*frequency), H, lacunarity, octaves)+ 0.25* fbm_9(position.xz * frequency/2.0);
-	position.y = fBm(position.xz*frequency, 1.4, 3.2, octaves);
-	position.y *= amplitude;
-    
+	//position.y = fBm(position.xz*frequency, 1.4, 3.2, octaves);
+    position.y = getHeightValue(position.xz);
+		
    if(position.y < -amplitude)
     {
         position.y = -amplitude;
@@ -182,9 +185,9 @@ void main()
     } 
 	
 	// Calculate surface normals based on height of neighboring heights with fractals
-	vNormal.x = fBm(vec2(position.x - float(1.0/subdivide), position.z )*frequency, 1.4, 3.2, octaves) - fBm(vec2(position.x + float(1.0/subdivide), position.z )*frequency, 1.4, 3.2, octaves);
+	vNormal.x = getHeightValue(vec2(position.x-1.0, position.z)) - getHeightValue(vec2(position.x+1.0, position.z));
 	vNormal.y = float(1.0/subdivide) + float(1.0/subdivide);
-	vNormal.z = fBm(vec2(position.x, position.z - float(1.0/subdivide))*frequency, 1.4, 3.2, octaves) - fBm(vec2(position.x, position.z + float(1.0/subdivide))*frequency, 1.4, 3.2, octaves);
+	vNormal.z = getHeightValue(vec2(position.x, position.z - 1.0)) - getHeightValue(vec2(position.x, position.z + 1.0));
 	vNormal = normalize(vNormal);
 	
     position.x = vPos.x;    //to stay on the grid, reset x and values

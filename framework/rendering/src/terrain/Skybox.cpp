@@ -58,48 +58,5 @@ void Skybox::drawVAOPostions()
 	addVertex3f(-(mSize/2.0f), -(mSize/2.0f), (mSize/2.0f));
 	addVertex3f((mSize/2.0f), -(mSize/2.0f), (mSize/2.0f));
 
-/*	
-	addVertex3f(-mSize, mSize, -mSize);
-	addVertex3f(-mSize, -mSize, -mSize);
-	addVertex3f(mSize, -mSize, -mSize);
-	addVertex3f(mSize, -mSize, -mSize);
-	addVertex3f(mSize, mSize, -mSize);
-	addVertex3f(-mSize, mSize, -mSize);
-
-	addVertex3f(-mSize, -mSize, mSize);
-	addVertex3f(-mSize, -mSize, -mSize);
-	addVertex3f(-mSize, mSize, -mSize);
-	addVertex3f(-mSize, mSize, -mSize);
-	addVertex3f(-mSize, mSize, mSize);
-	addVertex3f(-mSize, -mSize, mSize);
-
-	addVertex3f(mSize, -mSize, -mSize);
-	addVertex3f(mSize, -mSize, mSize);
-	addVertex3f(mSize, mSize, mSize);
-	addVertex3f(mSize, mSize, mSize);
-	addVertex3f(mSize, mSize, -mSize);
-	addVertex3f(mSize, -mSize, -mSize);
-
-	addVertex3f(-mSize, -mSize, mSize);
-	addVertex3f(-mSize, mSize, mSize);
-	addVertex3f(mSize, mSize, mSize);
-	addVertex3f(mSize, mSize, mSize);
-	addVertex3f(mSize, -mSize, mSize);
-	addVertex3f(-mSize, -mSize, mSize);
-
-	addVertex3f(-mSize, mSize, -mSize);
-	addVertex3f(mSize, mSize, -mSize);
-	addVertex3f(mSize, mSize, mSize);
-	addVertex3f(mSize, mSize, mSize);
-	addVertex3f(-mSize, mSize, mSize);
-	addVertex3f(-mSize, mSize, -mSize);
-
-	addVertex3f(-mSize, -mSize, -mSize);
-	addVertex3f(-mSize, -mSize, mSize);
-	addVertex3f(mSize, -mSize, -mSize);
-	addVertex3f(mSize, -mSize, -mSize);
-	addVertex3f(-mSize, -mSize, mSize);
-	addVertex3f(mSize, -mSize, mSize);
-*/
 	end();
 }

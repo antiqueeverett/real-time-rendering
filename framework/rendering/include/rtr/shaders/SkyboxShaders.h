@@ -22,12 +22,12 @@ private:
 
 	GLuint generateSkyBox(int resolution, std::vector<std::string> texture_path);
 	
-	GLint mViewLocation;
-	GLint mRotateViewLocation;
-	GLint mProjectionLocation;
-	GLint mCubeDaySamplerLocation;
-	GLint mCubeNightSamplerLocation;
-	GLint mTimeLocation;
+	GLint mViewLocation = -1;
+	GLint mRotateViewLocation = -1;
+	GLint mProjectionLocation = -1;
+	GLint mCubeDaySamplerLocation = -1;
+	GLint mCubeNightSamplerLocation = -1;
+	GLint mTimeLocation = -1;
 	GLint mTextureID1;
 	GLint mTextureID2;
 

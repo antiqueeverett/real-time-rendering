@@ -5,11 +5,6 @@ using namespace glm;
 
 
 SkyboxShaders::SkyboxShaders(int textureResolution, std::vector<std::string> texture_path_day, std::vector<std::string> texture_path_night) :
-	mViewLocation(-1),
-	mRotateViewLocation(-1),
-	mProjectionLocation(-1),
-	mCubeDaySamplerLocation(-1),
-	mTimeLocation(-1),
 	mTexturePathDay(texture_path_day),
 	mTexturePathNight(texture_path_night),
 	mRotation(0.0f)
@@ -83,7 +78,7 @@ void SkyboxShaders::setViewMatrix(const glm::mat4& viewMatrix, const glm::mat4& 
 void SkyboxShaders::setProjectionMatrix(const glm::mat4& projMatrix)
 {
 	if (mProjectionLocation < 0)
-		printf("[TerrainShaders] uniform location for 'projection' not known\n");
+		printf("[Skybox Shaders] uniform location for 'projection' not known\n");
 
 	glUseProgram(mShaderProgram);
 	glUniformMatrix4fv(mProjectionLocation, 1, GL_FALSE, &projMatrix[0][0]);
@@ -91,6 +86,9 @@ void SkyboxShaders::setProjectionMatrix(const glm::mat4& projMatrix)
 
 void SkyboxShaders::setTime(float time)
 {
+	if(mTimeLocation < 0)
+		printf("[Skybox Shaders] uniform location for 'time' not known\n");
+	
 	int timeInt = static_cast<int>(time) % 24000;
 	glUseProgram(mShaderProgram);
 	glUniform1f(mTimeLocation, static_cast<float> (timeInt));

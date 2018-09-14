@@ -16,17 +16,15 @@ public:
 	int calcIndex(float x, float z);
 
 	void setVAOPositions();
-	std::vector<float> makeCollisionMesh();
 
 private:     
-
-	float noise(int x, int z);
     int mResolution;    
 	int mTileNumber;
 	int mSubdivide;
 	float mFactor;
 	int mStretchFactor;
 	std::vector<float> mHeight;
+	
 };
 
 

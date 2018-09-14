@@ -28,22 +28,22 @@ public:
 private:
 	GLuint generateTexture(int resolution, const char* path);
 
-	GLint mModelLocation;
-	GLint mModelInvTLocation;
-	GLint mViewLocation;
-	GLint mProjectionLocation;
-	GLint mWorldSunDirectionLocation;
-	GLint mTextureSamplerLocation0;
-	GLint mTextureSamplerLocation1;
-	GLint mTextureSamplerLocation2;
-	GLint mAmplitudeLocation;
-	GLint mFrequencyLocation;
-	GLint mTimeLocation;
-	GLint mTerrainResLocation;
-	GLint mTileNoLocation;
-	GLint mSubdivideLocation;
-	GLint mTimeDayLocation;
-	GLint mRotationLocation;
+	GLint mModelLocation = -1;
+	GLint mModelInvTLocation = -1;
+	GLint mViewLocation = -1;
+	GLint mProjectionLocation = -1;
+	GLint mWorldSunDirectionLocation = -1;
+	GLint mTextureSamplerLocation0 = -1;
+	GLint mTextureSamplerLocation1 = -1;
+	GLint mTextureSamplerLocation2 = -1;
+	GLint mAmplitudeLocation = -1;
+	GLint mFrequencyLocation = -1;
+	GLint mTimeLocation = -1;
+	GLint mTerrainResLocation = -1;
+	GLint mTileNoLocation = -1;
+	GLint mSubdivideLocation = -1;
+	GLint mTimeDayLocation = -1;
+	GLint mRotationLocation = -1;
 	GLuint mTextureID0;
 	GLuint mTextureID1;
 	GLuint mTextureID2;
