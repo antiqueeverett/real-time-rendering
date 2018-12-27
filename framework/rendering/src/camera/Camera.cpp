@@ -149,7 +149,11 @@ void Camera::updateProjection(float ratio){
 }
 
 void Camera::setViewDir(glm::fvec3 dir){
+	mDirection = dir;
 	mViewMatrix = lookAt(mPosition, mPosition + dir, vec3(0.0f, 0.75f, 0.0f));
+
+    mTheta = glm::acos(dir.y);
+    mPhi = -glm::acos(dir.x / sin(mTheta));
 }
 
 void Camera::setPosition(glm::fvec3 pos){

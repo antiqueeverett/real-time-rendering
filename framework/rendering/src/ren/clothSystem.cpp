@@ -1,0 +1,33 @@
+//
+// Created by anny on 27.12.18.
+//
+
+#include <rtr/ren/clothSystem.h>
+
+ClothSystem::ClothSystem(size_t maxCount, Camera *cam)
+  : ParticleSystem(maxCount, cam) {}
+
+void ClothSystem::update(float dt) {
+  if(do_update) {
+
+    if(getAliveCount() > 0){
+      for (size_t i = 0; i < m_count; ++i){
+        m_particles.m_acc[i] = glm::vec4(0.0f);
+      }
+
+
+      for(auto& up : m_updaters) {
+        up->update(dt, &m_particles);
+      }
+
+      if(do_sort) {sort();}
+    }
+
+    if(do_emit) {
+      do_emit = false;  //cloth particles only emitted once
+      for (auto& em: m_emitters){
+        em->emit(dt, &m_particles);
+      }
+    }
+  }
+}

@@ -80,6 +80,19 @@ public:
 
 };
 
+class GridPosGen: public ParticleGenerator {
+public:
+	glm::fvec4 m_pos;
+	glm::fmat4 m_rot;
+	int m_x;
+	int m_y;
+	float m_d;
+
+	GridPosGen() : m_pos{0.0f}, m_rot{1.0f}, m_x{3}, m_y{3}, m_d{1} {}
+
+	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
+};
+
 class BasicColorGen : public ParticleGenerator {
 public:
 	glm::vec4 m_min_start_col;

@@ -170,4 +170,24 @@ public:
 private:
 	std::vector<std::shared_ptr<FlameEffect>> m_flames;
 };
+
+class ClothEffect : public ParticleEffect {
+public:
+	ClothEffect(){}
+	~ClothEffect(){}
+
+	void init(size_t numParticles, Camera* cam) override;
+	void update(float dt) override;
+
+    glm::fvec4 m_gridPos;
+    glm::fmat4 m_gridRot;
+
+private:
+	std::shared_ptr<BasicColorGen> m_colGen;
+	std::shared_ptr<GridPosGen> m_posGen;
+	std::shared_ptr<BasicVelGen> m_VelGen;
+
+    std::shared_ptr<BasicColorUpdater> m_colUp;
+
+};
 #endif

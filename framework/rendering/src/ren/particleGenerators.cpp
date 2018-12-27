@@ -70,6 +70,25 @@ void RotatingPosGen::generate(float dt, ParticleData *p, size_t start_id, size_t
 	}
 }
 
+void GridPosGen::generate(float dt, ParticleData *p, size_t start_id, size_t end_id) {
+	glm::fvec4 new_pos;
+	new_pos.w = 1;
+
+	for(size_t i = start_id; i < end_id; ++i){
+		if(i / m_y > m_x) break;
+		new_pos.x = (i / m_y) * m_d;
+        new_pos.y = 0;
+        new_pos.z = (i % m_y) * m_d;
+
+		new_pos = m_rot * new_pos;
+
+		p->m_pos[i].x = new_pos.x + m_pos.x;
+		p->m_pos[i].y = new_pos.y + m_pos.y;
+		p->m_pos[i].z = new_pos.z + m_pos.z;
+
+	}
+}
+
 void BasicColorGen::generate(float dt, ParticleData *p, size_t start_id, size_t end_id){
 	for (size_t i = start_id; i < end_id; ++i){
 		p->m_start_col[i] = glm::linearRand(m_min_start_col, m_max_start_col);

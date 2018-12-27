@@ -5,6 +5,7 @@
  * https://www.bfilipek.com/2014/03/three-particle-effects.html				  *
  ******************************************************************************/
 #include <rtr/ren/particleEffects.hpp>
+#include <rtr/ren/clothSystem.h>
 
 void FlameEffect::init(size_t numParticles, Camera* cam) {
 	m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
@@ -309,4 +310,26 @@ void FireRing::setColor(glm::fvec3 col){
 	for(auto i : m_flames){
 		i->setColor(col);
 	}
+}
+
+void ClothEffect::update(float dt) {return;}
+void ClothEffect::init(size_t numParticles, Camera *cam) {
+	m_sys = std::make_shared<ClothSystem>(numParticles, cam);
+
+	m_colGen = std::make_shared<BasicColorGen>();
+	m_colGen->m_min_end_col = glm::fvec4{1.0f};
+	m_colGen->m_max_end_col = glm::fvec4{1.0f};
+
+	m_posGen = std::make_shared<GridPosGen>();
+    m_posGen->m_pos = m_gridPos;
+    m_posGen->m_rot = m_gridRot;
+
+	auto emmit = std::make_shared<ParticleEmitter>(numParticles);
+	emmit->addGenerator(m_posGen);
+	emmit->addGenerator(m_colGen);
+
+	m_sys->addEmitter(emmit);
+
+    m_colUp = std::make_shared<BasicColorUpdater>();
+    m_sys->addUpdater(m_colUp);
 }
