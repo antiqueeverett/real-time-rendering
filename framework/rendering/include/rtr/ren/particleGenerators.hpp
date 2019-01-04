@@ -84,13 +84,18 @@ class GridPosGen: public ParticleGenerator {
 public:
 	glm::fvec4 m_pos;
 	glm::fmat4 m_rot;
-	int m_x;
-	int m_y;
+	int m_w;
+	int m_h;
 	float m_d;
 
-	GridPosGen() : m_pos{0.0f}, m_rot{1.0f}, m_x{3}, m_y{3}, m_d{1} {}
+	GridPosGen() : m_pos{0.0f}, m_rot{1.0f}, m_w{3}, m_h{3}, m_d{1} {}
 
 	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
+};
+
+class PrevPosGen: public ParticleGenerator {
+public:
+    virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
 };
 
 class BasicColorGen : public ParticleGenerator {

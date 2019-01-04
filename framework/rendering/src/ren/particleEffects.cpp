@@ -314,7 +314,7 @@ void FireRing::setColor(glm::fvec3 col){
 
 void ClothEffect::update(float dt) {return;}
 void ClothEffect::init(size_t numParticles, Camera *cam) {
-	m_sys = std::make_shared<ClothSystem>(numParticles, cam);
+	m_sys = std::make_shared<ClothSystem>(m_gridW * m_gridH, cam);
 
 	m_colGen = std::make_shared<BasicColorGen>();
 	m_colGen->m_min_end_col = glm::fvec4{1.0f};
@@ -323,13 +323,42 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
 	m_posGen = std::make_shared<GridPosGen>();
     m_posGen->m_pos = m_gridPos;
     m_posGen->m_rot = m_gridRot;
+    m_posGen->m_w = m_gridW;
+    m_posGen->m_h = m_gridH;
+    m_posGen->m_d = m_gridD;
 
-	auto emmit = std::make_shared<ParticleEmitter>(numParticles);
+    m_prevGen = std::make_shared<PrevPosGen>();
+
+	auto emmit = std::make_shared<ParticleEmitter>(m_gridW * m_gridH);
 	emmit->addGenerator(m_posGen);
 	emmit->addGenerator(m_colGen);
+    emmit->addGenerator(m_prevGen);
 
 	m_sys->addEmitter(emmit);
 
     m_colUp = std::make_shared<BasicColorUpdater>();
+    m_gravUp = std::make_shared<GravityUpdater>();
+    m_posUp = std::make_shared<VerletPosUpdater>();
     m_sys->addUpdater(m_colUp);
+    m_sys->addUpdater(m_gravUp);
+    m_sys->addUpdater(m_posUp);
+
+    m_sys->toggleSort();
+
+    auto ind = &m_sys->finalData()->m_indices;
+    for(int h = 0; h < m_gridH - 1; ++h){
+      for(int w = 0; w < m_gridW - 1; ++w) {
+        unsigned int top_left = w % m_gridW + h * m_gridW;
+        unsigned int top_right = top_left + 1;
+        unsigned int bot_left = top_left + m_gridW;
+        unsigned int bot_right = bot_left + 1;
+        ind->push_back(top_left);
+        ind->push_back(bot_right);
+        ind->push_back(top_right);
+        ind->push_back(top_left);
+        ind->push_back(bot_left);
+        ind->push_back(bot_right);
+      }
+    }
+
 }

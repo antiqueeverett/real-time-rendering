@@ -41,6 +41,14 @@ void ParticleSystem::update(float dt){
 	
 }
 
+void ParticleSystem::emit(){
+	if(do_emit) {
+		for (auto& em: m_emitters){
+			em->emit(0, &m_particles);
+		}
+	}
+}
+
 void ParticleSystem::reset(){
 	m_particles.m_count_alive = 0;
 }

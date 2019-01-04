@@ -26,9 +26,13 @@ public:
 	virtual void cpuUpdate(float dt) { m_sys->update(dt);}
 	virtual void gpuUpdate() { m_rend->update();}
 	virtual void render() { m_rend->render();}
+    virtual void emit() { m_sys->emit();}
 
 	virtual int numAllParticles() { return m_sys->getCount();}
 	virtual int numAliveParticles() { return m_sys->getAliveCount();};
+
+	virtual void fixedParticles(unsigned int i) { m_sys->finalData()->m_pos.get()[i].w = 1; };
+	virtual void movingParticles(unsigned int i) { m_sys->finalData()->m_pos.get()[i].w = 0; };
 
 protected:
 	std::shared_ptr<ParticleSystem> m_sys;
@@ -181,12 +185,17 @@ public:
 
     glm::fvec4 m_gridPos;
     glm::fmat4 m_gridRot;
+    int m_gridW;
+    int m_gridH;
+    int m_gridD;
 
 private:
 	std::shared_ptr<BasicColorGen> m_colGen;
 	std::shared_ptr<GridPosGen> m_posGen;
-	std::shared_ptr<BasicVelGen> m_VelGen;
+    std::shared_ptr<PrevPosGen> m_prevGen;
 
+    std::shared_ptr<GravityUpdater> m_gravUp;
+    std::shared_ptr<VerletPosUpdater> m_posUp;
     std::shared_ptr<BasicColorUpdater> m_colUp;
 
 };

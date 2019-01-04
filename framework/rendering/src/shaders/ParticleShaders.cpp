@@ -12,7 +12,7 @@ ParticleShaders::ParticleShaders():
 
 void ParticleShaders::activate(){
 
-glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+glPolygonMode(GL_FRONT_AND_BACK, mDrawMode);
 SimpleShaders::activate(); // calls activate of inheritated class
 }
 

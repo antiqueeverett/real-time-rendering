@@ -22,6 +22,7 @@ public:
 	virtual void update(float dt);
 	virtual void sort();
 	virtual void reset();
+    virtual void emit();
 
 	virtual size_t getCount() const { return m_particles.m_count; }
 	virtual size_t getAliveCount() const { return m_particles.m_count_alive; }
@@ -32,7 +33,6 @@ public:
 
 	void addEmitter(std::shared_ptr<ParticleEmitter> em) { m_emitters.push_back(em); }
 	void addUpdater(std::shared_ptr<ParticleUpdater> up) { m_updaters.push_back(up); }
-
 
 	ParticleData *finalData() { return &m_particles; }
 

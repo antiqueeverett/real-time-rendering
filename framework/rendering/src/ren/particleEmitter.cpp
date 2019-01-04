@@ -11,7 +11,7 @@ void ParticleEmitter::emit(float dt, ParticleData *p){
 	const size_t start_id = p->m_count_alive;
 	const size_t end_id = std::min(start_id + new_particles, p->m_count-1);
 
-	for (size_t i = start_id; i < end_id; ++i)
+	for (size_t i = start_id; i <= end_id; ++i)
 		p->wake(i);
 	
 	for (auto &gen : m_generators)

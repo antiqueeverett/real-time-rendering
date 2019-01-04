@@ -14,6 +14,7 @@ public:
 
 	
 	std::unique_ptr<glm::vec4[]> m_pos;
+	std::unique_ptr<glm::vec4[]> m_pos_prev;
 	std::unique_ptr<glm::vec4[]> m_col;
 	std::unique_ptr<glm::vec4[]> m_start_col;
 	std::unique_ptr<glm::vec4[]> m_end_col;
@@ -21,6 +22,8 @@ public:
 	std::unique_ptr<glm::vec4[]> m_acc;
 	std::unique_ptr<glm::vec4[]> m_time;
 	std::unique_ptr<bool[]>  m_alive;
+
+	std::vector<unsigned int> m_indices;
 
 	size_t m_count{0};
 	size_t m_count_alive{0};

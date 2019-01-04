@@ -36,9 +36,10 @@ bool render_texture = false;
 uint64_t elapsed_ms_{0};
 
 void createShaders(){
-  //particle_shader_->loadVertexFragmentShaders("../resources/shaders/particlePoint.vert", "../resources/shaders/particlePoint.frag");
-  particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
+  particle_shader_->loadVertexFragmentShaders("../resources/shaders/particlePoint.vert", "../resources/shaders/particlePoint.frag");
+  //particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
   particle_shader_->locateUniforms();
+  particle_shader_->mDrawMode = GL_LINE;
 }
 
 
@@ -53,7 +54,7 @@ void glut_display() {
   // update camera
   camera->update();
 
-  glDisable(GL_BLEND);
+  //glDisable(GL_BLEND);
   shader_->activate();
 
   //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
@@ -70,7 +71,7 @@ void glut_display() {
   //object_->draw();
   //object_->deactivate();
 
-  glEnable(GL_BLEND);
+  //glEnable(GL_BLEND);
 
   particle_shader_->setCameraMatrix(camera->getViewMatrix());
   particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
@@ -158,6 +159,7 @@ int32_t main(int32_t argc, char* argv[]) {
   glewExperimental = GL_TRUE;
   glewInit();
 
+
   glm::fvec3 fire_pos = {0.0, 0.008, 0.01};
   float scale = 50.0;
 
@@ -182,9 +184,14 @@ int32_t main(int32_t argc, char* argv[]) {
 
   effect_ = new ClothEffect();
   effect_->m_gridPos = glm::fvec4{1.f, 1.f, 0.f, 1.f};
-  //effect_->m_gridRot = glm::rotate(glm::fmat4{}, 2.0f, glm::vec3{1, 0, 0});
+  effect_->m_gridRot = glm::rotate(glm::fmat4{}, 2.0f, glm::vec3{1, 0, 0});
+  effect_->m_gridW = 2;
+  effect_->m_gridH = 1;
+  effect_->m_gridD = 1;
   effect_->init(10, camera);
   effect_->initRenderer();
+  effect_->emit();
+  effect_->fixedParticles(0);
 
 
 
@@ -195,6 +202,8 @@ int32_t main(int32_t argc, char* argv[]) {
   glutKeyboardFunc(glut_keyboard);
   glutMotionFunc(glut_motion);
   glutMouseFunc(glut_mouse);
+
+
 
   glutShowWindow();
 

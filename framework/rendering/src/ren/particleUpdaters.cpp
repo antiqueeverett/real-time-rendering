@@ -21,7 +21,7 @@ void GravityUpdater::update(float dt, ParticleData *p){
 	glm::fvec4* acc = p->m_acc.get();
 
 	for (size_t i = 0; i < end_id; ++i) {
-		acc[i] += m_grav * dt;
+		acc[i] += m_grav;
 	}
 }
 
@@ -31,7 +31,7 @@ void BasicAccUpdater::update(float dt, ParticleData *p){
 	glm::fvec4* acc = p->m_acc.get();
 
 	for (size_t i = 0; i < end_id; ++i) {
-		acc[i] += m_acceleration * dt;
+		acc[i] += m_acceleration;
 	}
 }
 
@@ -91,6 +91,24 @@ void BasicPosUpdater::update(float dt, ParticleData *p){
 	
 	for (size_t i = 0; i < end_id; ++i) {
 		pos[i] += vel[i] * dt;
+	}
+}
+
+void VerletPosUpdater::update(float dt, ParticleData *p) {
+	size_t end_id = p->m_count_alive;
+
+	glm::fvec4* pos = p->m_pos.get();
+	glm::fvec4* prev_pos = p->m_pos_prev.get();
+	glm::fvec4* acc = p->m_acc.get();
+	glm::fvec4 temp;
+
+	for (size_t i = 0; i < end_id; ++i) {
+		if(pos[i].w == 0.f) {
+			temp = pos[i];
+			pos[i] += (pos[i] - prev_pos[i]) * (1.f - m_damp) + acc[i] * dt * dt;
+			prev_pos[i] = temp;
+			pos[i].w = temp.w;
+		}
 	}
 }
 

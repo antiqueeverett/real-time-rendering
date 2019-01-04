@@ -64,6 +64,15 @@ public:
 	virtual void update(float dt, ParticleData *p) override;
 };
 
+class VerletPosUpdater : public ParticleUpdater {
+public:
+	float m_damp;
+
+	VerletPosUpdater() : m_damp(0.f) {}
+	VerletPosUpdater(float damp) : m_damp(damp) {}
+	virtual void update(float dt, ParticleData *p) override;
+};
+
 class TranslationUpdater : public ParticleUpdater {
 public:
 	glm::fvec4 m_translate;

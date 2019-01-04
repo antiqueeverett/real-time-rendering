@@ -17,6 +17,8 @@ public:
 	void setCameraMatrix(const glm::mat4& cameraMatrix);
 	void setProjectionMatrix(const glm::mat4& projectionMatrix);
 
+	GLint mDrawMode = GL_FILL;
+
 private:
 
 	GLint mCameraLocation;
