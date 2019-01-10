@@ -3,7 +3,7 @@
  * https://github.com/fenbf/particles 										  *
  * https://www.bfilipek.com/2014/03/three-particle-effects.html				  *
  ******************************************************************************/
-#define GLM_ENABLE_EXPERIMENTAL
+
 #include <rtr/ren/particleData.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,6 +20,11 @@ void ParticleData::generate(size_t maxSize){
 	m_acc.reset(new glm::vec4[maxSize]);
 	m_time.reset(new glm::vec4[maxSize]);
 	m_alive.reset(new bool[maxSize]);
+
+    m_indices = std::make_shared<std::vector<unsigned int>>();
+    m_struct_con = std::make_shared<std::vector<glm::vec3>>();
+    m_shear_con = std::make_shared<std::vector<glm::vec3>>();
+    m_bend_con = std::make_shared<std::vector<glm::vec3>>();
 }
 
 void ParticleData::kill(size_t id){

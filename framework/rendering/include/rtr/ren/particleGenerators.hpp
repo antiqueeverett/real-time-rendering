@@ -223,4 +223,9 @@ public:
 	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;	
 };
 
+class SpringGen : public ParticleGenerator {
+	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
+
+};
+
 #endif //GEN_HPP

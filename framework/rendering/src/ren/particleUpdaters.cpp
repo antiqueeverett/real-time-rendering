@@ -6,6 +6,7 @@
 
 #include <rtr/ren/particleUpdaters.hpp>
 
+
 /******************************************************************************
 void update(float dt, ParticleData *p){
 	size_t end_id = p->m_count_alive;
@@ -202,4 +203,54 @@ void BasicTimeUpdater::update(float dt, ParticleData *p){
 			end_id = p->m_count_alive < p->m_count ? p->m_count_alive : p->m_count;
 		}
 	}
+}
+
+void SpringUpdater::update(float dt, ParticleData *p) {
+
+  glm::fvec4* pos = p->m_pos.get();
+  glm::fvec4* acc = p->m_acc.get();
+  glm::fvec3 dist, f;
+
+  for(auto& s : *m_spring){
+    dist = glm::fvec3(pos[(int)s.x] - pos[(int)s.y]);
+
+    f = m_k * glm::normalize(dist) * (glm::length(dist) - s.z);
+    acc[(int)s.x] -= glm::fvec4(f, 0.f);
+    acc[(int)s.y] += glm::fvec4(f, 0.f);
+  }
+}
+
+void StretchUpdater::update(float dt, ParticleData *p) {
+  glm::fvec4* pos = p->m_pos.get();
+  auto struct_con = p->m_struct_con;
+  auto shear_con = p->m_shear_con;
+  auto bend_con = p->m_bend_con;
+
+  for(int i = 0; i < m_iter; ++i){
+    for(auto& s : *struct_con){
+      maxStretch(s.z, pos[(int)s.x], pos[(int)s.y]);
+    }
+    for(auto& s : *shear_con){
+      maxStretch(s.z, pos[(int)s.x], pos[(int)s.y]);
+    }
+    for(auto& s : *bend_con){
+      maxStretch(s.z, pos[(int)s.x], pos[(int)s.y]);
+    }
+  }
+}
+
+void StretchUpdater::maxStretch(float rest, glm::fvec4& pos_1, glm::fvec4& pos_2) {
+  glm::fvec3 dist = glm::fvec3(pos_1 - pos_2);
+  glm::fvec3 dir = glm::normalize(dist);
+  float len = glm::length(dist);
+  //satisfy max distance constraint
+  if (len > rest * m_max) {
+    glm::fvec3 f = dist * (1 - (rest * m_max) / len);
+
+    glm::fvec3 corr = f * (1 - pos_1.w) * 0.5f * (1 + pos_2.w);
+    pos_1 -= glm::fvec4(corr, 0.f);
+
+    corr = f * (1 - pos_2.w) * 0.5f * (1 + pos_1.w);
+    pos_2 += glm::fvec4(corr, 0.f);
+  }
 }

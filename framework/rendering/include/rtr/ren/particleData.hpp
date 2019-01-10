@@ -23,7 +23,11 @@ public:
 	std::unique_ptr<glm::vec4[]> m_time;
 	std::unique_ptr<bool[]>  m_alive;
 
-	std::vector<unsigned int> m_indices;
+    // cloth stuff
+	std::shared_ptr<std::vector<unsigned int>> m_indices;
+    std::shared_ptr<std::vector<glm::vec3>> m_struct_con;
+    std::shared_ptr<std::vector<glm::vec3>> m_shear_con;
+    std::shared_ptr<std::vector<glm::vec3>> m_bend_con;
 
 	size_t m_count{0};
 	size_t m_count_alive{0};

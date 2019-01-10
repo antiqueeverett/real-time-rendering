@@ -183,15 +183,15 @@ int32_t main(int32_t argc, char* argv[]) {
   object_ = new Object(obj_file_, (model::POSITION | model::TEXCOORD));
 
   effect_ = new ClothEffect();
-  effect_->m_gridPos = glm::fvec4{1.f, 1.f, 0.f, 1.f};
-  effect_->m_gridRot = glm::rotate(glm::fmat4{}, 2.0f, glm::vec3{1, 0, 0});
-  effect_->m_gridW = 2;
-  effect_->m_gridH = 1;
+  effect_->m_gridPos = glm::fvec4{-5.f, 5.f, 0.f, 1.f};
+  //effect_->m_gridRot = glm::rotate(glm::fmat4{}, 2.0f, glm::vec3{1, 0, 0});
+  effect_->m_gridW = 10;
+  effect_->m_gridH = 10;
   effect_->m_gridD = 1;
   effect_->init(10, camera);
   effect_->initRenderer();
-  effect_->emit();
   effect_->fixedParticles(0);
+  effect_->fixedParticles(4);
 
 
 

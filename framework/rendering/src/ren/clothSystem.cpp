@@ -22,12 +22,5 @@ void ClothSystem::update(float dt) {
 
       if(do_sort) {sort();}
     }
-
-    if(do_emit) {
-      do_emit = false;  //cloth particles only emitted once
-      for (auto& em: m_emitters){
-        em->emit(dt, &m_particles);
-      }
-    }
   }
 }

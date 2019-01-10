@@ -193,10 +193,15 @@ private:
 	std::shared_ptr<BasicColorGen> m_colGen;
 	std::shared_ptr<GridPosGen> m_posGen;
     std::shared_ptr<PrevPosGen> m_prevGen;
+    std::shared_ptr<SpringGen> m_springGen;
 
     std::shared_ptr<GravityUpdater> m_gravUp;
     std::shared_ptr<VerletPosUpdater> m_posUp;
     std::shared_ptr<BasicColorUpdater> m_colUp;
+    std::shared_ptr<SpringUpdater> m_structUp;
+    std::shared_ptr<SpringUpdater> m_shearUp;
+    std::shared_ptr<SpringUpdater> m_bendUp;
+    std::shared_ptr<StretchUpdater> m_stretchUp;
 
 };
 #endif

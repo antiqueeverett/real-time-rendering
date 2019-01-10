@@ -35,10 +35,11 @@ void ParticleRenderer::generate(ParticleSystem *sys){
 	glEnableVertexAttribArray(2);
 
 	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
-    if(m_sys->finalData()->m_indices.size() != 0){
+    if(m_sys->finalData()->m_indices->size() != 0){
       glGenBuffers(1, &m_buf_indices);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buf_indices);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_sys->finalData()->m_indices.size() * sizeof(unsigned int), m_sys->finalData()->m_indices.data(), GL_STATIC_DRAW);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_sys->finalData()->m_indices->size() * sizeof(unsigned int),
+                   m_sys->finalData()->m_indices->data(), GL_STATIC_DRAW);
     }
 
 
@@ -86,17 +87,17 @@ void ParticleRenderer::render() {
     const size_t count = m_sys->getAliveCount();
 
 
-    if(m_sys->finalData()->m_indices.data() != 0){
+    if(m_sys->finalData()->m_indices->data() != 0){
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buf_indices);
       glBindVertexArray(m_vao);
-      glDrawElements(GL_TRIANGLES, m_sys->finalData()->m_indices.size(), GL_UNSIGNED_INT, NULL);
+      glDrawElements(GL_TRIANGLES, m_sys->finalData()->m_indices->size(), GL_UNSIGNED_INT, NULL);
       glBindVertexArray(0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     } else {
 
       if (count > 0)
         glBindVertexArray(m_vao);
-        glDrawArrays(GL_POINTS, 0, count);
+        glDrawArrays(GL_LINE_STRIP, 0, count);
         glBindVertexArray(0);
     }
 

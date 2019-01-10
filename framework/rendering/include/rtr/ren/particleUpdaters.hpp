@@ -126,4 +126,27 @@ public:
 	virtual void update(float dt, ParticleData *p) override; 
 };
 
+class SpringUpdater : public ParticleUpdater {
+public:
+	float m_k;
+    std::shared_ptr<std::vector<glm::vec3>> m_spring;
+
+	SpringUpdater(std::shared_ptr<std::vector<glm::vec3>> springs) : m_k(1.0f), m_spring(springs){}
+
+	virtual void update(float dt, ParticleData *p) override;
+};
+
+class StretchUpdater : public ParticleUpdater {
+public:
+    float m_max;
+    int m_iter;
+
+    StretchUpdater() : m_max(1.2f), m_iter(3){}
+    StretchUpdater(float max, int iter) : m_max(max), m_iter(iter){}
+
+    virtual void update(float dt, ParticleData *p) override;
+    void maxStretch(float rest, glm::fvec4& pos_1, glm::fvec4& pos_2);
+
+};
+
 #endif //UPDATER_HPP

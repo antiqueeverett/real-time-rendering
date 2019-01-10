@@ -212,3 +212,21 @@ void VelTimeGen::generate(float dt, ParticleData *p, size_t start_id, size_t end
 	}
 }
 
+void SpringGen::generate(float dt, ParticleData *p, size_t start_id, size_t end_id) {
+	glm::fvec4* pos = p->m_pos.get();
+	auto struc = p->m_struct_con;
+	for(auto& s : *struc){
+		s.z = glm::length(glm::vec3(pos[(int)s.x] - pos[(int)s.y]));
+	}
+
+	auto shear = p->m_shear_con;
+	for(auto& s : *shear){
+		s.z = glm::length(glm::vec3(pos[(int)s.x] - pos[(int)s.y]));
+	}
+
+	auto bend = p->m_bend_con;
+	for(auto& s : *bend){
+		s.z = glm::length(glm::vec3(pos[(int)s.x] - pos[(int)s.y]));
+	}
+}
+
