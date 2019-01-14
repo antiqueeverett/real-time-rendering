@@ -9,9 +9,10 @@
 
 class ClothSystem : public ParticleSystem {
 public:
-    ClothSystem(size_t maxCount, Camera* cam);
+    ClothSystem(size_t maxCount, std::shared_ptr<Camera> cam);
 
     void update(float dt) override;
+
 };
 
 

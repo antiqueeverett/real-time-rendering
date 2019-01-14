@@ -14,8 +14,8 @@
 
 class ParticleSystem {
 public:
-	ParticleSystem(size_t maxCount, Camera* cam);
-	//virtual ~ParticleSystem() { }									
+	ParticleSystem(size_t maxCount, std::shared_ptr<Camera> cam);
+	virtual ~ParticleSystem() { }
 	//ParticleSystem(const ParticleSystem &) = delete;
 	//ParticleSystem &operator=(const ParticleSystem &) = delete;
 

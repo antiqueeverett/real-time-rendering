@@ -4,7 +4,7 @@
 
 #include <rtr/ren/clothSystem.h>
 
-ClothSystem::ClothSystem(size_t maxCount, Camera *cam)
+ClothSystem::ClothSystem(size_t maxCount, std::shared_ptr<Camera>cam)
   : ParticleSystem(maxCount, cam) {}
 
 void ClothSystem::update(float dt) {

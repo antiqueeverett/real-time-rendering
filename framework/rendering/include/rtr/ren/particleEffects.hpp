@@ -9,6 +9,7 @@
 #include <rtr/ren/headers.hpp>
 #include <rtr/ren/particleHeaders.hpp>
 #include <rtr/camera/Camera.h>
+#include <set>
 
 class ParticleEffect {
 public:
@@ -17,7 +18,7 @@ public:
 
 	virtual void init(size_t numParticles, Camera* cam) = 0;
 	virtual void initRenderer() { m_rend->generate(m_sys.get());}
-	virtual void reset() { m_sys->reset();}
+	virtual void reset() { m_sys->reset(); m_fixed.clear();}
 	virtual void clean() { m_rend->destroy();}
 	virtual void toggleUpdate() { m_sys->toggleUpdate(); }
 	virtual void toggleEmit() { m_sys->toggleEmit(); }
@@ -31,12 +32,15 @@ public:
 	virtual int numAllParticles() { return m_sys->getCount();}
 	virtual int numAliveParticles() { return m_sys->getAliveCount();};
 
-	virtual void fixedParticles(unsigned int i) { m_sys->finalData()->m_pos.get()[i].w = 1; };
-	virtual void movingParticles(unsigned int i) { m_sys->finalData()->m_pos.get()[i].w = 0; };
+	virtual void fixedParticles(unsigned int i) { m_fixed.insert(i); };
+	virtual void movingParticles(unsigned int i) { m_fixed.erase(i); };
 
 protected:
+	std::shared_ptr<Camera> m_cam;
 	std::shared_ptr<ParticleSystem> m_sys;
 	std::shared_ptr<ParticleRenderer> m_rend = std::make_shared<ParticleRenderer> ();
+    std::set<unsigned int> m_fixed;
+
 
 };
 
@@ -182,12 +186,23 @@ public:
 
 	void init(size_t numParticles, Camera* cam) override;
 	void update(float dt) override;
+    void reset() override;
 
     glm::fvec4 m_gridPos;
     glm::fmat4 m_gridRot;
     int m_gridW;
     int m_gridH;
-    int m_gridD;
+    float m_gridD;
+	float m_damp;
+	float m_kStruct;
+	float m_kShear;
+	float m_kBend;
+
+    bool m_gravity = true;
+    bool m_structure = true;
+    bool m_shear = true;
+    bool m_bend = true;
+    bool m_stretch = true;
 
 private:
 	std::shared_ptr<BasicColorGen> m_colGen;

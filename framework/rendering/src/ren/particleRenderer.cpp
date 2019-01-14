@@ -44,20 +44,34 @@ void ParticleRenderer::generate(ParticleSystem *sys){
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void ParticleRenderer::destroy() {
-	if (m_buf_pos != 0)
-	{
+	if(m_buf_pos != 0){
 		glDeleteBuffers(1, &m_buf_pos);
 		m_buf_pos = 0;
 	}
 
-	if (m_buf_col != 0)
-	{
+	if(m_buf_col != 0){
 		glDeleteBuffers(1, &m_buf_col);
 		m_buf_col = 0;
 	}
+
+    if(m_buf_time != 0){
+      glDeleteBuffers(1, &m_buf_time);
+      m_buf_col = 0;
+    }
+
+    if(m_buf_indices != 0){
+      glDeleteBuffers(1, &m_buf_indices);
+      m_buf_indices = 0;
+    }
+
+    if(m_vao != 0){
+      glDeleteVertexArrays(1, &m_vao);
+      m_vao = 0;
+    }
 }
 
 void ParticleRenderer::update() {

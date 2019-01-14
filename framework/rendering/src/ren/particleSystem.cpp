@@ -6,7 +6,7 @@
 
 #include <rtr/ren/particleSystem.hpp>
 
-ParticleSystem::ParticleSystem(size_t maxCount, Camera* cam)
+ParticleSystem::ParticleSystem(size_t maxCount, std::shared_ptr<Camera> cam)
 	: m_camera{cam} {
 	m_count = maxCount;
 	m_particles.generate(maxCount);

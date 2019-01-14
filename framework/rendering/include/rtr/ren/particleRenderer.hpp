@@ -27,6 +27,7 @@ private:
 	unsigned int m_buf_time{0};
 	unsigned int m_buf_indices{0};
 	unsigned int m_vao{0};
+
 };
 
 #endif //PARTICLERENDERER

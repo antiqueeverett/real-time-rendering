@@ -8,7 +8,8 @@
 #include <rtr/ren/clothSystem.h>
 
 void FlameEffect::init(size_t numParticles, Camera* cam) {
-  m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
+  m_cam.reset(cam);
+  m_sys = std::make_shared<ParticleSystem>(numParticles, m_cam);
   //Generators
   m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.0f, 0.f, 1.0f}));
   m_velGen = std::make_shared<SphereVelGen>(SphereVelGen(0.01f, 0.2f));
@@ -65,7 +66,8 @@ void FlameEffect::setColor(glm::fvec3 col){
 
 
 void FlameThrowerEffect::init(size_t numParticles, Camera* cam) {
-  m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
+  m_cam.reset(cam);
+  m_sys = std::make_shared<ParticleSystem>(numParticles, m_cam);
   //Generators
   m_posGen = std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{0.f, 0.f, 0.f, 0.0f}));
   m_velGen = std::make_shared<ConeVelGen>(ConeVelGen(1.0f, 3.0f, glm::fvec3{0.0, -3.0, -1.0}, 0.032f));
@@ -116,7 +118,8 @@ void FlameThrowerEffect::setDir(glm::fvec3 dir){
 }
 
 void TrailEffect::init(size_t numParticles, Camera* cam) {
-  m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
+  m_cam.reset(cam);
+  m_sys = std::make_shared<ParticleSystem>(numParticles, m_cam);
   //Generators
   m_posGen = std::make_shared<RotatingPosGen>(RotatingPosGen());
   m_posGen->m_pos = glm::fvec4{0.0f, 80.0f, 10.0f, 1.0f};
@@ -168,7 +171,8 @@ void TrailEffect::setDir(glm::fvec3 dir){
 }
 
 void BlackHoleEffect::init(size_t numParticles, Camera* cam) {
-  m_sys = std::make_shared<ParticleSystem>(numParticles, cam);
+  m_cam.reset(cam);
+  m_sys = std::make_shared<ParticleSystem>(numParticles, m_cam);
   //Generators
   m_posGen.push_back(std::make_shared<PointPosGen>(PointPosGen(glm::fvec4{4.f, 1.f, 0.f, 1.0f})));
   m_velGen.push_back(std::make_shared<ConeVelGen>(ConeVelGen(0.5f, 2.0f, glm::fvec3{0.0, -1.0, -1.0}, 0.032f)));
@@ -239,6 +243,7 @@ void BlackHoleEffect::update(float dt) {
 }
 
 void FireRing::init(size_t numParticles, Camera* cam) {
+  m_cam.reset(cam);
   glm::fvec3 pos;
   int numParticlesPerFlame = numParticles / 36;
   for (int i = 0; i < 36; i ++){
@@ -312,51 +317,40 @@ void FireRing::setColor(glm::fvec3 col){
   }
 }
 
-void ClothEffect::update(float dt) {return;}
-void ClothEffect::init(size_t numParticles, Camera *cam) {
-  m_sys = std::make_shared<ClothSystem>(m_gridW * m_gridH, cam);
+void ClothEffect::reset() {
+  m_sys.reset(new ClothSystem(m_gridW * m_gridH, m_cam));
+  m_rend.reset(new ParticleRenderer());
 
-  m_colGen = std::make_shared<BasicColorGen>();
-  m_colGen->m_min_end_col = glm::fvec4{1.0f};
-  m_colGen->m_max_end_col = glm::fvec4{1.0f};
-
-  m_posGen = std::make_shared<GridPosGen>();
   m_posGen->m_pos = m_gridPos;
   m_posGen->m_rot = m_gridRot;
   m_posGen->m_w = m_gridW;
   m_posGen->m_h = m_gridH;
   m_posGen->m_d = m_gridD;
 
-  m_prevGen = std::make_shared<PrevPosGen>();
+  m_structUp.reset(new SpringUpdater(m_sys->finalData()->m_struct_con));
+  m_shearUp.reset(new SpringUpdater(m_sys->finalData()->m_shear_con));
+  m_bendUp.reset(new SpringUpdater(m_sys->finalData()->m_bend_con));
 
-  m_springGen = std::make_shared<SpringGen>();
+  m_posUp->m_damp = m_damp;
+  m_structUp->m_k = m_kStruct;
+  m_shearUp->m_k = m_kShear;
+  m_bendUp->m_k = m_kBend;
+
+
+  m_sys->addUpdater(m_colUp);
+  if(m_structure) m_sys->addUpdater(m_structUp);
+  if(m_shear) m_sys->addUpdater(m_shearUp);
+  if(m_bend) m_sys->addUpdater(m_bendUp);
+  if(m_gravity) m_sys->addUpdater(m_gravUp);
+  m_sys->addUpdater(m_posUp);
+  if(m_stretch) m_sys->addUpdater(m_stretchUp);
 
   auto emmit = std::make_shared<ParticleEmitter>(m_gridW * m_gridH);
   emmit->addGenerator(m_posGen);
   emmit->addGenerator(m_colGen);
   emmit->addGenerator(m_prevGen);
   emmit->addGenerator(m_springGen);
-
   m_sys->addEmitter(emmit);
-
-  m_colUp = std::make_shared<BasicColorUpdater>();
-  m_gravUp = std::make_shared<GravityUpdater>();
-  m_posUp = std::make_shared<VerletPosUpdater>();
-  m_structUp = std::make_shared<SpringUpdater>(m_sys->finalData()->m_struct_con);
-    //m_structUp->m_k = 5.f;
-  m_shearUp = std::make_shared<SpringUpdater>(m_sys->finalData()->m_shear_con);
-    //m_shearUp->m_k = 5.f;
-  m_bendUp = std::make_shared<SpringUpdater>(m_sys->finalData()->m_bend_con);
-    //m_bendUp->m_k = 5.f;
-  m_stretchUp = std::make_shared<StretchUpdater>();
-  m_sys->addUpdater(m_colUp);
-  m_sys->addUpdater(m_structUp);
-  m_sys->addUpdater(m_shearUp);
-  m_sys->addUpdater(m_bendUp);
-  m_sys->addUpdater(m_gravUp);
-  m_sys->addUpdater(m_posUp);
-  m_sys->addUpdater(m_stretchUp);
-
   m_sys->toggleSort();
 
   //create mesh faces
@@ -377,21 +371,20 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
   }
 
   //create springs
-  //struc->push_back(glm::vec3(0, 1, 1));
   auto struc = m_sys->finalData()->m_struct_con;
-  glm::fvec4* pos = m_sys->finalData()->m_pos.get();
   for(int h = 0; h < m_gridH; ++h){
-    for(int w = 0; w < m_gridW - 1; ++w) {
-      unsigned int left = w % m_gridW + h * m_gridW;
-      unsigned int right = left + 1;
-      struc->push_back(glm::fvec3(left, right, 0));
-    }
-  }
-  for(int h = 0; h < m_gridH - 1; ++h){
     for(int w = 0; w < m_gridW; ++w) {
-      unsigned int top = w % m_gridW + h * m_gridW;
-      unsigned int bottom = top + m_gridW;
-      struc->push_back(glm::fvec3(top, bottom, 0));
+      if(w < m_gridW - 1) {
+        unsigned int left = w % m_gridW + h * m_gridW;
+        unsigned int right = left + 1;
+        struc->push_back(glm::fvec3(left, right, 0));
+      }
+
+      if(h < m_gridH - 1) {
+        unsigned int top = w % m_gridW + h * m_gridW;
+        unsigned int bottom = top + m_gridW;
+        struc->push_back(glm::fvec3(top, bottom, 0));
+      }
     }
   }
 
@@ -407,21 +400,50 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
 
     }
   }
+
   auto bend = m_sys->finalData()->m_bend_con;
-  for(int h = 0; h < m_gridH; ++h){
-    for(int w = 0; w < m_gridW - 2; ++w) {
-      unsigned int left = w % m_gridW + h * m_gridW;
-      unsigned int right = left + 2;
-      struc->push_back(glm::fvec3(left, right, 0));
+  for(int h = 0; h < m_gridH; ++h) {
+    for (int w = 0; w < m_gridW; ++w) {
+      if (w < m_gridW - 2) {
+        unsigned int left = w % m_gridW + h * m_gridW;
+        unsigned int right = left + 2;
+        bend->push_back(glm::fvec3(left, right, 0));
+      }
+      if (h < m_gridH - 2) {
+        unsigned int top = w % m_gridW + h * m_gridW;
+        unsigned int bottom = top + 2 * m_gridW;
+        bend->push_back(glm::fvec3(top, bottom, 0));
+      }
     }
   }
-  for(int h = 0; h < m_gridH - 2; ++h){
-    for(int w = 0; w < m_gridW; ++w) {
-      unsigned int top = w % m_gridW + h * m_gridW;
-      unsigned int bottom = top + 2 * m_gridW;
-      struc->push_back(glm::fvec3(top, bottom, 0));
-    }
-  }
+
   emit();
+  initRenderer();
+
+  auto pos =  m_sys->finalData()->m_pos.get();
+  for(unsigned int i : m_fixed){
+    pos[i].w = 1.f;
+  }
 
 }
+
+void ClothEffect::init(size_t numParticles, Camera *cam) {
+  m_cam.reset(cam);
+
+  m_colGen = std::make_shared<BasicColorGen>();
+  m_colGen->m_min_end_col = glm::fvec4{1.0f};
+  m_colGen->m_max_end_col = glm::fvec4{1.0f};
+
+  m_posGen = std::make_shared<GridPosGen>();
+  m_prevGen = std::make_shared<PrevPosGen>();
+  m_springGen = std::make_shared<SpringGen>();
+
+  m_colUp = std::make_shared<BasicColorUpdater>();
+  m_gravUp = std::make_shared<GravityUpdater>();
+  m_posUp = std::make_shared<VerletPosUpdater>();
+  m_stretchUp = std::make_shared<StretchUpdater>();
+  std::cout << "hi" << std::endl;
+
+}
+
+void ClothEffect::update(float dt) {return;}
