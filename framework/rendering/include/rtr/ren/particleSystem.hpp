@@ -30,6 +30,7 @@ public:
 	void toggleUpdate() { do_update = !do_update; }
 	void toggleEmit() { do_emit = !do_emit; }
 	void toggleSort() { do_sort = !do_sort; }
+    bool getUpdate(){ return do_update; }
 
 	void addEmitter(std::shared_ptr<ParticleEmitter> em) { m_emitters.push_back(em); }
 	void addUpdater(std::shared_ptr<ParticleUpdater> up) { m_updaters.push_back(up); }

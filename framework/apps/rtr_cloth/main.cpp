@@ -13,41 +13,42 @@
 int32_t window_width_  = 800;
 int32_t window_height_ = 800;
 
-//model-to-world space representation
-glm::mat4 model_matrix_ = glm::mat4();
-
-//inverse world-to-camera space transformation
-glm::mat4 camera_matrix_ = glm::mat4(0.0f);
-
-//camera-to-screen space transformation
-glm::mat4 projection_matrix_ = glm::mat4(0.0f);
-
 //3d mesh input file
 std::string obj_file_ = "../resources/objects/sphere.obj";
 
 Object* object_;
-
 SimpleShaders* shader_;
 ParticleShaders* particle_shader_;
-
 Camera* camera;
-
 ClothEffect* effect_;
 
 bool render_texture = false;
 
 uint64_t elapsed_ms_{0};
-
-static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-static bool show_demo_window = true;
-static bool show_another_window = false;
+//GUi
 ImGuiIO* io;
+bool gui_fix_ = false;
+
+//uniforms
+int color_mode_ = 0;
+glm::vec3 pick_color_;
 
 void createShaders(){
   particle_shader_->loadVertexFragmentShaders("../resources/shaders/particlePoint.vert", "../resources/shaders/particlePoint.frag");
   //particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
   particle_shader_->locateUniforms();
   particle_shader_->mDrawMode = GL_LINE;
+}
+
+glm::vec3 rayCast(int x, int y){
+  float n_x = (2.0f * x) / window_width_ - 1.0f;
+  float n_y = 1.0f - (2.0f * y) / window_height_;
+
+  glm::vec4 ray = glm::vec4(n_x, n_y, -1.f, 1.f);
+  ray = glm::inverse(camera->getProjectionMatrix()) * ray;
+  ray = glm::inverse(camera->getViewMatrix()) * glm::vec4(ray.x, ray.y, -1.f, 0.f);
+
+  return glm::normalize(glm::vec3(ray));
 }
 
 
@@ -77,7 +78,8 @@ void glut_display() {
   particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
   particle_shader_->activate();
 
-  effect_ ->cpuUpdate(16.f/1000.f);
+  effect_->update(0.f);
+  if(!gui_fix_)effect_ ->cpuUpdate(16.f/1000.f);
   effect_ ->gpuUpdate();
   effect_ ->render();
 
@@ -88,8 +90,6 @@ void glut_display() {
 
 void gui_display()
 {
-  static float f = 0.0f;
-  static int counter = 0;
 
   ImGui::Begin("Sloth Simulation");
 
@@ -109,12 +109,29 @@ void gui_display()
   ImGui::InputInt("Width", &effect_->m_gridW);
   ImGui::InputInt("Height", &effect_->m_gridH);
   ImGui::InputFloat("Step Size", &effect_->m_gridD);
-  ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
   if (ImGui::Button("Reset"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
     effect_->reset();
 
+  if(effect_->getUpdate()){
+    if(ImGui::Button("Pause")) effect_->toggleUpdate();
+  } else {
+    if(ImGui::Button("Play")) effect_->toggleUpdate();
+  }
+
+  ImGui::Checkbox("Fix Points", &gui_fix_);
+  if (ImGui::Button("Release all Points")) effect_->movingAllParticles();
+
+  ImGui::ColorEdit3("clear color", (float*)&pick_color_); // Edit 3 floats representing a color
+  ImGui::RadioButton("Pick Colour", &color_mode_, 1);
+  ImGui::RadioButton("Texture", &color_mode_, 2);
+  ImGui::RadioButton("Spring Stretch", &color_mode_, 4);
+  ImGui::RadioButton("Normals", &color_mode_, 8);
+  ImGui::RadioButton("Fixed", &color_mode_, 16);
+
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
+
+
   ImGui::End();
 }
 
@@ -143,7 +160,7 @@ void glut_display_func()
 void glut_motion(int32_t _x, int32_t _y) {
   if(io->WantCaptureMouse){
     ImGui_ImplFreeGLUT_MotionFunc(_x, _y);
-  } else {
+  } else if (!gui_fix_) {
     camera->mouseMove(_x, _y);
   }
 }
@@ -152,8 +169,17 @@ void glut_motion(int32_t _x, int32_t _y) {
 void glut_mouse(int32_t _button, int32_t _state, int32_t _x, int32_t _y) {
   if(io->WantCaptureMouse){
     ImGui_ImplFreeGLUT_MouseFunc(_button, _state, _x, _y);
+  } else if (gui_fix_) {
+    effect_->fixedParticles(effect_->findClosest(rayCast(_x, _y)));
   } else {
     camera->mouseButton(_button, _state, _x, _y);
+  }
+}
+
+void glut_mouse_passive(int32_t _x, int32_t _y) {
+  ImGui_ImplFreeGLUT_MotionFunc(_x, _y);
+  if (gui_fix_ && !io->WantCaptureMouse) {
+    auto ray = rayCast(_x, _y);
   }
 }
 
@@ -224,7 +250,7 @@ int32_t main(int32_t argc, char* argv[]) {
   glutSpecialFunc(ImGui_ImplFreeGLUT_SpecialFunc);
   glutSpecialUpFunc(ImGui_ImplFreeGLUT_SpecialUpFunc);
   glutMotionFunc(glut_motion);
-  glutPassiveMotionFunc(ImGui_ImplFreeGLUT_MotionFunc);
+  glutPassiveMotionFunc(glut_mouse_passive);
   glutMouseFunc(glut_mouse);
   glutMouseWheelFunc(ImGui_ImplFreeGLUT_MouseWheelFunc);
 
@@ -258,6 +284,7 @@ int32_t main(int32_t argc, char* argv[]) {
   shader_->addUniform("model_matrix");
   shader_->addUniform("camera_matrix");
   shader_->addUniform("projection_matrix");
+  shader_->addUniform("color_mode");
 
   particle_shader_ = new ParticleShaders();
 

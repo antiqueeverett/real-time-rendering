@@ -22,8 +22,10 @@ public:
 	virtual void clean() { m_rend->destroy();}
 	virtual void toggleUpdate() { m_sys->toggleUpdate(); }
 	virtual void toggleEmit() { m_sys->toggleEmit(); }
-	
-	virtual void update(float dt) = 0;
+    bool getUpdate(){ return m_sys->getUpdate(); };
+
+
+    virtual void update(float dt) = 0;
 	virtual void cpuUpdate(float dt) { m_sys->update(dt);}
 	virtual void gpuUpdate() { m_rend->update();}
 	virtual void render() { m_rend->render();}
@@ -34,6 +36,7 @@ public:
 
 	virtual void fixedParticles(unsigned int i) { m_fixed.insert(i); };
 	virtual void movingParticles(unsigned int i) { m_fixed.erase(i); };
+    virtual void movingAllParticles() { m_fixed.clear(); }
 
 protected:
 	std::shared_ptr<Camera> m_cam;
@@ -169,7 +172,7 @@ public:
 	void clean() ;
 	void toggleUpdate() ;
 	void toggleEmit() ;
-	
+
 	void cpuUpdate(float dt) ;
 	void gpuUpdate() ;
 	void render() ;
@@ -187,6 +190,7 @@ public:
 	void init(size_t numParticles, Camera* cam) override;
 	void update(float dt) override;
     void reset() override;
+    int findClosest(glm::vec3 ray);
 
     glm::fvec4 m_gridPos;
     glm::fmat4 m_gridRot;

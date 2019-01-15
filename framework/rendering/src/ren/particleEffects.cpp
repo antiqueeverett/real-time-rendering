@@ -442,8 +442,32 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
   m_gravUp = std::make_shared<GravityUpdater>();
   m_posUp = std::make_shared<VerletPosUpdater>();
   m_stretchUp = std::make_shared<StretchUpdater>();
-  std::cout << "hi" << std::endl;
 
 }
 
-void ClothEffect::update(float dt) {return;}
+void ClothEffect::update(float dt) {
+  auto pos = m_sys->finalData()->m_pos.get();
+  for(unsigned int i = 0; i < m_sys->getCount(); ++i){
+    if(m_fixed.count(i)){
+      pos[i].w = 1.f;
+    } else {
+      pos[i].w = 0.f;
+    }
+  }
+}
+
+int ClothEffect::findClosest(glm::vec3 ray){
+  auto pos = m_sys->finalData()->m_pos.get();
+  float l = glm::length(ray);
+  float dist = FLT_MAX, temp = 0;
+  unsigned int result;
+  for(unsigned int i = 0; i < m_sys->getCount(); ++i){
+    temp = glm::length(glm::cross(ray, m_cam->getPosition() - glm::vec3(pos[i]))) / l;
+    if(temp < dist){
+      dist = temp;
+      result = i;
+    }
+  }
+
+  return result;
+}
