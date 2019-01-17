@@ -244,7 +244,7 @@ void StretchUpdater::maxStretch(float rest, glm::fvec4& pos_1, glm::fvec4& pos_2
   glm::fvec3 dir = glm::normalize(dist);
   float len = glm::length(dist);
   //satisfy max distance constraint
-  if (len > rest * m_max) {
+  if ((len > rest * m_max) || (len < rest * m_min)) {
     glm::fvec3 f = dist * (1 - (rest * m_max) / len);
 
     glm::fvec3 corr = f * (1 - pos_1.w) * 0.5f * (1 + pos_2.w);
@@ -253,4 +253,38 @@ void StretchUpdater::maxStretch(float rest, glm::fvec4& pos_1, glm::fvec4& pos_2
     corr = f * (1 - pos_2.w) * 0.5f * (1 + pos_1.w);
     pos_2 += glm::fvec4(corr, 0.f);
   }
+}
+
+void NormalUpdater::update(float dt, ParticleData *p) {
+	size_t end_id = p->m_count_alive;
+
+	auto normal = p->m_normal.get();
+	auto pos = p->m_pos.get();
+	auto ind = p->m_indices;
+
+	unsigned int a, b, c;
+	glm::vec3 x, y, z, u, v, n;
+
+	for(int i = 0; i < ind->size() / 3; ++i){
+		a = ind->at(3 * i);
+		b = ind->at(3 * i + 1);
+		c = ind->at(3 * i + 2);
+
+		x = glm::vec3(pos[a]);
+		y = glm::vec3(pos[b]);
+		z = glm::vec3(pos[c]);
+
+		u = x - z; v = y - z;
+		n = glm::normalize(glm::cross(u, v));
+
+		normal[a] += glm::vec4(n, 0.f);
+		normal[b] += glm::vec4(n, 0.f);
+		normal[c] += glm::vec4(n, 0.f);
+
+	}
+
+	for (size_t i = 0; i < end_id; ++i) {
+		normal[i] = glm::normalize(normal[i]);
+	}
+
 }

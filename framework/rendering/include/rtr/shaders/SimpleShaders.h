@@ -18,6 +18,9 @@ public:
 	GLuint getUniform(std::string uniform) const;
 	void addUniform(const char* uniform);
 
+	GLint mDrawMode = GL_FILL;
+
+
 protected:
 	std::string readFile(std::string fileName);
 

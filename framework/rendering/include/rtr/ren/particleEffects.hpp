@@ -201,6 +201,8 @@ public:
 	float m_kStruct;
 	float m_kShear;
 	float m_kBend;
+    float m_minStretch;
+    float m_maxStretch;
 
     bool m_gravity = true;
     bool m_structure = true;
@@ -221,6 +223,7 @@ private:
     std::shared_ptr<SpringUpdater> m_shearUp;
     std::shared_ptr<SpringUpdater> m_bendUp;
     std::shared_ptr<StretchUpdater> m_stretchUp;
+	std::shared_ptr<NormalUpdater> m_normUp;
 
 };
 #endif

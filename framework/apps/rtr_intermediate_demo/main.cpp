@@ -126,9 +126,9 @@ glm::vec3 rot_axis_ad_{0.0, 1.0, 0.0};
 glm::vec3 rot_axis_qe_{0.0, 0.0, 1.0};
 
 
-SimpleShaders* shader_;
+SimpleShaders* object_shader_;
 TextureShaders* texture_shader_;
-ParticleShaders* particle_shader_;
+ParticleShaders* cloth_shader_;
 FireRing* fire_;
 std::vector<FireRing*> rings_(50, new FireRing());
 
@@ -391,9 +391,9 @@ void display(void){
 
 		glEnable(GL_BLEND);
 	 glBlendFunc (GL_SRC_ALPHA, GL_ONE);
-		particle_shader_->activate();
-		particle_shader_->setCameraMatrix(camera->getViewMatrix());
-		particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
+		cloth_shader_->activate();
+		cloth_shader_->setCameraMatrix(camera->getViewMatrix());
+		cloth_shader_->setProjectionMatrix(camera->getProjectionMatrix());
 	  for(auto i : rings_){
   		i->cpuUpdate(16.f/1000.f);
   		i->gpuUpdate();
@@ -559,9 +559,9 @@ int main(int argc, char** argv)
   skyboxShaders->loadVertexFragmentShaders(skyboxVert, skyboxFrag);
   skyboxShaders->locateUniforms();
 
-  particle_shader_ = new ParticleShaders();
-  particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag"); 
-  particle_shader_->locateUniforms();
+  cloth_shader_ = new ParticleShaders();
+  cloth_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
+  cloth_shader_->locateUniforms();
     
   dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
   dragonfly->translate(drgnfly_pos);

@@ -20,6 +20,8 @@ void ParticleData::generate(size_t maxSize){
 	m_acc.reset(new glm::vec4[maxSize]);
 	m_time.reset(new glm::vec4[maxSize]);
 	m_alive.reset(new bool[maxSize]);
+	m_normal.reset(new glm::vec4[maxSize]);
+	m_uv.reset(new glm::vec4[maxSize]);
 
     m_indices = std::make_shared<std::vector<unsigned int>>();
     m_struct_con = std::make_shared<std::vector<glm::vec3>>();
@@ -45,6 +47,8 @@ void ParticleData::wake(size_t id){
 	m_vel[id] = glm::vec4(0.0f);
 	m_acc[id] = glm::vec4(0.0f);
 	m_time[id] = glm::vec4(0.0f);
+	m_normal[id] = glm::vec4(0.0f);
+	m_uv[id] = glm::vec4(0.0f);
 	m_count_alive ++;
 }
 
@@ -58,6 +62,8 @@ void ParticleData::swapData(size_t a, size_t b){
 	m_vel[a] = m_vel[b];
 	m_acc[a] = m_acc[b];
 	m_time[a] = m_time[b];
+	m_normal[a] = m_normal[b];
+	m_uv[a] = m_uv[b];
 }
 
 ////////////////////////////////////////////////////////////////////////////////

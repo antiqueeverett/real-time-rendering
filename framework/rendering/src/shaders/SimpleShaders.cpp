@@ -203,7 +203,6 @@ void SimpleShaders::addUniform(const char* uniform){
 	activate();
 	GLuint uniform_location = glGetUniformLocation(mShaderProgram, uniform);
 	deactivate();
-	//std::pair<std::string, GLuint> uniform_pair = 
 	mUniforms.insert(std::make_pair(std::string(uniform), uniform_location));
 
 }

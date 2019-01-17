@@ -320,6 +320,7 @@ void FireRing::setColor(glm::fvec3 col){
 void ClothEffect::reset() {
   m_sys.reset(new ClothSystem(m_gridW * m_gridH, m_cam));
   m_rend.reset(new ParticleRenderer());
+  m_fixed.clear();
 
   m_posGen->m_pos = m_gridPos;
   m_posGen->m_rot = m_gridRot;
@@ -335,7 +336,8 @@ void ClothEffect::reset() {
   m_structUp->m_k = m_kStruct;
   m_shearUp->m_k = m_kShear;
   m_bendUp->m_k = m_kBend;
-
+  m_stretchUp->m_min = m_minStretch;
+  m_stretchUp->m_max = m_maxStretch;
 
   m_sys->addUpdater(m_colUp);
   if(m_structure) m_sys->addUpdater(m_structUp);
@@ -344,6 +346,7 @@ void ClothEffect::reset() {
   if(m_gravity) m_sys->addUpdater(m_gravUp);
   m_sys->addUpdater(m_posUp);
   if(m_stretch) m_sys->addUpdater(m_stretchUp);
+  m_sys->addUpdater(m_normUp);
 
   auto emmit = std::make_shared<ParticleEmitter>(m_gridW * m_gridH);
   emmit->addGenerator(m_posGen);
@@ -418,12 +421,19 @@ void ClothEffect::reset() {
   }
 
   emit();
+
+  auto uv = m_sys->finalData()->m_uv.get();
+  for(int h = 0; h < m_gridH; ++h) {
+    for (int w = 0; w < m_gridW; ++w) {
+      float u = w / (float)m_gridW;
+      float v = -(h / (float)m_gridH) + 1;
+
+      uv[h * m_gridW + w] = glm::vec4(u, v, 0, 0);
+    }
+  }
+
   initRenderer();
 
-  auto pos =  m_sys->finalData()->m_pos.get();
-  for(unsigned int i : m_fixed){
-    pos[i].w = 1.f;
-  }
 
 }
 
@@ -442,6 +452,7 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
   m_gravUp = std::make_shared<GravityUpdater>();
   m_posUp = std::make_shared<VerletPosUpdater>();
   m_stretchUp = std::make_shared<StretchUpdater>();
+  m_normUp = std::make_shared<NormalUpdater>();
 
 }
 

@@ -198,6 +198,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources/shaders DESTINATION reso
         PATTERN "*.tess"
     	PATTERN "*.vs"
     	PATTERN "*.fs"
+        PATTERN "*.glsl"
         )
 
 # install textures

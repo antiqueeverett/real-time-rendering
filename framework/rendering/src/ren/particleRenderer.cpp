@@ -34,7 +34,24 @@ void ParticleRenderer::generate(ParticleSystem *sys){
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float)* 4 * count, nullptr, GL_STREAM_DRAW);
 	glEnableVertexAttribArray(2);
 
-	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
+
+    glGenBuffers(1, &m_buf_normals);
+	glBindBuffer(GL_ARRAY_BUFFER, m_buf_normals);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)* 4 * count, nullptr, GL_STREAM_DRAW);
+	glEnableVertexAttribArray(3);
+
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
+
+    glGenBuffers(1, &m_buf_uv);
+    glBindBuffer(GL_ARRAY_BUFFER, m_buf_uv);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float)* 4 * count, m_sys->finalData()->m_uv.get(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(4);
+
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), NULL);
+
+
+    //glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, (4)*sizeof(float), (void *)((0)*sizeof(float)));
     if(m_sys->finalData()->m_indices->size() != 0){
       glGenBuffers(1, &m_buf_indices);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buf_indices);
@@ -45,6 +62,7 @@ void ParticleRenderer::generate(ParticleSystem *sys){
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+
 }
 
 void ParticleRenderer::destroy() {
@@ -68,6 +86,16 @@ void ParticleRenderer::destroy() {
       m_buf_indices = 0;
     }
 
+	if(m_buf_normals != 0){
+		glDeleteBuffers(1, &m_buf_normals);
+		m_buf_normals = 0;
+	}
+
+    if(m_buf_uv != 0){
+      glDeleteBuffers(1, &m_buf_uv);
+      m_buf_uv = 0;
+    }
+
     if(m_vao != 0){
       glDeleteVertexArrays(1, &m_vao);
       m_vao = 0;
@@ -76,7 +104,7 @@ void ParticleRenderer::destroy() {
 
 void ParticleRenderer::update() {
 	assert(m_sys);
-	assert(m_buf_pos > 0 && m_buf_col > 0);
+	assert(m_buf_pos > 0 && m_buf_col > 0 && m_buf_normals > 0 && m_buf_time > 0);
 
 	const size_t count = m_sys->getAliveCount();
 	if (count > 0)
@@ -93,13 +121,16 @@ void ParticleRenderer::update() {
 		ptr = (float*)(m_sys->finalData()->m_time.get());
 		glBufferSubData(GL_ARRAY_BUFFER, 0, count*sizeof(float)* 4, ptr);
 
+		glBindBuffer(GL_ARRAY_BUFFER, m_buf_normals);
+		ptr = (float*)(m_sys->finalData()->m_normal.get());
+		glBufferSubData(GL_ARRAY_BUFFER, 0, count*sizeof(float)* 4, ptr);
+
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }
 
 void ParticleRenderer::render() {
     const size_t count = m_sys->getAliveCount();
-
 
     if(m_sys->finalData()->m_indices->data() != 0){
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buf_indices);
@@ -114,7 +145,5 @@ void ParticleRenderer::render() {
         glDrawArrays(GL_LINE_STRIP, 0, count);
         glBindVertexArray(0);
     }
-
-
 
 }

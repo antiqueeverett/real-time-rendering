@@ -10,6 +10,12 @@
 #include <rtr/imgui/imgui_impl_freeglut.h>
 #include <rtr/imgui/imgui_impl_opengl2.h>
 
+#define CAM_MAT "camera_matrix"
+#define PROJ_MAT "projection_matrix"
+#define MODEL_MAT "model_matrix"
+#define COLOR_MODE "color_mode"
+#define PICK_COL "pick_color"
+
 int32_t window_width_  = 800;
 int32_t window_height_ = 800;
 
@@ -17,27 +23,38 @@ int32_t window_height_ = 800;
 std::string obj_file_ = "../resources/objects/sphere.obj";
 
 Object* object_;
-SimpleShaders* shader_;
-ParticleShaders* particle_shader_;
+SimpleShaders* object_shader_;
+TextureShaders* cloth_shader_;
 Camera* camera;
 ClothEffect* effect_;
 
 bool render_texture = false;
 
 uint64_t elapsed_ms_{0};
+uint64_t real_elapsed_ms{0};
+uint64_t old_elapsed_ms{0};
 //GUi
 ImGuiIO* io;
 bool gui_fix_ = false;
 
 //uniforms
-int color_mode_ = 0;
+int color_mode_ = 1;
 glm::vec3 pick_color_;
+glm::vec3 clear_color_ = glm::vec3(0.5f, 0.5f, 0.5f);
 
 void createShaders(){
-  particle_shader_->loadVertexFragmentShaders("../resources/shaders/particlePoint.vert", "../resources/shaders/particlePoint.frag");
-  //particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
-  particle_shader_->locateUniforms();
-  particle_shader_->mDrawMode = GL_LINE;
+
+  cloth_shader_->loadVertexFragmentShaders("../resources/shaders/cloth.vert.glsl", "../resources/shaders/particlePoint.frag");
+  cloth_shader_->mDrawMode = GL_TRIANGLES;
+  cloth_shader_->addUniform(CAM_MAT);
+  cloth_shader_->addUniform(PROJ_MAT);
+  cloth_shader_->addUniform(COLOR_MODE);
+  cloth_shader_->addUniform(PICK_COL);
+
+  object_shader_->loadVertexFragmentShaders("../resources/shaders/tutorial.vert", "../resources/shaders/color.frag");
+  object_shader_->addUniform(MODEL_MAT);
+  object_shader_->addUniform(CAM_MAT);
+  object_shader_->addUniform(PROJ_MAT);
 }
 
 glm::vec3 rayCast(int x, int y){
@@ -54,17 +71,17 @@ glm::vec3 rayCast(int x, int y){
 
 //render callback function; called every frame
 void glut_display() {
+  glDisable(GL_BLEND);
 
   // update camera
   camera->update();
 
-  //glDisable(GL_BLEND);
-  shader_->activate();
+  object_shader_->activate();
 
   //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-  glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, object_->get_model_matrix());
-  glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
-  glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+  glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, object_->get_model_matrix());
+  glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+  glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
 
   //bind the VBO of the model such that the next draw call will render with these vertices
   //object_->activate();
@@ -72,20 +89,24 @@ void glut_display() {
   //object_->draw();
   //object_->deactivate();
 
-  //glEnable(GL_BLEND);
+  cloth_shader_->activate();
+  glUniformMatrix4fv(cloth_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+  glUniformMatrix4fv(cloth_shader_->getUniform(PROJ_MAT), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+  glUniform1i(cloth_shader_->getUniform(COLOR_MODE), color_mode_);
+  glUniform3fv(cloth_shader_->getUniform(PICK_COL), 1, glm::value_ptr(pick_color_));
 
-  particle_shader_->setCameraMatrix(camera->getViewMatrix());
-  particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
-  particle_shader_->activate();
-
+  real_elapsed_ms = glutGet(GLUT_ELAPSED_TIME);
   effect_->update(0.f);
-  if(!gui_fix_)effect_ ->cpuUpdate(16.f/1000.f);
+  if(!gui_fix_)effect_ ->cpuUpdate((real_elapsed_ms - old_elapsed_ms)/1000.f);
   effect_ ->gpuUpdate();
   effect_ ->render();
+  old_elapsed_ms = real_elapsed_ms;
 
   //unbind, unuse
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glUseProgram(0);
+  glEnable(GL_BLEND);
+
 }
 
 void gui_display()
@@ -103,7 +124,10 @@ void gui_display()
   ImGui::InputFloat("Structural k", &effect_->m_kStruct);
   ImGui::InputFloat("Bend k", &effect_->m_kBend);
   ImGui::InputFloat("Shear k", &effect_->m_kShear);
+  ImGui::InputFloat("Max Stretch", &effect_->m_maxStretch);
+  ImGui::SliderFloat("Min Stretch", &effect_->m_minStretch, 0.f, 1.f);
   ImGui::SliderFloat("Damping", &effect_->m_damp, 0.f, 1.f);
+
 
   ImGui::Text("Cloth dimension");
   ImGui::InputInt("Width", &effect_->m_gridW);
@@ -122,12 +146,15 @@ void gui_display()
   ImGui::Checkbox("Fix Points", &gui_fix_);
   if (ImGui::Button("Release all Points")) effect_->movingAllParticles();
 
-  ImGui::ColorEdit3("clear color", (float*)&pick_color_); // Edit 3 floats representing a color
+  ImGui::ColorEdit3("pick colour", (float*)&pick_color_); // Edit 3 floats representing a color
   ImGui::RadioButton("Pick Colour", &color_mode_, 1);
   ImGui::RadioButton("Texture", &color_mode_, 2);
   ImGui::RadioButton("Spring Stretch", &color_mode_, 4);
   ImGui::RadioButton("Normals", &color_mode_, 8);
   ImGui::RadioButton("Fixed", &color_mode_, 16);
+
+
+  ImGui::ColorEdit3("clear colour", (float*)&clear_color_);
 
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
 
@@ -143,7 +170,7 @@ void glut_display_func()
 
   //set the viewport, background color, and reset default framebuffer
   glViewport(0, 0, (GLsizei)window_width_, (GLsizei)window_height_);
-  glClearColor(1.0f, 0.0f, 0.1f, 1.0f);
+  glClearColor(clear_color_.x, clear_color_.y, clear_color_.y, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   gui_display();
@@ -236,8 +263,8 @@ int32_t main(int32_t argc, char* argv[]) {
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_MULTISAMPLE);
   glutInitWindowSize(window_width_, window_height_);
   glutCreateWindow("Dear ImGui FreeGLUT+OpenGL2 Example");
-  //glEnable(GL_DEPTH_TEST);
-  //glDisable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
   glewExperimental = GL_TRUE;
   glewInit();
 
@@ -276,24 +303,17 @@ int32_t main(int32_t argc, char* argv[]) {
   camera = new Camera((window_width_/(float)window_height_), glm::fvec3{0.0f, 0.f, 0.f});
   camera->setPosition(glm::fvec3{0.f, 0.f, 20.f});
   camera->setViewDir(glm::fvec3{0.f, 0.f, -1.f});
-  shader_ = new SimpleShaders();
 
   ///////////////////////////////////////////////////////////////
 
-  shader_->loadVertexFragmentShaders("../resources/shaders/tutorial.vert", "../resources/shaders/color.frag");
-  shader_->addUniform("model_matrix");
-  shader_->addUniform("camera_matrix");
-  shader_->addUniform("projection_matrix");
-  shader_->addUniform("color_mode");
-
-  particle_shader_ = new ParticleShaders();
-
+  object_shader_ = new SimpleShaders();
+  cloth_shader_ = new TextureShaders(0, "", 1);
   createShaders();
+  ///////////////////////////////////////////////////////////////
 
   object_ = new Object(obj_file_, (model::POSITION | model::TEXCOORD));
 
   effect_ = new ClothEffect();
-
   effect_->m_gridPos = glm::fvec4{-5.f, 5.f, 0.f, 1.f};
   //effect_->m_gridRot = glm::rotate(glm::fmat4{}, 2.0f, glm::vec3{1, 0, 0});
   effect_->m_gridW = 10;
@@ -303,12 +323,14 @@ int32_t main(int32_t argc, char* argv[]) {
   effect_->m_kStruct = 1.f;
   effect_->m_kShear = 1.f;
   effect_->m_kBend = 10.f;
+  effect_->m_minStretch = 0.f;
+  effect_->m_maxStretch = 1.2f;
   effect_->init(10, camera);
-  effect_->fixedParticles(45);
   effect_->reset();
+  effect_->fixedParticles(45);
 
   ///////////////////////////////////////////////////////////////
-
+  old_elapsed_ms = glutGet(GLUT_ELAPSED_TIME);
   //start the main loop (which mainly calls the glutDisplayFunc)
   glutMainLoop();
 

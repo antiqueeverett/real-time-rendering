@@ -21,6 +21,8 @@ public:
 	std::unique_ptr<glm::vec4[]> m_vel;
 	std::unique_ptr<glm::vec4[]> m_acc;
 	std::unique_ptr<glm::vec4[]> m_time;
+	std::unique_ptr<glm::vec4[]> m_normal;
+	std::unique_ptr<glm::vec4[]> m_uv;
 	std::unique_ptr<bool[]>  m_alive;
 
     // cloth stuff

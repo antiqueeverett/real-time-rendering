@@ -139,14 +139,16 @@ public:
 class StretchUpdater : public ParticleUpdater {
 public:
     float m_max;
-    int m_iter;
-
-    StretchUpdater() : m_max(1.2f), m_iter(3){}
-    StretchUpdater(float max, int iter) : m_max(max), m_iter(iter){}
+    float m_min;
+    int m_iter = 3;
 
     virtual void update(float dt, ParticleData *p) override;
     void maxStretch(float rest, glm::fvec4& pos_1, glm::fvec4& pos_2);
 
 };
 
+class NormalUpdater : public ParticleUpdater {
+public:
+	virtual void update(float dt, ParticleData *p) override;
+};
 #endif //UPDATER_HPP

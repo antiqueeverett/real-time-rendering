@@ -24,8 +24,8 @@ std::string obj_file_ = "../resources/objects/sphere.obj";
 
 Object* object_;
 
-SimpleShaders* shader_;
-ParticleShaders* particle_shader_;
+SimpleShaders* object_shader_;
+ParticleShaders* cloth_shader_;
 
 Camera* camera;
 
@@ -36,9 +36,9 @@ bool render_texture = false;
 uint64_t elapsed_ms_{0};
 
 void createShaders(){
-  //particle_shader_->loadVertexFragmentShaders("../resources/shaders/particlePoint.vert", "../resources/shaders/particlePoint.frag");
-  particle_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
-  particle_shader_->locateUniforms();
+  //cloth_shader_->loadVertexFragmentShaders("../resources/shaders/particlePoint.vert", "../resources/shaders/particlePoint.frag");
+  cloth_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
+  cloth_shader_->locateUniforms();
 }
 
 
@@ -54,12 +54,12 @@ void glut_display() {
   camera->update();
 
   glDisable(GL_BLEND);
-  shader_->activate();
+  object_shader_->activate();
 
   //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-  glUniformMatrix4fv(shader_->getUniform("model_matrix"), 1, GL_FALSE, object_->get_model_matrix());
-  glUniformMatrix4fv(shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
-  glUniformMatrix4fv(shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+  glUniformMatrix4fv(object_shader_->getUniform("model_matrix"), 1, GL_FALSE, object_->get_model_matrix());
+  glUniformMatrix4fv(object_shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+  glUniformMatrix4fv(object_shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
   
 
   //bind the VBO of the model such that the next draw call will render with these vertices
@@ -72,9 +72,9 @@ void glut_display() {
 
   glEnable(GL_BLEND);
 
-  particle_shader_->setCameraMatrix(camera->getViewMatrix());
-  particle_shader_->setProjectionMatrix(camera->getProjectionMatrix());
-  particle_shader_->activate();
+  cloth_shader_->setCameraMatrix(camera->getViewMatrix());
+  cloth_shader_->setProjectionMatrix(camera->getProjectionMatrix());
+  cloth_shader_->activate();
 
   effect_ ->cpuUpdate(16.f/1000.f);
   effect_ ->gpuUpdate();
@@ -165,15 +165,15 @@ int32_t main(int32_t argc, char* argv[]) {
 
   camera = new Camera((window_width_/(float)window_height_), glm::fvec3{0.0f, 0.f, 0.f});
 
-  shader_ = new SimpleShaders();
+  object_shader_ = new SimpleShaders();
 
 
-  shader_->loadVertexFragmentShaders("../resources/shaders/tutorial.vert", "../resources/shaders/color.frag"); 
-  shader_->addUniform("model_matrix");
-  shader_->addUniform("camera_matrix");
-  shader_->addUniform("projection_matrix");
+  object_shader_->loadVertexFragmentShaders("../resources/shaders/tutorial.vert", "../resources/shaders/color.frag");
+  object_shader_->addUniform("model_matrix");
+  object_shader_->addUniform("camera_matrix");
+  object_shader_->addUniform("projection_matrix");
 
-  particle_shader_ = new ParticleShaders();
+  cloth_shader_ = new ParticleShaders();
 
   createShaders();
 

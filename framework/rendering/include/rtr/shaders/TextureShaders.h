@@ -23,14 +23,21 @@ public:
 
 private:
 
+	//for single textures
 	void generateTexture(int resolution);
+	//for multiple textures
+	void addTexture(int imageX, int imageY, const char* sampler, const char* location);
+
 
 	GLint mModelLocation;
 	GLint mCameraLocation;
 	GLint mProjectionLocation;
 	GLint mTextureSamplerLocation;
 	GLint mDimLocation;
-	GLuint mTextureID;
+	GLuint mTextureID = -1;
+
+	std::map<std::string, GLuint> mTextures;
+
 
 	const char* path;
 	const int atlas_dim;

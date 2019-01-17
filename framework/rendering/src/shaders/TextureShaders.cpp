@@ -1,39 +1,49 @@
-﻿	#include <rtr/shaders/TextureShaders.h>
+﻿#include <rtr/shaders/TextureShaders.h>
 
-	#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 
-	using namespace glm;
+using namespace glm;
 
-	TextureShaders::TextureShaders(int textureResolution, const char* texture_path, int dim):
-		mModelLocation(-1),
-		mCameraLocation(-1),
-		mProjectionLocation(-1),
-		mTextureSamplerLocation(-1),
-		mDimLocation(-1),
-		mTextureID(0),
-		path(texture_path),
-		atlas_dim(dim)
-	{
-		generateTexture(textureResolution);
-	}
-
-	void TextureShaders::activate()
+TextureShaders::TextureShaders(int textureResolution, const char* texture_path, int dim):
+				mModelLocation(-1),
+				mCameraLocation(-1),
+				mProjectionLocation(-1),
+				mTextureSamplerLocation(-1),
+				mDimLocation(-1),
+				mTextureID(0),
+				path(texture_path),
+				atlas_dim(dim)
 {
-	// activate texture unit 0 and bind the texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mTextureID);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	generateTexture(textureResolution);
+}
+
+void TextureShaders::activate()
+{
+	glUseProgram(mShaderProgram);
+	if(mTextures.size() != 0) {
+		int i = 1;
+		for(auto const& tex : mTextures){
+			glActiveTexture(GL_TEXTURE0 + (i++));
+			glBindTexture(GL_TEXTURE_2D, tex.second);
+		}
+	} else if (mTextureID != -1) {
+		// activate texture unit 0 and bind the texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mTextureID);
+	}
+	glPolygonMode(GL_FRONT_AND_BACK, mDrawMode);
 	SimpleShaders::activate(); // calls activate of inheritated class
+
 }
 
 void TextureShaders::locateUniforms()
 {
-	
+
 	mCameraLocation = glGetUniformLocation(mShaderProgram, "camera_matrix");
 	if (mCameraLocation == -1)
 		printf("Camera location not found\n");
-	
+
 	mProjectionLocation = glGetUniformLocation(mShaderProgram, "projection_matrix");
 	if (mProjectionLocation == -1)
 		printf("Projection location not found\n");
@@ -55,7 +65,7 @@ void TextureShaders::locateUniforms()
 	if (mDimLocation == -1)
 		printf("Dimension location not found\n");
 
-	
+
 }
 
 
@@ -65,7 +75,7 @@ void TextureShaders::setModelMatrix(const glm::mat4& modelMatrix)
 	if (mModelLocation < 0)
 		printf("[TextureShaders] uniform location for 'model' not known\n");
 
-	glUseProgram(mShaderProgram);												
+	glUseProgram(mShaderProgram);
 	glUniformMatrix4fv(mModelLocation, 1, GL_FALSE, &modelMatrix[0][0]);
 }
 
@@ -124,8 +134,32 @@ void TextureShaders::generateTexture(int imageResolution)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageResolution, imageResolution, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
-	glEnable (GL_BLEND); 
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE);
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE);
 	glGenerateMipmap(GL_TEXTURE_2D);
-		std::cout << "hi" << std::endl;
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
+// for adding multiple textures
+void TextureShaders::addTexture(int imageX, int imageY, const char* sampler, const char* location){
+	activate();
+	GLuint uniform_location = glGetUniformLocation(mShaderProgram, sampler);
+	deactivate();
+
+	mTextures.insert(std::make_pair(std::string(sampler), uniform_location));
+
+	unsigned char* texture_data = SOIL_load_image(location,&imageX, &imageY, 0, SOIL_LOAD_RGBA);
+
+	glGenTextures(1, &uniform_location);
+	glBindTexture(GL_TEXTURE_2D, uniform_location);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageX, imageY, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

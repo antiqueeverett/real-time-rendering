@@ -26,6 +26,8 @@ private:
 	unsigned int m_buf_col{0};
 	unsigned int m_buf_time{0};
 	unsigned int m_buf_indices{0};
+	unsigned int m_buf_normals{0};
+    unsigned int m_buf_uv{0};
 	unsigned int m_vao{0};
 
 };
