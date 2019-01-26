@@ -16,8 +16,8 @@
 #define COLOR_MODE "color_mode"
 #define PICK_COL "pick_color"
 
-int32_t window_width_  = 800;
-int32_t window_height_ = 800;
+int32_t window_width_  = 1080;
+int32_t window_height_ = 720;
 
 //3d mesh input file
 std::string obj_file_ = "../resources/objects/sphere.obj";
@@ -33,9 +33,13 @@ bool render_texture = false;
 uint64_t elapsed_ms_{0};
 uint64_t real_elapsed_ms{0};
 uint64_t old_elapsed_ms{0};
+
 //GUi
 ImGuiIO* io;
 bool gui_fix_ = false;
+bool setup_window_ = false;
+bool shader_window_ = false;
+bool interact_window_ = false;
 
 //uniforms
 int color_mode_ = 1;
@@ -76,18 +80,24 @@ void glut_display() {
   // update camera
   camera->update();
 
-  object_shader_->activate();
+  if(effect_->m_sphere) {
+    object_->translation_matrix_ = glm::translate(glm::mat4(), effect_->m_spherePos);
+    object_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_sphereRad * 0.95));
 
-  //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-  glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, object_->get_model_matrix());
-  glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
-  glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+    object_shader_->activate();
 
-  //bind the VBO of the model such that the next draw call will render with these vertices
-  //object_->activate();
-  //draw triangles from the currently bound buffer
-  //object_->draw();
-  //object_->deactivate();
+    //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
+    glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, object_->get_model_matrix());
+    glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+    glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE,
+                       glm::value_ptr(camera->getProjectionMatrix()));
+
+    //bind the VBO of the model such that the next draw call will render with these vertices
+    object_->activate();
+    //draw triangles from the currently bound buffer
+    object_->draw();
+    object_->deactivate();
+  }
 
   cloth_shader_->activate();
   glUniformMatrix4fv(cloth_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
@@ -111,55 +121,123 @@ void glut_display() {
 
 void gui_display()
 {
+  if(ImGui::Begin("Sloth Simulation")) {
 
-  ImGui::Begin("Sloth Simulation");
+    if(ImGui::Button("Show Setup Options")) setup_window_ = true;
+    if(ImGui::Button("Show Shader Options")) shader_window_ = true;
+    if(ImGui::Button("Show Interactive Controls")) interact_window_ = true;
 
-  ImGui::Text("Customize new Cloth");
-  ImGui::Checkbox("Gravity", &effect_->m_gravity);
-  ImGui::Checkbox("Structural Springs", &effect_->m_structure);
-  ImGui::Checkbox("Shear Springs", &effect_->m_shear);
-  ImGui::Checkbox("Bend Springs", &effect_->m_bend);
-  ImGui::Checkbox("Restrict Stretch", &effect_->m_stretch);
+    ImGui::Separator();
+    if (ImGui::Button("Reset"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+      effect_->reset();
 
-  ImGui::InputFloat("Structural k", &effect_->m_kStruct);
-  ImGui::InputFloat("Bend k", &effect_->m_kBend);
-  ImGui::InputFloat("Shear k", &effect_->m_kShear);
-  ImGui::InputFloat("Max Stretch", &effect_->m_maxStretch);
-  ImGui::SliderFloat("Min Stretch", &effect_->m_minStretch, 0.f, 1.f);
-  ImGui::SliderFloat("Damping", &effect_->m_damp, 0.f, 1.f);
+    if (effect_->getUpdate()) {
+      if (ImGui::Button("Pause")) effect_->toggleUpdate();
+    } else {
+      if (ImGui::Button("Play")) effect_->toggleUpdate();
+    }
 
+    ImGui::Separator();
+    ImGui::Checkbox("Fix Points", &gui_fix_);
+    if (ImGui::Button("Release all Points")) effect_->movingAllParticles();
 
-  ImGui::Text("Cloth dimension");
-  ImGui::InputInt("Width", &effect_->m_gridW);
-  ImGui::InputInt("Height", &effect_->m_gridH);
-  ImGui::InputFloat("Step Size", &effect_->m_gridD);
+    ImGui::Separator();
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
 
-  if (ImGui::Button("Reset"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-    effect_->reset();
+  }
+  ImGui::End();
 
-  if(effect_->getUpdate()){
-    if(ImGui::Button("Pause")) effect_->toggleUpdate();
-  } else {
-    if(ImGui::Button("Play")) effect_->toggleUpdate();
+  if(setup_window_){
+
+    if(ImGui::Begin("Setup a new Cloth", &setup_window_)){
+
+      ImGui::Text("Customize new Cloth");
+      ImGui::Checkbox("Wind", &effect_->m_wind);
+      ImGui::Checkbox("Gravity", &effect_->m_gravity);
+      ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
+      ImGui::InputFloat("Mass", &effect_->m_mass);
+
+      ImGui::Separator();
+      ImGui::Checkbox("Structural Springs", &effect_->m_structure);
+      ImGui::Checkbox("Shear Springs", &effect_->m_shear);
+      ImGui::Checkbox("Bend Springs", &effect_->m_bend);
+
+      ImGui::Separator();
+      ImGui::Checkbox("Self-Collision", &effect_->m_collision);
+      ImGui::Checkbox("Sphere-Collision", &effect_->m_sphere);
+      {
+        ImGui::Text("Sphere Position");
+        ImGui::PushItemWidth(ImGui::GetFontSize() * 7);
+        ImGui::SliderFloat("##spx", &effect_->m_spherePos.x, -10.f, 10.f); ImGui::SameLine();
+        ImGui::SliderFloat("##spy", &effect_->m_spherePos.y, -10.f, 10.f); ImGui::SameLine();
+        ImGui::SliderFloat("##spz", &effect_->m_spherePos.z, -10.f, 10.f);
+        ImGui::PopItemWidth();
+      }
+      ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
+      ImGui::InputFloat("Sphere Radius", &effect_->m_sphereRad);
+
+      ImGui::Separator();
+      ImGui::Checkbox("Restrict Stretch", &effect_->m_stretch);
+      ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
+      ImGui::InputInt("Iterations of Constraint Tests", &effect_->m_stretchIter);
+
+      ImGui::Separator();
+      ImGui::Text("Cloth dimension");
+      ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
+      ImGui::InputInt("Width", &effect_->m_gridW);
+      ImGui::InputInt("Height", &effect_->m_gridH);
+      ImGui::InputFloat("Step Size", &effect_->m_gridD);
+    }
+
+    ImGui::End();
   }
 
-  ImGui::Checkbox("Fix Points", &gui_fix_);
-  if (ImGui::Button("Release all Points")) effect_->movingAllParticles();
+  if(shader_window_){
+    if(ImGui::Begin("Shader Options", &shader_window_)){
+      ImGui::ColorEdit3("pick colour", (float *) &pick_color_); // Edit 3 floats representing a color
+      ImGui::RadioButton("Pick Colour", &color_mode_, 1);
+      ImGui::RadioButton("Texture", &color_mode_, 2);
+      ImGui::RadioButton("Spring Stretch", &color_mode_, 4);
+      ImGui::RadioButton("Normals", &color_mode_, 8);
+      ImGui::RadioButton("Fixed", &color_mode_, 16);
 
-  ImGui::ColorEdit3("pick colour", (float*)&pick_color_); // Edit 3 floats representing a color
-  ImGui::RadioButton("Pick Colour", &color_mode_, 1);
-  ImGui::RadioButton("Texture", &color_mode_, 2);
-  ImGui::RadioButton("Spring Stretch", &color_mode_, 4);
-  ImGui::RadioButton("Normals", &color_mode_, 8);
-  ImGui::RadioButton("Fixed", &color_mode_, 16);
+      ImGui::ColorEdit3("clear colour", (float *) &clear_color_);
+    }
 
+    ImGui::End();
+  }
 
-  ImGui::ColorEdit3("clear colour", (float*)&clear_color_);
+  if(interact_window_){
+    if(ImGui::Begin("Interactive Controls")){
+      ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
+      ImGui::SliderFloat("Damping", &effect_->m_damp, 0.f, 1.f);
 
-  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
+      ImGui::InputFloat("Structural k", &effect_->m_kStruct);
+      ImGui::InputFloat("Shear k", &effect_->m_kShear);
+      ImGui::InputFloat("Bend k", &effect_->m_kBend);
 
+      ImGui::Separator();
+      ImGui::SliderFloat("Max Stretch", &effect_->m_maxStretch, 1.f, 2.f);
+      ImGui::SliderFloat("Min Stretch", &effect_->m_minStretch, 0.f, 1.f);
 
-  ImGui::End();
+      ImGui::Separator();
+      ImGui::SliderFloat("Collision Distance", &effect_->m_collisionDist, 0.f, 2.f);
+      ImGui::Separator();
+      ImGui::SliderFloat("Sphere Friction", &effect_->m_sphereFric, 0.0f, 1.0f);
+
+      ImGui::Separator();
+      ImGui::Text("Wind Direction");
+      ImGui::PushItemWidth(ImGui::GetFontSize() * 7);
+      ImGui::SliderFloat("##wx", &effect_->m_windVec.x, -2.f, 2.f, "%.3f", 3.f); ImGui::SameLine();
+      ImGui::SliderFloat("##wy", &effect_->m_windVec.y, -2.f, 2.f, "%.3f", 3.f); ImGui::SameLine();
+      ImGui::SliderFloat("##wz", &effect_->m_windVec.z, -2.f, 2.f, "%.3f", 3.f);
+      ImGui::PopItemWidth();
+
+    }
+
+    ImGui::End();
+  }
+
 }
 
 void glut_display_func()
@@ -301,8 +379,8 @@ int32_t main(int32_t argc, char* argv[]) {
   ///////////////////////////////////////////////////////////////
 
   camera = new Camera((window_width_/(float)window_height_), glm::fvec3{0.0f, 0.f, 0.f});
-  camera->setPosition(glm::fvec3{0.f, 0.f, 20.f});
-  camera->setViewDir(glm::fvec3{0.f, 0.f, -1.f});
+  camera->setPosition(glm::fvec3{0.f, 3.f, 20.f});
+  camera->setViewDir(glm::fvec3{0.f, 0.f, -20.f});
 
   ///////////////////////////////////////////////////////////////
 
@@ -316,15 +394,20 @@ int32_t main(int32_t argc, char* argv[]) {
   effect_ = new ClothEffect();
   effect_->m_gridPos = glm::fvec4{-5.f, 5.f, 0.f, 1.f};
   //effect_->m_gridRot = glm::rotate(glm::fmat4{}, 2.0f, glm::vec3{1, 0, 0});
-  effect_->m_gridW = 10;
-  effect_->m_gridH = 10;
-  effect_->m_gridD = 1;
+  effect_->m_gridW = 20;
+  effect_->m_gridH = 20;
+  effect_->m_gridD = 0.5;
   effect_->m_damp = 0.01f;
   effect_->m_kStruct = 1.f;
   effect_->m_kShear = 1.f;
   effect_->m_kBend = 10.f;
   effect_->m_minStretch = 0.f;
   effect_->m_maxStretch = 1.2f;
+  effect_->m_sphereRad = 5.f;
+  effect_->m_spherePos = glm::vec3(0, -6, 0);
+  effect_->m_collisionDist = 1.8f;
+  effect_->m_stretchIter = 3;
+  effect_->m_mass = 100;
   effect_->init(10, camera);
   effect_->reset();
   effect_->fixedParticles(45);

@@ -5,8 +5,11 @@
  ******************************************************************************/
 #ifndef UPDATER_HPP
 #define UPDATER_HPP
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include <rtr/ren/particleData.hpp>
+#include <glm/gtx/intersect.hpp>
+
 
 class ParticleUpdater{
 public:
@@ -25,6 +28,13 @@ public:
 	GravityUpdater(float grav) : m_grav{0.0, -grav, 0.0, 0.0} {}
 
 	virtual void update(float dt, ParticleData *p) override;
+};
+
+class WindForceUpdater : public ParticleUpdater {
+public:
+    glm::vec3 m_wind;
+    virtual void update(float dt, ParticleData *p) override;
+
 };
 
 class NoiseVelocityUpdater : public ParticleUpdater {
@@ -151,4 +161,32 @@ class NormalUpdater : public ParticleUpdater {
 public:
 	virtual void update(float dt, ParticleData *p) override;
 };
+
+class SphereCollisionUpdater : public ParticleUpdater {
+public:
+	float m_r, m_f;
+	glm::vec3 m_pos;
+
+	virtual void update(float dt, ParticleData *p) override;
+};
+
+class ClothCollisionUpdater : public ParticleUpdater {
+public:
+    float m_dist;
+    int m_W, m_H, m_it = 1;
+    std::vector<std::vector<bool>> m_collide;
+
+    virtual void update(float dt, ParticleData *p) override;
+    void init(ParticleData *p);
+
+};
+/*
+class SphereFrictionUpdater : public ParticleUpdater {
+public:
+	float r, m_friction = 0.1f;
+	glm::vec3 m_pos;
+
+	virtual void update(float dt, ParticleData *p) override;
+};
+ */
 #endif //UPDATER_HPP

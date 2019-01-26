@@ -84,11 +84,9 @@ void GridPosGen::generate(float dt, ParticleData *p, size_t start_id, size_t end
 
 		new_pos = m_rot * new_pos;
 
-		pos[i].x = new_pos.x + m_pos.x;
-		pos[i].y = new_pos.y + m_pos.y;
-		pos[i].z = new_pos.z + m_pos.z;
-
-
+		pos[i].x = new_pos.x - (m_w / 2) * m_d;
+		pos[i].y = new_pos.y;
+		pos[i].z = new_pos.z - (m_h / 2) * m_d;
 	}
 }
 
@@ -230,3 +228,16 @@ void SpringGen::generate(float dt, ParticleData *p, size_t start_id, size_t end_
 	}
 }
 
+void MeshMassGen::generate(float dt, ParticleData *p, size_t start_id, size_t end_id){
+	auto mass = p->m_mass.get();
+	auto tris = p->m_indices.get();
+	float tri_mass = m_total_mass / tris->size();
+
+	for (size_t i = start_id; i <= end_id; ++i) {
+		mass[i] = 0;
+	}
+
+	for(int i : *tris){
+		mass[i] += tri_mass;
+	}
+}

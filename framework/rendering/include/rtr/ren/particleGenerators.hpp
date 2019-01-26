@@ -228,4 +228,11 @@ class SpringGen : public ParticleGenerator {
 
 };
 
+class MeshMassGen : public ParticleGenerator {
+public:
+	float m_total_mass;
+	virtual void generate(float dt, ParticleData *p, size_t start_id, size_t end_id) override;
+
+};
+
 #endif //GEN_HPP

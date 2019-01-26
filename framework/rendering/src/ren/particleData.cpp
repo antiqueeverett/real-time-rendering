@@ -18,7 +18,8 @@ void ParticleData::generate(size_t maxSize){
 	m_end_col.reset(new glm::vec4[maxSize]);
 	m_vel.reset(new glm::vec4[maxSize]);
 	m_acc.reset(new glm::vec4[maxSize]);
-	m_time.reset(new glm::vec4[maxSize]);
+    m_time.reset(new glm::vec4[maxSize]);
+    m_mass.reset(new float[maxSize]);
 	m_alive.reset(new bool[maxSize]);
 	m_normal.reset(new glm::vec4[maxSize]);
 	m_uv.reset(new glm::vec4[maxSize]);
@@ -46,7 +47,8 @@ void ParticleData::wake(size_t id){
 	m_end_col[id] = glm::vec4(0.0f);
 	m_vel[id] = glm::vec4(0.0f);
 	m_acc[id] = glm::vec4(0.0f);
-	m_time[id] = glm::vec4(0.0f);
+    m_time[id] = glm::vec4(0.0f);
+    m_mass[id] = 1.f;
 	m_normal[id] = glm::vec4(0.0f);
 	m_uv[id] = glm::vec4(0.0f);
 	m_count_alive ++;
@@ -61,7 +63,8 @@ void ParticleData::swapData(size_t a, size_t b){
 	m_end_col[a] = m_end_col[b];
 	m_vel[a] = m_vel[b];
 	m_acc[a] = m_acc[b];
-	m_time[a] = m_time[b];
+    m_time[a] = m_time[b];
+    m_mass[a] = m_mass[b];
 	m_normal[a] = m_normal[b];
 	m_uv[a] = m_uv[b];
 }

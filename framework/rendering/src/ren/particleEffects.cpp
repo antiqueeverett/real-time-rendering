@@ -318,15 +318,16 @@ void FireRing::setColor(glm::fvec3 col){
 }
 
 void ClothEffect::reset() {
+  if(m_sys && m_gridW * m_gridH != m_sys->getCount()) m_fixed.clear();
   m_sys.reset(new ClothSystem(m_gridW * m_gridH, m_cam));
   m_rend.reset(new ParticleRenderer());
-  m_fixed.clear();
 
   m_posGen->m_pos = m_gridPos;
   m_posGen->m_rot = m_gridRot;
   m_posGen->m_w = m_gridW;
   m_posGen->m_h = m_gridH;
   m_posGen->m_d = m_gridD;
+  m_massGen->m_total_mass = m_mass;
 
   m_structUp.reset(new SpringUpdater(m_sys->finalData()->m_struct_con));
   m_shearUp.reset(new SpringUpdater(m_sys->finalData()->m_shear_con));
@@ -338,14 +339,23 @@ void ClothEffect::reset() {
   m_bendUp->m_k = m_kBend;
   m_stretchUp->m_min = m_minStretch;
   m_stretchUp->m_max = m_maxStretch;
+  m_stretchUp->m_iter = m_stretchIter;
+  m_sphereUp->m_r = m_sphereRad;
+  m_sphereUp->m_pos = m_spherePos;
+  m_sphereUp->m_f = m_sphereFric;
+  m_collisionUp->m_dist = m_gridD * m_collisionDist;
+  m_windUp->m_wind = m_windVec;
 
   m_sys->addUpdater(m_colUp);
   if(m_structure) m_sys->addUpdater(m_structUp);
   if(m_shear) m_sys->addUpdater(m_shearUp);
   if(m_bend) m_sys->addUpdater(m_bendUp);
   if(m_gravity) m_sys->addUpdater(m_gravUp);
+  if(m_wind) m_sys->addUpdater(m_windUp);
   m_sys->addUpdater(m_posUp);
   if(m_stretch) m_sys->addUpdater(m_stretchUp);
+  if(m_collision) m_sys->addUpdater(m_collisionUp);
+  if(m_sphere) m_sys->addUpdater(m_sphereUp);
   m_sys->addUpdater(m_normUp);
 
   auto emmit = std::make_shared<ParticleEmitter>(m_gridW * m_gridH);
@@ -353,6 +363,7 @@ void ClothEffect::reset() {
   emmit->addGenerator(m_colGen);
   emmit->addGenerator(m_prevGen);
   emmit->addGenerator(m_springGen);
+  emmit->addGenerator(m_massGen);
   m_sys->addEmitter(emmit);
   m_sys->toggleSort();
 
@@ -432,8 +443,9 @@ void ClothEffect::reset() {
     }
   }
 
+  m_collisionUp->init(m_sys->finalData());
+  m_normUp->update(0.f, m_sys->finalData());
   initRenderer();
-
 
 }
 
@@ -447,12 +459,16 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
   m_posGen = std::make_shared<GridPosGen>();
   m_prevGen = std::make_shared<PrevPosGen>();
   m_springGen = std::make_shared<SpringGen>();
+  m_massGen = std::make_shared<MeshMassGen>();
 
   m_colUp = std::make_shared<BasicColorUpdater>();
   m_gravUp = std::make_shared<GravityUpdater>();
   m_posUp = std::make_shared<VerletPosUpdater>();
   m_stretchUp = std::make_shared<StretchUpdater>();
   m_normUp = std::make_shared<NormalUpdater>();
+  m_sphereUp = std::make_shared<SphereCollisionUpdater>();
+  m_collisionUp = std::make_shared<ClothCollisionUpdater>();
+  m_windUp = std::make_shared<WindForceUpdater>();
 
 }
 
@@ -465,6 +481,17 @@ void ClothEffect::update(float dt) {
       pos[i].w = 0.f;
     }
   }
+
+  m_posUp->m_damp = m_damp;
+  m_structUp->m_k = m_kStruct;
+  m_shearUp->m_k = m_kShear;
+  m_bendUp->m_k = m_kBend;
+  m_stretchUp->m_min = m_minStretch;
+  m_stretchUp->m_max = m_maxStretch;
+  m_sphereUp->m_f = m_sphereFric;
+  m_collisionUp->m_dist = m_gridD * m_collisionDist;
+  m_windUp->m_wind = m_windVec;
+
 }
 
 int ClothEffect::findClosest(glm::vec3 ray){
