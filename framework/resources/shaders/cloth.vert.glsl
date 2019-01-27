@@ -4,7 +4,6 @@
 #define TEXTURE 2
 #define SPRING 4
 #define NORMAL 8
-#define FIXED 16
 
 layout (location = 0) in vec4 particle_position;
 layout (location = 1) in vec4 particle_color;
@@ -28,12 +27,6 @@ void main() {
     pass_color = vec4(particle_color.xyz, 1.0);
   } else if (bool(color_mode & NORMAL)) {
     pass_color = vec4(particle_normal.xyz,1.0);
-  } else if (bool(color_mode & FIXED)) {
-        if(particle_position.w == 1){
-            pass_color = vec4(0.0, 0.0, 0.0, 1.0);
-        } else {
-            pass_color = vec4(1.0, 1.0, 1.0, 1.0);
-        }
   } else {
     // PICK_COLOR is default
     pass_color = vec4(pick_color.xyz, 1.0);

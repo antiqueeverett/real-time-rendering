@@ -15,6 +15,19 @@
 #define MODEL_MAT "model_matrix"
 #define COLOR_MODE "color_mode"
 #define PICK_COL "pick_color"
+#define IN_COL "in_color"
+
+#define GUI_STD 0
+#define GUI_FIX 1
+#define GUI_DRAG 2
+#define GUI_PAUSE 3
+
+#define PICK 1
+#define TEXTURE 2
+#define SPRING 4
+#define NORMALS 8
+#define FIXED 16
+
 
 int32_t window_width_  = 1080;
 int32_t window_height_ = 720;
@@ -36,10 +49,11 @@ uint64_t old_elapsed_ms{0};
 
 //GUi
 ImGuiIO* io;
-bool gui_fix_ = false;
+int gui_mode_ = GUI_STD;
 bool setup_window_ = false;
 bool shader_window_ = false;
 bool interact_window_ = false;
+bool show_fixed_ = false;
 
 //uniforms
 int color_mode_ = 1;
@@ -55,10 +69,12 @@ void createShaders(){
   cloth_shader_->addUniform(COLOR_MODE);
   cloth_shader_->addUniform(PICK_COL);
 
-  object_shader_->loadVertexFragmentShaders("../resources/shaders/tutorial.vert", "../resources/shaders/color.frag");
+  object_shader_->loadVertexFragmentShaders("../resources/shaders/sphere.vert.glsl", "../resources/shaders/sphere.frag.glsl");
   object_shader_->addUniform(MODEL_MAT);
   object_shader_->addUniform(CAM_MAT);
   object_shader_->addUniform(PROJ_MAT);
+  object_shader_->addUniform(IN_COL);
+
 }
 
 glm::vec3 rayCast(int x, int y){
@@ -91,12 +107,34 @@ void glut_display() {
     glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
     glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE,
                        glm::value_ptr(camera->getProjectionMatrix()));
+    glUniform4fv(object_shader_->getUniform(IN_COL), 1, glm::value_ptr(glm::vec4(1.f)));
+
 
     //bind the VBO of the model such that the next draw call will render with these vertices
     object_->activate();
     //draw triangles from the currently bound buffer
     object_->draw();
     object_->deactivate();
+  }
+
+  if(gui_mode_ == GUI_FIX || show_fixed_){
+    object_shader_->activate();
+    object_->activate();
+    object_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_gridD / 4.f));
+    glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+    glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE,
+                       glm::value_ptr(camera->getProjectionMatrix()));
+    glUniform4fv(object_shader_->getUniform(IN_COL), 1, glm::value_ptr(glm::vec4(0.8f, 0.f, 0.f, 1.f)));
+
+    auto fixed = effect_->getfixedParticles();
+    for(auto const& pos : fixed){
+      object_->translation_matrix_ = glm::translate(glm::mat4(), pos);
+      glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, object_->get_model_matrix());
+      object_->draw();
+    }
+
+    object_->deactivate();
+
   }
 
   cloth_shader_->activate();
@@ -107,7 +145,7 @@ void glut_display() {
 
   real_elapsed_ms = glutGet(GLUT_ELAPSED_TIME);
   effect_->update(0.f);
-  if(!gui_fix_)effect_ ->cpuUpdate((real_elapsed_ms - old_elapsed_ms)/1000.f);
+  if(gui_mode_ == GUI_STD)effect_ ->cpuUpdate((real_elapsed_ms - old_elapsed_ms)/1000.f);
   effect_ ->gpuUpdate();
   effect_ ->render();
   old_elapsed_ms = real_elapsed_ms;
@@ -131,15 +169,13 @@ void gui_display()
     if (ImGui::Button("Reset"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
       effect_->reset();
 
-    if (effect_->getUpdate()) {
-      if (ImGui::Button("Pause")) effect_->toggleUpdate();
-    } else {
-      if (ImGui::Button("Play")) effect_->toggleUpdate();
-    }
-
     ImGui::Separator();
-    ImGui::Checkbox("Fix Points", &gui_fix_);
+    ImGui::RadioButton("Play", &gui_mode_, GUI_STD);
+    ImGui::RadioButton("Pause", &gui_mode_, GUI_PAUSE);
+    ImGui::RadioButton("Fix Points", &gui_mode_, GUI_FIX);
+    ImGui::RadioButton("Drag Points", &gui_mode_, GUI_DRAG);
     if (ImGui::Button("Release all Points")) effect_->movingAllParticles();
+    ImGui::Checkbox("Show fixed Points", &show_fixed_);
 
     ImGui::Separator();
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
@@ -195,11 +231,10 @@ void gui_display()
   if(shader_window_){
     if(ImGui::Begin("Shader Options", &shader_window_)){
       ImGui::ColorEdit3("pick colour", (float *) &pick_color_); // Edit 3 floats representing a color
-      ImGui::RadioButton("Pick Colour", &color_mode_, 1);
-      ImGui::RadioButton("Texture", &color_mode_, 2);
-      ImGui::RadioButton("Spring Stretch", &color_mode_, 4);
-      ImGui::RadioButton("Normals", &color_mode_, 8);
-      ImGui::RadioButton("Fixed", &color_mode_, 16);
+      ImGui::RadioButton("Pick Colour", &color_mode_, PICK);
+      ImGui::RadioButton("Texture", &color_mode_, TEXTURE);
+      ImGui::RadioButton("Spring Stretch", &color_mode_, SPRING);
+      ImGui::RadioButton("Normals", &color_mode_, NORMALS);
 
       ImGui::ColorEdit3("clear colour", (float *) &clear_color_);
     }
@@ -265,7 +300,7 @@ void glut_display_func()
 void glut_motion(int32_t _x, int32_t _y) {
   if(io->WantCaptureMouse){
     ImGui_ImplFreeGLUT_MotionFunc(_x, _y);
-  } else if (!gui_fix_) {
+  } else if (gui_mode_ != GUI_FIX) {
     camera->mouseMove(_x, _y);
   }
 }
@@ -274,7 +309,7 @@ void glut_motion(int32_t _x, int32_t _y) {
 void glut_mouse(int32_t _button, int32_t _state, int32_t _x, int32_t _y) {
   if(io->WantCaptureMouse){
     ImGui_ImplFreeGLUT_MouseFunc(_button, _state, _x, _y);
-  } else if (gui_fix_) {
+  } else if (gui_mode_ == GUI_FIX) {
     effect_->fixedParticles(effect_->findClosest(rayCast(_x, _y)));
   } else {
     camera->mouseButton(_button, _state, _x, _y);
@@ -283,9 +318,6 @@ void glut_mouse(int32_t _button, int32_t _state, int32_t _x, int32_t _y) {
 
 void glut_mouse_passive(int32_t _x, int32_t _y) {
   ImGui_ImplFreeGLUT_MotionFunc(_x, _y);
-  if (gui_fix_ && !io->WantCaptureMouse) {
-    auto ray = rayCast(_x, _y);
-  }
 }
 
 //keyboard events you want to register

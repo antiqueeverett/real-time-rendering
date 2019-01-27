@@ -35,6 +35,10 @@ public:
 	virtual int numAliveParticles() { return m_sys->getAliveCount();};
 
 	virtual void fixedParticles(unsigned int i) { m_fixed.insert(i); };
+    virtual std::vector<glm::vec3> getfixedParticles() { std::vector<glm::vec3> result;
+      for(auto i : m_fixed){ result.push_back(glm::vec3(m_sys->finalData()->m_pos[i])); }
+      return result;
+    }
 	virtual void movingParticles(unsigned int i) { m_fixed.erase(i); };
     virtual void movingAllParticles() { m_fixed.clear(); }
 
@@ -210,6 +214,8 @@ public:
     float m_collisionDist;
     float m_mass;
     glm::vec3 m_windVec;
+
+    glm::vec4 m_dragParticle;
 
     bool m_wind = false;
     bool m_gravity = true;

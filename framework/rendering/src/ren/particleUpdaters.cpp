@@ -319,7 +319,7 @@ void ClothCollisionUpdater::update(float dt, ParticleData *p){
 
   auto pos = p->m_pos.get();
   auto prev = p->m_pos_prev.get();
-  glm::fvec3 dist;
+  glm::fvec3 dist, corr;
   float err;
   for(int k = 0; k < m_it; ++k) {
     for (size_t i = 0; i < end_id; ++i) {
@@ -329,8 +329,10 @@ void ClothCollisionUpdater::update(float dt, ParticleData *p){
           if(glm::length(dist) < m_dist){
             err = m_dist - glm::length(dist);
 
-            pos[i] += glm::vec4(glm::normalize(dist) * err * 0.5f, 0.f);
-            pos[j] -= glm::vec4(glm::normalize(dist) * err * 0.5f, 0.f);
+            corr = err * (1 - pos[i].w) * 0.5f * (1 + pos[j].w) * glm::normalize(dist);
+            pos[i] += glm::vec4(corr, 0.f);
+            corr = err * (1 - pos[j].w) * 0.5f * (1 + pos[i].w) * glm::normalize(dist);
+            pos[j] -= glm::vec4(corr, 0.f);
 
           }
 
