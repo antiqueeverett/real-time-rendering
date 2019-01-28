@@ -33,9 +33,10 @@ int32_t window_width_  = 1080;
 int32_t window_height_ = 720;
 
 //3d mesh input file
-std::string obj_file_ = "../resources/objects/sphere.obj";
+std::string sphere_file_ = "../resources/objects/sphere.obj";
+std::string cube_file_ = "../resources/objects/cubemod.obj";
 
-Object* object_;
+Object* sphere_, *cube_;
 SimpleShaders* object_shader_;
 TextureShaders* cloth_shader_;
 Camera* camera;
@@ -59,6 +60,8 @@ bool show_fixed_ = false;
 int color_mode_ = 1;
 glm::vec3 pick_color_;
 glm::vec3 clear_color_ = glm::vec3(0.5f, 0.5f, 0.5f);
+
+float drag_distance_;
 
 void createShaders(){
 
@@ -88,6 +91,24 @@ glm::vec3 rayCast(int x, int y){
   return glm::normalize(glm::vec3(ray));
 }
 
+void drag(int x, int y){
+  glm::vec3 dir = glm::normalize(camera->getViewDir());
+  glm::vec3 ray = glm::normalize(rayCast(x, y));
+  float result;
+
+  glm::intersectRayPlane(
+          camera->getPosition(), ray,
+          camera->getPosition() + dir * drag_distance_, -dir,
+          result
+  );
+  glm::vec3 pos = camera->getPosition() + result * ray;
+  effect_->m_dragMutex.lock();
+  effect_->m_dragParticle.x = pos.x;
+  effect_->m_dragParticle.y = pos.y;
+  effect_->m_dragParticle.z = pos.z;
+  effect_->m_dragMutex.unlock();
+}
+
 
 //render callback function; called every frame
 void glut_display() {
@@ -97,13 +118,13 @@ void glut_display() {
   camera->update();
 
   if(effect_->m_sphere) {
-    object_->translation_matrix_ = glm::translate(glm::mat4(), effect_->m_spherePos);
-    object_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_sphereRad * 0.95));
+    sphere_->translation_matrix_ = glm::translate(glm::mat4(), effect_->m_spherePos);
+    sphere_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_sphereRad * 0.95));
 
     object_shader_->activate();
 
     //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-    glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, object_->get_model_matrix());
+    glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, sphere_->get_model_matrix());
     glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
     glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE,
                        glm::value_ptr(camera->getProjectionMatrix()));
@@ -111,16 +132,56 @@ void glut_display() {
 
 
     //bind the VBO of the model such that the next draw call will render with these vertices
-    object_->activate();
+    sphere_->activate();
     //draw triangles from the currently bound buffer
-    object_->draw();
-    object_->deactivate();
+    sphere_->draw();
+    sphere_->deactivate();
   }
 
-  if(gui_mode_ == GUI_FIX || show_fixed_){
+  if(effect_->m_cube) {
+    cube_->translation_matrix_ = glm::translate(glm::mat4(), effect_->m_cubePos);
+    cube_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_cubeDim - 2 * effect_->m_gridD));
+
     object_shader_->activate();
-    object_->activate();
-    object_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_gridD / 4.f));
+
+    //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
+    glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, cube_->get_model_matrix());
+    glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+    glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE,
+                       glm::value_ptr(camera->getProjectionMatrix()));
+    glUniform4fv(object_shader_->getUniform(IN_COL), 1, glm::value_ptr(glm::vec4(1.f)));
+
+
+    //bind the VBO of the model such that the next draw call will render with these vertices
+    cube_->activate();
+    //draw triangles from the currently bound buffer
+    cube_->draw();
+    cube_->deactivate();
+  }
+
+  if(gui_mode_ == GUI_DRAG && glm::length(effect_->m_dragParticle) != 0){
+    sphere_->translation_matrix_ = glm::translate(glm::mat4(), glm::vec3(effect_->m_dragParticle));
+    sphere_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_gridD / 4.f));
+
+    object_shader_->activate();
+
+    //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
+    glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, sphere_->get_model_matrix());
+    glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
+    glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE,
+                       glm::value_ptr(camera->getProjectionMatrix()));
+    glUniform4fv(object_shader_->getUniform(IN_COL), 1, glm::value_ptr(glm::vec4(0.2f, 1.f, 0.f, 1.f)));
+
+
+    //bind the VBO of the model such that the next draw call will render with these vertices
+    sphere_->activate();
+    //draw triangles from the currently bound buffer
+    sphere_->draw();
+    sphere_->deactivate();
+  } else if(gui_mode_ == GUI_FIX || show_fixed_){
+    object_shader_->activate();
+    sphere_->activate();
+    sphere_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_gridD / 4.f));
     glUniformMatrix4fv(object_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
     glUniformMatrix4fv(object_shader_->getUniform(PROJ_MAT), 1, GL_FALSE,
                        glm::value_ptr(camera->getProjectionMatrix()));
@@ -128,12 +189,12 @@ void glut_display() {
 
     auto fixed = effect_->getfixedParticles();
     for(auto const& pos : fixed){
-      object_->translation_matrix_ = glm::translate(glm::mat4(), pos);
-      glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, object_->get_model_matrix());
-      object_->draw();
+      sphere_->translation_matrix_ = glm::translate(glm::mat4(), pos);
+      glUniformMatrix4fv(object_shader_->getUniform(MODEL_MAT), 1, GL_FALSE, sphere_->get_model_matrix());
+      sphere_->draw();
     }
 
-    object_->deactivate();
+    sphere_->deactivate();
 
   }
 
@@ -145,7 +206,7 @@ void glut_display() {
 
   real_elapsed_ms = glutGet(GLUT_ELAPSED_TIME);
   effect_->update(0.f);
-  if(gui_mode_ == GUI_STD)effect_ ->cpuUpdate((real_elapsed_ms - old_elapsed_ms)/1000.f);
+  if(gui_mode_ == GUI_STD || gui_mode_ == GUI_DRAG)effect_ ->cpuUpdate((real_elapsed_ms - old_elapsed_ms)/1000.f);
   effect_ ->gpuUpdate();
   effect_ ->render();
   old_elapsed_ms = real_elapsed_ms;
@@ -198,8 +259,9 @@ void gui_display()
       ImGui::Checkbox("Shear Springs", &effect_->m_shear);
       ImGui::Checkbox("Bend Springs", &effect_->m_bend);
 
-      ImGui::Separator();
+      ImGui::Separator();ImGui::Separator();
       ImGui::Checkbox("Self-Collision", &effect_->m_collision);
+      ImGui::Separator();
       ImGui::Checkbox("Sphere-Collision", &effect_->m_sphere);
       {
         ImGui::Text("Sphere Position");
@@ -211,6 +273,18 @@ void gui_display()
       }
       ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
       ImGui::InputFloat("Sphere Radius", &effect_->m_sphereRad);
+      ImGui::Separator();
+      ImGui::Checkbox("Cube-Collision", &effect_->m_cube);
+      {
+        ImGui::Text("Cube Position");
+        ImGui::PushItemWidth(ImGui::GetFontSize() * 7);
+        ImGui::SliderFloat("##cpx", &effect_->m_cubePos.x, -10.f, 10.f); ImGui::SameLine();
+        ImGui::SliderFloat("##cpy", &effect_->m_cubePos.y, -10.f, 10.f); ImGui::SameLine();
+        ImGui::SliderFloat("##cpz", &effect_->m_cubePos.z, -10.f, 10.f);
+        ImGui::PopItemWidth();
+      }
+      ImGui::InputFloat("Cube Dim", &effect_->m_cubeDim);
+
 
       ImGui::Separator();
       ImGui::Checkbox("Restrict Stretch", &effect_->m_stretch);
@@ -309,8 +383,24 @@ void glut_motion(int32_t _x, int32_t _y) {
 void glut_mouse(int32_t _button, int32_t _state, int32_t _x, int32_t _y) {
   if(io->WantCaptureMouse){
     ImGui_ImplFreeGLUT_MouseFunc(_button, _state, _x, _y);
-  } else if (gui_mode_ == GUI_FIX) {
+  } else if (gui_mode_ == GUI_FIX && _button == GLUT_LEFT_BUTTON
+             && _state == GLUT_DOWN) {
     effect_->fixedParticles(effect_->findClosest(rayCast(_x, _y)));
+  } else if (gui_mode_ == GUI_DRAG&& _button == GLUT_LEFT_BUTTON
+            && _state == GLUT_DOWN) {
+    if(glm::length(effect_->m_dragParticle) == 0.f) {
+      effect_->m_dragMutex.lock();
+      effect_->setDrag(rayCast(_x, _y));
+      effect_->m_dragMutex.unlock();
+      drag_distance_ = glm::dot(
+              glm::normalize(camera->getViewDir()),
+              glm::vec3(effect_->m_dragParticle) - camera->getPosition()
+      );
+    } else {
+      effect_->m_dragMutex.lock();
+      effect_->releaseDrag();
+      effect_->m_dragMutex.unlock();
+    }
   } else {
     camera->mouseButton(_button, _state, _x, _y);
   }
@@ -318,6 +408,9 @@ void glut_mouse(int32_t _button, int32_t _state, int32_t _x, int32_t _y) {
 
 void glut_mouse_passive(int32_t _x, int32_t _y) {
   ImGui_ImplFreeGLUT_MotionFunc(_x, _y);
+  if(!io->WantCaptureMouse && GUI_DRAG && glm::length(effect_->m_dragParticle) != 0){
+    drag(_x, _y);
+  }
 }
 
 //keyboard events you want to register
@@ -421,7 +514,8 @@ int32_t main(int32_t argc, char* argv[]) {
   createShaders();
   ///////////////////////////////////////////////////////////////
 
-  object_ = new Object(obj_file_, (model::POSITION | model::TEXCOORD));
+  sphere_ = new Object(sphere_file_, (model::POSITION | model::TEXCOORD));
+  cube_ = new Object(cube_file_, (model::POSITION));
 
   effect_ = new ClothEffect();
   effect_->m_gridPos = glm::fvec4{-5.f, 5.f, 0.f, 1.f};

@@ -314,6 +314,38 @@ void SphereCollisionUpdater::update(float dt, ParticleData *p) {
   }
 }
 
+void CubeCollisionUpdater::update(float dt, ParticleData *p) {
+  size_t end_id = p->m_count_alive;
+
+  auto pos = p->m_pos.get();
+  auto prev = p->m_pos_prev.get();
+  glm::vec3 mov,newpos, oldpos, ipos;
+  float xdist = FLT_MAX, ydist = FLT_MAX, zdist = FLT_MAX;
+  for (size_t i = 0; i < end_id; ++i) {
+    ipos = glm::vec3(pos[i]);
+    if(glm::all(glm::greaterThan(ipos, m_min)) && glm::all(glm::lessThan(ipos, m_max))){
+      oldpos = glm::vec3(prev[i]);
+      mov = glm::normalize(ipos - oldpos);
+      if(oldpos.x <= m_min.x){ glm::intersectRayPlane(oldpos, mov, m_min, glm::vec3(-1.f, 0.f, 0.f), xdist);}
+      else if(oldpos.x >= m_max.x){ glm::intersectRayPlane(oldpos, mov, m_max, glm::vec3(1.f, 0.f, 0.f), xdist);}
+      if(oldpos.y <= m_min.y){ glm::intersectRayPlane(oldpos, mov, m_min, glm::vec3(0.f, -1.f, 0.f), ydist);}
+      else if(oldpos.y >= m_max.y){glm::intersectRayPlane(oldpos, mov, m_max, glm::vec3(0.f, 1.f, 0.f), ydist);}
+      if(oldpos.z <= m_min.z){glm::intersectRayPlane(oldpos, mov, m_min, glm::vec3(0.f, 0.f, -1.f), zdist);}
+      else if(oldpos.z >= m_max.z){glm::intersectRayPlane(oldpos, mov, m_max, glm::vec3(0.f, 0.f, 1.f), zdist);}
+
+      if(xdist > ydist){
+        if(ydist > zdist){ newpos = oldpos + mov * zdist;}
+        else { newpos = oldpos + mov * ydist;}
+      }
+      else if(xdist > zdist){ newpos = oldpos + mov * zdist;}
+      else { newpos = oldpos + mov * xdist;}
+
+      pos[i] = glm::vec4(newpos, pos[i].w);
+    }
+  }
+}
+
+
 void ClothCollisionUpdater::update(float dt, ParticleData *p){
   size_t end_id = p->m_count_alive;
 
@@ -342,6 +374,23 @@ void ClothCollisionUpdater::update(float dt, ParticleData *p){
   }
 }
 
+void GroundCollisionUpdater::update(float dt, ParticleData *p) {
+  size_t end_id = p->m_count_alive;
+  auto pos = p->m_pos.get();
+  auto prev = p->m_pos_prev.get();
+
+  glm::vec3 oldpos, mov;
+  float dist;
+
+  for (size_t i = 0; i < end_id; ++i) {
+    if(pos[i].y < m_height){
+      oldpos = glm::vec3(prev[i]);
+      mov = glm::normalize(glm::vec3(pos[i]) - oldpos);
+      glm::intersectRayPlane(oldpos, mov, glm::vec3(0.f, m_height, 0.f), glm::vec3(0.f, 1.f, 0.f), dist);
+      pos[i] = glm::vec4(oldpos + mov * dist, pos[i].w);
+    }
+  }
+}
 
 void ClothCollisionUpdater::init(ParticleData *p) {
   size_t count = p->m_count;

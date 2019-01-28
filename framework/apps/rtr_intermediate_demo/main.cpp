@@ -91,7 +91,7 @@ float rotationXAngle = 0.0f;	// rotation angles for camera movement
 float rotationYAngle = 0.0f;
 Camera* camera;
 
-std::string obj_file_ = "../resources/objects/dragon_fly.obj";
+std::string sphere_file_ = "../resources/objects/dragon_fly.obj";
 //std::string obj_file_ = "../resources/objects/DRAGNFLY.OBJ";
 
 Object* dragonfly;
@@ -467,7 +467,7 @@ void init_scene(){
   accumulated_left_stick_vertical_axis_state = 0.0;
 
   delete dragonfly;
-  dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
+  dragonfly = new Object(sphere_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
   dragonfly->translate(drgnfly_pos);
   dragonfly->scale(0.7f);
 
@@ -563,7 +563,7 @@ int main(int argc, char** argv)
   cloth_shader_->loadVertGeomFragShaders("../resources/shaders/particleQuad.vert", "../resources/shaders/particleQuad.geom", "../resources/shaders/particlePoint.frag");
   cloth_shader_->locateUniforms();
     
-  dragonfly = new Object(obj_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
+  dragonfly = new Object(sphere_file_, (model::POSITION | model::TEXCOORD | model::NORMAL));
   dragonfly->translate(drgnfly_pos);
   dragonfly->scale(0.7f);
 

@@ -170,6 +170,14 @@ public:
 	virtual void update(float dt, ParticleData *p) override;
 };
 
+class CubeCollisionUpdater : public ParticleUpdater {
+public:
+	glm::vec3 m_min, m_max;
+
+	virtual void update(float dt, ParticleData *p) override;
+
+};
+
 class ClothCollisionUpdater : public ParticleUpdater {
 public:
     float m_dist;
@@ -178,6 +186,13 @@ public:
 
     virtual void update(float dt, ParticleData *p) override;
     void init(ParticleData *p);
+
+};
+
+class GroundCollisionUpdater : public ParticleUpdater {
+public:
+	float m_height;
+	virtual void update(float dt, ParticleData *p) override;
 
 };
 /*

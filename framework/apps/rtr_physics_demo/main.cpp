@@ -20,9 +20,9 @@ glm::mat4 camera_matrix_ = glm::mat4(0.0f);
 glm::mat4 projection_matrix_ = glm::mat4(0.0f);
 
 //3d mesh input file
-std::string obj_file_ = "../resources/objects/sphere.obj";
+std::string sphere_file_ = "../resources/objects/sphere.obj";
 
-Object* object_;
+Object* sphere_;
 
 SimpleShaders* object_shader_;
 ParticleShaders* cloth_shader_;
@@ -57,18 +57,18 @@ void glut_display() {
   object_shader_->activate();
 
   //upload model, camera and projection matrices to GPU (1 matrix, transposed, address beginnings of data block)
-  glUniformMatrix4fv(object_shader_->getUniform("model_matrix"), 1, GL_FALSE, object_->get_model_matrix());
+  glUniformMatrix4fv(object_shader_->getUniform("model_matrix"), 1, GL_FALSE, sphere_->get_model_matrix());
   glUniformMatrix4fv(object_shader_->getUniform("camera_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
   glUniformMatrix4fv(object_shader_->getUniform("projection_matrix"), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
   
 
   //bind the VBO of the model such that the next draw call will render with these vertices
-  object_->activate();
+  sphere_->activate();
 
   
   //draw triangles from the currently bound buffer
-  object_->draw();
-  object_->deactivate();
+  sphere_->draw();
+  sphere_->deactivate();
 
   glEnable(GL_BLEND);
 
@@ -177,7 +177,7 @@ int32_t main(int32_t argc, char* argv[]) {
 
   createShaders();
 
-  object_ = new Object(obj_file_, (model::POSITION | model::TEXCOORD));
+  sphere_ = new Object(sphere_file_, (model::POSITION | model::TEXCOORD));
 
   effect_ = new BlackHoleEffect();
   effect_->init(100000, camera);

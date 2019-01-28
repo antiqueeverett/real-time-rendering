@@ -13,5 +13,5 @@ out vec4 pass_color;
 
 void main() {
     gl_Position = (projection_matrix * camera_matrix * model_matrix) * vec4(vertex_position, 1.0);
-    pass_color = in_color;
+    pass_color = vec4(in_color.xyz, 1.0);
 }

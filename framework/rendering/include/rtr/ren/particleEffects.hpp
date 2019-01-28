@@ -10,6 +10,7 @@
 #include <rtr/ren/particleHeaders.hpp>
 #include <rtr/camera/Camera.h>
 #include <set>
+#include <mutex>
 
 class ParticleEffect {
 public:
@@ -195,6 +196,8 @@ public:
 	void update(float dt) override;
     void reset() override;
     int findClosest(glm::vec3 ray);
+    void setDrag(glm::vec3 ray);
+    void releaseDrag();
 
     glm::fvec4 m_gridPos;
     glm::fmat4 m_gridRot;
@@ -209,13 +212,16 @@ public:
     float m_maxStretch;
     float m_sphereRad;
     float m_sphereFric;
+    glm::vec3 m_cubePos;
+    float m_cubeDim;
     glm::vec3 m_spherePos;
     int m_stretchIter;
     float m_collisionDist;
     float m_mass;
     glm::vec3 m_windVec;
 
-    glm::vec4 m_dragParticle;
+    glm::vec4 m_dragParticle{0};
+    std::mutex m_dragMutex;
 
     bool m_wind = false;
     bool m_gravity = true;
@@ -224,6 +230,7 @@ public:
     bool m_bend = true;
     bool m_stretch = true;
     bool m_sphere = false;
+    bool m_cube = false;
 	bool m_collision = false;
 
 private:
@@ -243,6 +250,8 @@ private:
 	std::shared_ptr<NormalUpdater> m_normUp;
     std::shared_ptr<SphereCollisionUpdater> m_sphereUp;
 	std::shared_ptr<ClothCollisionUpdater> m_collisionUp;
+	std::shared_ptr<GroundCollisionUpdater> m_groundUp;
+    std::shared_ptr<CubeCollisionUpdater> m_cubeUp;
     std::shared_ptr<WindForceUpdater> m_windUp;
 
 };

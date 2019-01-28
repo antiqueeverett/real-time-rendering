@@ -343,6 +343,8 @@ void ClothEffect::reset() {
   m_sphereUp->m_r = m_sphereRad;
   m_sphereUp->m_pos = m_spherePos;
   m_sphereUp->m_f = m_sphereFric;
+  m_cubeUp->m_min = m_cubePos - glm::vec3(m_cubeDim / 2.f);
+  m_cubeUp->m_max = m_cubePos + glm::vec3(m_cubeDim / 2.f);
   m_collisionUp->m_dist = m_gridD * m_collisionDist;
   m_windUp->m_wind = m_windVec;
 
@@ -356,6 +358,8 @@ void ClothEffect::reset() {
   if(m_stretch) m_sys->addUpdater(m_stretchUp);
   if(m_collision) m_sys->addUpdater(m_collisionUp);
   if(m_sphere) m_sys->addUpdater(m_sphereUp);
+  if(m_cube) m_sys->addUpdater(m_cubeUp);
+  m_sys->addUpdater(m_groundUp);
   m_sys->addUpdater(m_normUp);
 
   auto emmit = std::make_shared<ParticleEmitter>(m_gridW * m_gridH);
@@ -467,8 +471,12 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
   m_stretchUp = std::make_shared<StretchUpdater>();
   m_normUp = std::make_shared<NormalUpdater>();
   m_sphereUp = std::make_shared<SphereCollisionUpdater>();
+  m_cubeUp = std::make_shared<CubeCollisionUpdater>();
   m_collisionUp = std::make_shared<ClothCollisionUpdater>();
   m_windUp = std::make_shared<WindForceUpdater>();
+  m_groundUp = std::make_shared<GroundCollisionUpdater>();
+
+  m_groundUp->m_height = -20.f;
 
 }
 
@@ -492,6 +500,14 @@ void ClothEffect::update(float dt) {
   m_collisionUp->m_dist = m_gridD * m_collisionDist;
   m_windUp->m_wind = m_windVec;
 
+  m_dragMutex.lock();
+  if(glm::length(m_dragParticle) != 0) {
+    //std::cout << m_dragParticle.x << "," << m_dragParticle.y << "," << m_dragParticle.z << "," << m_dragParticle.w << std::endl;
+    m_sys->finalData()->m_pos[m_dragParticle.w].x = m_dragParticle.x;
+    m_sys->finalData()->m_pos[m_dragParticle.w].y = m_dragParticle.y;
+    m_sys->finalData()->m_pos[m_dragParticle.w].z = m_dragParticle.z;
+  }
+  m_dragMutex.unlock();
 }
 
 int ClothEffect::findClosest(glm::vec3 ray){
@@ -508,4 +524,17 @@ int ClothEffect::findClosest(glm::vec3 ray){
   }
 
   return result;
+}
+
+void ClothEffect::setDrag(glm::vec3 ray) {
+  movingAllParticles();
+  int index = findClosest(ray);
+  m_dragParticle = m_sys->finalData()->m_pos[index];
+  m_dragParticle.w = index;
+  fixedParticles(index);
+}
+
+void ClothEffect::releaseDrag() {
+  m_sys->finalData()->m_pos[m_dragParticle.w].w = 0;
+  m_dragParticle = glm::vec4(0);
 }
