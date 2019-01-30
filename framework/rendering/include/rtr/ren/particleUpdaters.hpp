@@ -195,6 +195,14 @@ public:
 	virtual void update(float dt, ParticleData *p) override;
 
 };
+
+class SpringColourUpdater : public ParticleUpdater {
+public:
+    float m_min, m_max;
+    glm::vec3 m_minCol, m_maxCol;
+
+    virtual void update(float dt, ParticleData *p) override;
+};
 /*
 class SphereFrictionUpdater : public ParticleUpdater {
 public:

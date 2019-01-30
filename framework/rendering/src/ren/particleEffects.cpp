@@ -333,6 +333,10 @@ void ClothEffect::reset() {
   m_shearUp.reset(new SpringUpdater(m_sys->finalData()->m_shear_con));
   m_bendUp.reset(new SpringUpdater(m_sys->finalData()->m_bend_con));
 
+  m_colUp->m_min = m_minStretch;
+  m_colUp->m_max = m_maxStretch;
+  m_colUp->m_minCol = glm::vec3(0, 1, 0);
+  m_colUp->m_maxCol = glm::vec3(1, 0, 0);
   m_posUp->m_damp = m_damp;
   m_structUp->m_k = m_kStruct;
   m_shearUp->m_k = m_kShear;
@@ -348,7 +352,6 @@ void ClothEffect::reset() {
   m_collisionUp->m_dist = m_gridD * m_collisionDist;
   m_windUp->m_wind = m_windVec;
 
-  m_sys->addUpdater(m_colUp);
   if(m_structure) m_sys->addUpdater(m_structUp);
   if(m_shear) m_sys->addUpdater(m_shearUp);
   if(m_bend) m_sys->addUpdater(m_bendUp);
@@ -356,6 +359,7 @@ void ClothEffect::reset() {
   if(m_wind) m_sys->addUpdater(m_windUp);
   m_sys->addUpdater(m_posUp);
   if(m_stretch) m_sys->addUpdater(m_stretchUp);
+  m_sys->addUpdater(m_colUp);
   if(m_collision) m_sys->addUpdater(m_collisionUp);
   if(m_sphere) m_sys->addUpdater(m_sphereUp);
   if(m_cube) m_sys->addUpdater(m_cubeUp);
@@ -441,7 +445,7 @@ void ClothEffect::reset() {
   for(int h = 0; h < m_gridH; ++h) {
     for (int w = 0; w < m_gridW; ++w) {
       float u = w / (float)m_gridW;
-      float v = -(h / (float)m_gridH) + 1;
+      float v = (h / (float)m_gridH);
 
       uv[h * m_gridW + w] = glm::vec4(u, v, 0, 0);
     }
@@ -465,7 +469,7 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
   m_springGen = std::make_shared<SpringGen>();
   m_massGen = std::make_shared<MeshMassGen>();
 
-  m_colUp = std::make_shared<BasicColorUpdater>();
+  m_colUp = std::make_shared<SpringColourUpdater>();
   m_gravUp = std::make_shared<GravityUpdater>();
   m_posUp = std::make_shared<VerletPosUpdater>();
   m_stretchUp = std::make_shared<StretchUpdater>();
@@ -499,6 +503,8 @@ void ClothEffect::update(float dt) {
   m_sphereUp->m_f = m_sphereFric;
   m_collisionUp->m_dist = m_gridD * m_collisionDist;
   m_windUp->m_wind = m_windVec;
+  m_colUp->m_min = m_minStretch;
+  m_colUp->m_max = m_maxStretch;
 
   m_dragMutex.lock();
   if(glm::length(m_dragParticle) != 0) {

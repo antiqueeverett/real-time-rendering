@@ -20,12 +20,13 @@ TextureShaders::TextureShaders(int textureResolution, const char* texture_path, 
 
 void TextureShaders::activate()
 {
-	glUseProgram(mShaderProgram);
-	if(mTextures.size() != 0) {
+  SimpleShaders::activate(); // calls activate of inheritated class
+
+  if(mTextures.size() != 0) {
 		int i = 1;
 		for(auto const& tex : mTextures){
 			glActiveTexture(GL_TEXTURE0 + (i++));
-			glBindTexture(GL_TEXTURE_2D, tex.second);
+			glBindTexture(GL_TEXTURE_2D, tex);
 		}
 	} else if (mTextureID != -1) {
 		// activate texture unit 0 and bind the texture
@@ -33,8 +34,12 @@ void TextureShaders::activate()
 		glBindTexture(GL_TEXTURE_2D, mTextureID);
 	}
 	glPolygonMode(GL_FRONT_AND_BACK, mDrawMode);
-	SimpleShaders::activate(); // calls activate of inheritated class
 
+}
+
+void TextureShaders::deactivate() {
+  glActiveTexture(GL_TEXTURE0);
+  SimpleShaders::deactivate();
 }
 
 void TextureShaders::locateUniforms()
@@ -146,20 +151,20 @@ void TextureShaders::generateTexture(int imageResolution)
 void TextureShaders::addTexture(int imageX, int imageY, const char* sampler, const char* location){
 	activate();
 	GLuint uniform_location = glGetUniformLocation(mShaderProgram, sampler);
-	deactivate();
-
-	mTextures.insert(std::make_pair(std::string(sampler), uniform_location));
-
-	unsigned char* texture_data = SOIL_load_image(location,&imageX, &imageY, 0, SOIL_LOAD_RGBA);
-
-	glGenTextures(1, &uniform_location);
-	glBindTexture(GL_TEXTURE_2D, uniform_location);
+    GLuint texture_location = -1;
+    unsigned char* texture_data = SOIL_load_image(location,&imageX, &imageY, 0, SOIL_LOAD_RGB);
+	glGenTextures(1, &texture_location);
+	glBindTexture(GL_TEXTURE_2D, texture_location);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageX, imageY, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imageX, imageY, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+    mTextures.push_back(texture_location);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+  deactivate();
+
 }

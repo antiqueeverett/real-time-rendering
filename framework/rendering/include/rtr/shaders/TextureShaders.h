@@ -13,6 +13,7 @@ public:
 
 	void locateUniforms();
 	void activate() override;
+    void deactivate() override;
 
 	void setModelMatrix(const glm::mat4& transformMatrix);
 	void setCameraMatrix(const glm::mat4& cameraMatrix);
@@ -20,13 +21,14 @@ public:
 	void setAtlasDim();
 	void setMinTextureFilter(int filter);
 	void setMagTextureFilter(int filter);
+	void addTexture(int imageX, int imageY, const char* sampler, const char* location);
+
 
 private:
 
 	//for single textures
 	void generateTexture(int resolution);
 	//for multiple textures
-	void addTexture(int imageX, int imageY, const char* sampler, const char* location);
 
 
 	GLint mModelLocation;
@@ -36,7 +38,7 @@ private:
 	GLint mDimLocation;
 	GLuint mTextureID = -1;
 
-	std::map<std::string, GLuint> mTextures;
+	std::vector<GLuint> mTextures;
 
 
 	const char* path;

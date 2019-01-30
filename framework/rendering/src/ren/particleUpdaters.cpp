@@ -319,26 +319,54 @@ void CubeCollisionUpdater::update(float dt, ParticleData *p) {
 
   auto pos = p->m_pos.get();
   auto prev = p->m_pos_prev.get();
-  glm::vec3 mov,newpos, oldpos, ipos;
+  glm::vec3 mov,newpos, oldpos, ipos,
+          xnorm = glm::vec3(-1.f, 0.f, 0.f),
+          ynorm = glm::vec3(0.f, -1.f, 0.f),
+          znorm = glm::vec3(0.f, 0.f, -1.f);
   float xdist = FLT_MAX, ydist = FLT_MAX, zdist = FLT_MAX;
   for (size_t i = 0; i < end_id; ++i) {
     ipos = glm::vec3(pos[i]);
-    if(glm::all(glm::greaterThan(ipos, m_min)) && glm::all(glm::lessThan(ipos, m_max))){
+    if(ipos.x > m_min.x && ipos.y > m_min.y && ipos.z > m_min.z &&
+       ipos.x < m_max.x && ipos.y < m_max.y && ipos.z < m_max.z){
       oldpos = glm::vec3(prev[i]);
       mov = glm::normalize(ipos - oldpos);
-      if(oldpos.x <= m_min.x){ glm::intersectRayPlane(oldpos, mov, m_min, glm::vec3(-1.f, 0.f, 0.f), xdist);}
-      else if(oldpos.x >= m_max.x){ glm::intersectRayPlane(oldpos, mov, m_max, glm::vec3(1.f, 0.f, 0.f), xdist);}
-      if(oldpos.y <= m_min.y){ glm::intersectRayPlane(oldpos, mov, m_min, glm::vec3(0.f, -1.f, 0.f), ydist);}
-      else if(oldpos.y >= m_max.y){glm::intersectRayPlane(oldpos, mov, m_max, glm::vec3(0.f, 1.f, 0.f), ydist);}
-      if(oldpos.z <= m_min.z){glm::intersectRayPlane(oldpos, mov, m_min, glm::vec3(0.f, 0.f, -1.f), zdist);}
-      else if(oldpos.z >= m_max.z){glm::intersectRayPlane(oldpos, mov, m_max, glm::vec3(0.f, 0.f, 1.f), zdist);}
+      //prev was outside x
+      if(oldpos.x <= m_min.x){ glm::intersectRayPlane(ipos, -mov, m_min, -xnorm, xdist);}
+      else if(oldpos.x >= m_max.x){ glm::intersectRayPlane(ipos, -mov, m_max, xnorm, xdist);}
+      //prev was outside y
+      if(oldpos.y <= m_min.y){ glm::intersectRayPlane(ipos, -mov, m_min, -ynorm, ydist);}
+      else if(oldpos.y >= m_max.y){glm::intersectRayPlane(ipos, -mov, m_max, ynorm, ydist);}
+      //prev was outside z
+      if(oldpos.z <= m_min.z){glm::intersectRayPlane(ipos, -mov, m_min, -znorm, zdist);}
+      else if(oldpos.z >= m_max.z){glm::intersectRayPlane(ipos, -mov, m_max, znorm, zdist);}
 
       if(xdist > ydist){
-        if(ydist > zdist){ newpos = oldpos + mov * zdist;}
-        else { newpos = oldpos + mov * ydist;}
+        //crossed through z
+        if(ydist > zdist){
+          newpos = ipos - mov * zdist;
+          zdist = glm::dot(znorm, newpos - ipos);
+          newpos = ipos + znorm * zdist;
+        }
+        //crossed through y
+        else {
+          newpos = ipos - mov * ydist;
+          ydist = glm::dot(ynorm, newpos - ipos);
+          std::cout << ipos.y << "," << newpos.y << "," << (ipos + ynorm * ydist).y << std::endl;
+          newpos = ipos + ynorm * ydist;
+        }
       }
-      else if(xdist > zdist){ newpos = oldpos + mov * zdist;}
-      else { newpos = oldpos + mov * xdist;}
+      //crossed through z
+      else if(xdist > zdist){
+        newpos = ipos - mov * zdist;
+        zdist = glm::dot(znorm, newpos - ipos);
+        newpos = ipos + znorm * zdist;
+      }
+      //crossed through x
+      else {
+        newpos = ipos - mov * xdist;
+        xdist = glm::dot(xnorm, newpos - ipos);
+        newpos = ipos + xnorm * xdist;
+      }
 
       pos[i] = glm::vec4(newpos, pos[i].w);
     }
@@ -444,6 +472,45 @@ void WindForceUpdater::update(float dt, ParticleData *p) {
     acc[x] += glm::vec4(f / mass[x], 0);
     acc[y] += glm::vec4(f / mass[y], 0);
     acc[z] += glm::vec4(f / mass[z], 0);
+  }
+}
+
+void SpringColourUpdater::update(float dt, ParticleData *p) {
+  size_t count = p->m_count;
+
+  //reset colors
+  auto col = p->m_col.get();
+  auto pos = p->m_pos.get();
+  for(unsigned int i = 0; i < count; ++i){
+    col[i] = glm::vec4(0, 0, 0, 1);
+  }
+  //calc new colors
+  float mix;
+  int i,j;
+  auto struc = p->m_struct_con.get();
+  for(auto const& s : *struc){
+    i = (int)s.x; j = (int)s.y;
+    mix = (glm::length(glm::vec3(pos[i] - pos[j])) - m_min * s.z) / ((m_max - m_min) * s.z);
+    col[i] += glm::vec4(glm::mix(m_minCol, m_maxCol, mix), 1);
+    col[j] += glm::vec4(glm::mix(m_minCol, m_maxCol, mix), 1);
+  }
+  auto shear = p->m_shear_con.get();
+  for(auto const& s : *shear){
+    i = (int)s.x; j = (int)s.y;
+    mix = (glm::length(glm::vec3(pos[i] - pos[j])) - m_min * s.z) / ((m_max - m_min) * s.z);
+    col[i] += glm::vec4(glm::mix(m_minCol, m_maxCol, mix), 1);
+    col[j] += glm::vec4(glm::mix(m_minCol, m_maxCol, mix), 1);
+  }
+  auto bend = p->m_bend_con.get();
+  for(auto const& s : *bend){
+    i = (int)s.x; j = (int)s.y;
+    mix = (glm::length(glm::vec3(pos[i] - pos[j])) - m_min * s.z) / ((m_max - m_min) * s.z);
+    col[i] += glm::vec4(glm::mix(m_minCol, m_maxCol, mix), 1);
+    col[j] += glm::vec4(glm::mix(m_minCol, m_maxCol, mix), 1);
+  }
+
+  for(unsigned int i = 0; i < count; ++i){
+    col[i] = glm::vec4(glm::normalize(glm::vec3(col[i])), 1);
   }
 }
 

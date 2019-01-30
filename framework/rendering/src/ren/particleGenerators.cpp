@@ -78,15 +78,15 @@ void GridPosGen::generate(float dt, ParticleData *p, size_t start_id, size_t end
     auto ind = p->m_indices;
 	for(unsigned int i = start_id; i <= end_id; ++i){
 		if(i / m_h > m_w) break;
-		new_pos.x = (i % m_w) * m_d;
+		new_pos.x = (i % m_w) * m_d - (m_w / 2) * m_d;
         new_pos.y = 0;
-        new_pos.z = (i / m_w) * m_d;
+        new_pos.z = (i / m_w) * m_d - (m_h / 2) * m_d;
 
 		new_pos = m_rot * new_pos;
 
-		pos[i].x = new_pos.x - (m_w / 2) * m_d;
+		pos[i].x = new_pos.x ;
 		pos[i].y = new_pos.y;
-		pos[i].z = new_pos.z - (m_h / 2) * m_d;
+		pos[i].z = new_pos.z ;
 	}
 }
 

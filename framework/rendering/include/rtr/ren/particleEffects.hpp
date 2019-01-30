@@ -242,7 +242,7 @@ private:
 
     std::shared_ptr<GravityUpdater> m_gravUp;
     std::shared_ptr<VerletPosUpdater> m_posUp;
-    std::shared_ptr<BasicColorUpdater> m_colUp;
+    std::shared_ptr<SpringColourUpdater> m_colUp;
     std::shared_ptr<SpringUpdater> m_structUp;
     std::shared_ptr<SpringUpdater> m_shearUp;
     std::shared_ptr<SpringUpdater> m_bendUp;

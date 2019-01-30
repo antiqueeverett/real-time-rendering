@@ -13,14 +13,20 @@
 #define CAM_MAT "camera_matrix"
 #define PROJ_MAT "projection_matrix"
 #define MODEL_MAT "model_matrix"
+#define NORM_MAT "normal_matrix"
 #define COLOR_MODE "color_mode"
-#define PICK_COL "pick_color"
+#define SUN "sun_pos"
+#define AMB "amb"
+#define DIFF "diff"
+#define SPEC "spec"
 #define IN_COL "in_color"
+#define TEX "texture1"
 
 #define GUI_STD 0
 #define GUI_FIX 1
 #define GUI_DRAG 2
 #define GUI_PAUSE 3
+
 
 #define PICK 1
 #define TEXTURE 2
@@ -58,25 +64,57 @@ bool show_fixed_ = false;
 
 //uniforms
 int color_mode_ = 1;
-glm::vec3 pick_color_;
+int rotation_ = 0; //xz-plane
+glm::vec3 amb_, diff_, spec_, sun_;
 glm::vec3 clear_color_ = glm::vec3(0.5f, 0.5f, 0.5f);
+static int current_tex_ = 1;
+std::vector<glm::vec2> tex_dims_;
+glm::vec2 dim_tex_0_ {512, 512}; //brick
+glm::vec2 dim_tex_1 {96, 96}; //cubone.png
+glm::vec2 dim_tex_2 {500, 500}; //swampert.jpg
+glm::vec2 dim_tex_3 {1280, 640}; //flag.png
+glm::vec2 dim_tex_4 {390, 400}; //pikachu.png
+glm::vec2 dim_tex_5 {580, 383}; //sweater.jpg
+glm::vec2 dim_tex_6 {280, 280}; //vrgroup.png
+const char* list[] = {"Cubone", "Swampert", "Flag", "Pikachu", "Sweater", "VR"};
+
 
 float drag_distance_;
 
 void createShaders(){
 
-  cloth_shader_->loadVertexFragmentShaders("../resources/shaders/cloth.vert.glsl", "../resources/shaders/particlePoint.frag");
+  cloth_shader_->loadVertexFragmentShaders("../resources/shaders/cloth.vert.glsl", "../resources/shaders/cloth.frag.glsl");
   cloth_shader_->mDrawMode = GL_TRIANGLES;
   cloth_shader_->addUniform(CAM_MAT);
   cloth_shader_->addUniform(PROJ_MAT);
   cloth_shader_->addUniform(COLOR_MODE);
-  cloth_shader_->addUniform(PICK_COL);
+  cloth_shader_->addUniform(AMB);
+  cloth_shader_->addUniform(DIFF);
+  cloth_shader_->addUniform(SPEC);
+  cloth_shader_->addUniform(SUN);
+  cloth_shader_->addUniform(NORM_MAT);
+  cloth_shader_->addUniform(TEX);
+  {
+    cloth_shader_->addTexture(dim_tex_1.x, dim_tex_1.y, "texture1", "../resources/textures/Cloth/cubone.png");
+    tex_dims_.push_back(dim_tex_1);
+    cloth_shader_->addTexture(dim_tex_2.x, dim_tex_2.y, "texture1", "../resources/textures/Cloth/swampert.jpg");
+    tex_dims_.push_back(dim_tex_2);
+    cloth_shader_->addTexture(dim_tex_3.x, dim_tex_3.y, "texture1", "../resources/textures/Cloth/flag.png");
+    tex_dims_.push_back(dim_tex_3);
+    cloth_shader_->addTexture(dim_tex_4.x, dim_tex_4.y, "texture1", "../resources/textures/Cloth/pikachu.jpg");
+    tex_dims_.push_back(dim_tex_4);
+    cloth_shader_->addTexture(dim_tex_5.x, dim_tex_5.y, "texture1", "../resources/textures/Cloth/sweater1.jpg");
+    tex_dims_.push_back(dim_tex_5);
+    cloth_shader_->addTexture(dim_tex_6.x, dim_tex_6.y, "texture1", "../resources/textures/Cloth/vrgroup.png");
+    tex_dims_.push_back(dim_tex_6);
+  }
 
   object_shader_->loadVertexFragmentShaders("../resources/shaders/sphere.vert.glsl", "../resources/shaders/sphere.frag.glsl");
   object_shader_->addUniform(MODEL_MAT);
   object_shader_->addUniform(CAM_MAT);
   object_shader_->addUniform(PROJ_MAT);
   object_shader_->addUniform(IN_COL);
+
 
 }
 
@@ -201,8 +239,13 @@ void glut_display() {
   cloth_shader_->activate();
   glUniformMatrix4fv(cloth_shader_->getUniform(CAM_MAT), 1, GL_FALSE, glm::value_ptr(camera->getViewMatrix()));
   glUniformMatrix4fv(cloth_shader_->getUniform(PROJ_MAT), 1, GL_FALSE, glm::value_ptr(camera->getProjectionMatrix()));
+  glUniformMatrix4fv(cloth_shader_->getUniform(NORM_MAT), 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(camera->getViewMatrix()))));
   glUniform1i(cloth_shader_->getUniform(COLOR_MODE), color_mode_);
-  glUniform3fv(cloth_shader_->getUniform(PICK_COL), 1, glm::value_ptr(pick_color_));
+  glUniform3fv(cloth_shader_->getUniform(AMB), 1, glm::value_ptr(amb_));
+  glUniform3fv(cloth_shader_->getUniform(DIFF), 1, glm::value_ptr(diff_));
+  glUniform3fv(cloth_shader_->getUniform(SPEC), 1, glm::value_ptr(spec_));
+  glUniform3fv(cloth_shader_->getUniform(SUN), 1, glm::value_ptr(sun_ * 1000.f));
+  glUniform1i(cloth_shader_->getUniform(TEX), (current_tex_ + 1));
 
   real_elapsed_ms = glutGet(GLUT_ELAPSED_TIME);
   effect_->update(0.f);
@@ -211,6 +254,7 @@ void glut_display() {
   effect_ ->render();
   old_elapsed_ms = real_elapsed_ms;
 
+  cloth_shader_->deactivate();
   //unbind, unuse
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glUseProgram(0);
@@ -227,8 +271,15 @@ void gui_display()
     if(ImGui::Button("Show Interactive Controls")) interact_window_ = true;
 
     ImGui::Separator();
-    if (ImGui::Button("Reset"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+    if (ImGui::Button("Reset")) {                           // Buttons return true when clicked (most widgets return true when edited/activated)
+      if(color_mode_ == TEXTURE){
+        effect_->m_gridH = effect_->m_gridW * (tex_dims_[current_tex_].y / tex_dims_[current_tex_].x);
+      }
+      if(rotation_ == 0) {effect_->m_gridRot = glm::fmat4();}
+      else if (rotation_ == 1) {effect_->m_gridRot = glm::rotate(glm::fmat4(), (float)(M_PI / 2.f), glm::vec3(1.f, 0.f, 0.f));}
+      else if (rotation_ == 2) {effect_->m_gridRot = glm::rotate(glm::fmat4(), (float)(M_PI / 2.f), glm::vec3(0.f, 0.f, 1.f));}
       effect_->reset();
+    }
 
     ImGui::Separator();
     ImGui::RadioButton("Play", &gui_mode_, GUI_STD);
@@ -259,7 +310,7 @@ void gui_display()
       ImGui::Checkbox("Shear Springs", &effect_->m_shear);
       ImGui::Checkbox("Bend Springs", &effect_->m_bend);
 
-      ImGui::Separator();ImGui::Separator();
+      ImGui::Separator();
       ImGui::Checkbox("Self-Collision", &effect_->m_collision);
       ImGui::Separator();
       ImGui::Checkbox("Sphere-Collision", &effect_->m_sphere);
@@ -273,7 +324,7 @@ void gui_display()
       }
       ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
       ImGui::InputFloat("Sphere Radius", &effect_->m_sphereRad);
-      ImGui::Separator();
+      /*ImGui::Separator();
       ImGui::Checkbox("Cube-Collision", &effect_->m_cube);
       {
         ImGui::Text("Cube Position");
@@ -283,7 +334,7 @@ void gui_display()
         ImGui::SliderFloat("##cpz", &effect_->m_cubePos.z, -10.f, 10.f);
         ImGui::PopItemWidth();
       }
-      ImGui::InputFloat("Cube Dim", &effect_->m_cubeDim);
+      ImGui::InputFloat("Cube Dim", &effect_->m_cubeDim);*/
 
 
       ImGui::Separator();
@@ -297,6 +348,10 @@ void gui_display()
       ImGui::InputInt("Width", &effect_->m_gridW);
       ImGui::InputInt("Height", &effect_->m_gridH);
       ImGui::InputFloat("Step Size", &effect_->m_gridD);
+      ImGui::Text("Rotation");
+      ImGui::RadioButton("XZ-plane", &rotation_, 0); ImGui::SameLine();
+      ImGui::RadioButton("XY-plane", &rotation_, 1); ImGui::SameLine();
+      ImGui::RadioButton("YZ-plane", &rotation_, 2);
     }
 
     ImGui::End();
@@ -304,11 +359,24 @@ void gui_display()
 
   if(shader_window_){
     if(ImGui::Begin("Shader Options", &shader_window_)){
-      ImGui::ColorEdit3("pick colour", (float *) &pick_color_); // Edit 3 floats representing a color
+      {
+        ImGui::Text("Sun Position");
+        ImGui::PushItemWidth(ImGui::GetFontSize() * 7);
+        ImGui::SliderFloat("##supx", &sun_.x, -1.f, 1.f); ImGui::SameLine();
+        ImGui::SliderFloat("##supy", &sun_.y, 0.f, 1.f); ImGui::SameLine();
+        ImGui::SliderFloat("##supz", &sun_.z, -1.f, 1.f);
+        ImGui::PopItemWidth();
+      }
+      ImGui::ColorEdit3("Pick Amb", (float *) &amb_); // Edit 3 floats representing a color
+      ImGui::ColorEdit3("Pick Diff", (float *) &diff_); // Edit 3 floats representing a color
+      ImGui::ColorEdit3("Pick Spec", (float *) &spec_); // Edit 3 floats representing a color
       ImGui::RadioButton("Pick Colour", &color_mode_, PICK);
       ImGui::RadioButton("Texture", &color_mode_, TEXTURE);
       ImGui::RadioButton("Spring Stretch", &color_mode_, SPRING);
       ImGui::RadioButton("Normals", &color_mode_, NORMALS);
+
+      ImGui::Text("Pick Texture");
+      ImGui::ListBox("", &current_tex_, list, IM_ARRAYSIZE(list), 4);
 
       ImGui::ColorEdit3("clear colour", (float *) &clear_color_);
     }
@@ -360,8 +428,8 @@ void glut_display_func()
   glClearColor(clear_color_.x, clear_color_.y, clear_color_.y, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  gui_display();
   glut_display();
+  gui_display();
 
   // Rendering
   ImGui::Render();
@@ -374,7 +442,7 @@ void glut_display_func()
 void glut_motion(int32_t _x, int32_t _y) {
   if(io->WantCaptureMouse){
     ImGui_ImplFreeGLUT_MotionFunc(_x, _y);
-  } else if (gui_mode_ != GUI_FIX) {
+  } else if (gui_mode_ != GUI_FIX && gui_mode_ != GUI_DRAG) {
     camera->mouseMove(_x, _y);
   }
 }
@@ -401,7 +469,7 @@ void glut_mouse(int32_t _button, int32_t _state, int32_t _x, int32_t _y) {
       effect_->releaseDrag();
       effect_->m_dragMutex.unlock();
     }
-  } else {
+  } else if (gui_mode_ != GUI_FIX && gui_mode_ != GUI_DRAG){
     camera->mouseButton(_button, _state, _x, _y);
   }
 }
@@ -518,11 +586,10 @@ int32_t main(int32_t argc, char* argv[]) {
   cube_ = new Object(cube_file_, (model::POSITION));
 
   effect_ = new ClothEffect();
-  effect_->m_gridPos = glm::fvec4{-5.f, 5.f, 0.f, 1.f};
-  //effect_->m_gridRot = glm::rotate(glm::fmat4{}, 2.0f, glm::vec3{1, 0, 0});
-  effect_->m_gridW = 20;
-  effect_->m_gridH = 20;
-  effect_->m_gridD = 0.5;
+  effect_->m_gridRot = glm::rotate(glm::fmat4(), (float)(M_PI / 2.f), glm::vec3(1.f, 0.f, 0.f));
+  effect_->m_gridW = 30;
+  effect_->m_gridH = 30;
+  effect_->m_gridD = 0.4;
   effect_->m_damp = 0.01f;
   effect_->m_kStruct = 1.f;
   effect_->m_kShear = 1.f;
@@ -534,10 +601,17 @@ int32_t main(int32_t argc, char* argv[]) {
   effect_->m_collisionDist = 1.8f;
   effect_->m_stretchIter = 3;
   effect_->m_mass = 100;
+  effect_->m_collision = true;
+  effect_->m_wind = true;
+  effect_->m_windVec = glm::vec3(1.5f, 0.1f, 0.f);
   effect_->init(10, camera);
   effect_->reset();
-  effect_->fixedParticles(45);
+  for(int i = 0; i < 30; ++i){
+    effect_->fixedParticles(i * 30);
+  }
 
+  current_tex_ = 1;
+  color_mode_ = TEXTURE;
   ///////////////////////////////////////////////////////////////
   old_elapsed_ms = glutGet(GLUT_ELAPSED_TIME);
   //start the main loop (which mainly calls the glutDisplayFunc)
