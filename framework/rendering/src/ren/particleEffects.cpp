@@ -351,12 +351,14 @@ void ClothEffect::reset() {
   m_cubeUp->m_max = m_cubePos + glm::vec3(m_cubeDim / 2.f);
   m_collisionUp->m_dist = m_gridD * m_collisionDist;
   m_windUp->m_wind = m_windVec;
+  m_resUp->m_a = m_res;
 
   if(m_structure) m_sys->addUpdater(m_structUp);
   if(m_shear) m_sys->addUpdater(m_shearUp);
   if(m_bend) m_sys->addUpdater(m_bendUp);
   if(m_gravity) m_sys->addUpdater(m_gravUp);
   if(m_wind) m_sys->addUpdater(m_windUp);
+  m_sys->addUpdater(m_resUp);
   m_sys->addUpdater(m_posUp);
   if(m_stretch) m_sys->addUpdater(m_stretchUp);
   m_sys->addUpdater(m_colUp);
@@ -479,6 +481,7 @@ void ClothEffect::init(size_t numParticles, Camera *cam) {
   m_collisionUp = std::make_shared<ClothCollisionUpdater>();
   m_windUp = std::make_shared<WindForceUpdater>();
   m_groundUp = std::make_shared<GroundCollisionUpdater>();
+  m_resUp = std::make_shared<AirResistanceUpdater>();
 
   m_groundUp->m_height = -20.f;
 
@@ -501,10 +504,11 @@ void ClothEffect::update(float dt) {
   m_stretchUp->m_min = m_minStretch;
   m_stretchUp->m_max = m_maxStretch;
   m_sphereUp->m_f = m_sphereFric;
-  m_collisionUp->m_dist = m_gridD * m_collisionDist;
+  m_collisionUp->m_dist = m_posGen->m_d * m_collisionDist;
   m_windUp->m_wind = m_windVec;
   m_colUp->m_min = m_minStretch;
   m_colUp->m_max = m_maxStretch;
+  m_resUp->m_a = m_res;
 
   m_dragMutex.lock();
   if(glm::length(m_dragParticle) != 0) {

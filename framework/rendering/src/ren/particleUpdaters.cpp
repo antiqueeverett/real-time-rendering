@@ -209,17 +209,22 @@ void BasicTimeUpdater::update(float dt, ParticleData *p){
 void SpringUpdater::update(float dt, ParticleData *p) {
 
   auto pos = p->m_pos.get();
+  auto prev = p->m_pos_prev.get();
   auto acc = p->m_acc.get();
   auto mass = p->m_mass.get();
 
-  glm::fvec3 dist, f;
+  glm::fvec3 dist;
+  float f, dx, dy;
 
   for(auto& s : *m_spring){
     dist = glm::fvec3(pos[(int)s.x] - pos[(int)s.y]);
 
-    f = m_k * glm::normalize(dist) * (glm::length(dist) - s.z);
-    acc[(int)s.x] -= glm::fvec4(f, 0.f) / mass[(int)s.x];
-    acc[(int)s.y] += glm::fvec4(f, 0.f) / mass[(int)s.y];
+    f = m_k * (glm::length(dist) - s.z);
+    dist = glm::normalize(dist);
+    dx = 0.1f * glm::dot(dist, glm::vec3(pos[(int)s.x] - prev[(int)s.x])) - f;
+    dy = 0.1f * glm::dot(dist, glm::vec3(pos[(int)s.y] - prev[(int)s.y])) + f;
+    acc[(int)s.x] += glm::fvec4(dx * dist, 0.f) / mass[(int)s.x];
+    acc[(int)s.y] += glm::fvec4(dy * dist, 0.f) / mass[(int)s.y];
   }
 }
 
@@ -319,57 +324,60 @@ void CubeCollisionUpdater::update(float dt, ParticleData *p) {
 
   auto pos = p->m_pos.get();
   auto prev = p->m_pos_prev.get();
-  glm::vec3 mov,newpos, oldpos, ipos,
+  glm::vec3 mov,newpos, oldpos, ipos, clp,
           xnorm = glm::vec3(-1.f, 0.f, 0.f),
           ynorm = glm::vec3(0.f, -1.f, 0.f),
           znorm = glm::vec3(0.f, 0.f, -1.f);
-  float xdist = FLT_MAX, ydist = FLT_MAX, zdist = FLT_MAX;
+  float dist = 0.5f;
+  float xmin, xmax, ymin, ymax, zmin, zmax;
+
+  bool help = false;
   for (size_t i = 0; i < end_id; ++i) {
     ipos = glm::vec3(pos[i]);
-    if(ipos.x > m_min.x && ipos.y > m_min.y && ipos.z > m_min.z &&
-       ipos.x < m_max.x && ipos.y < m_max.y && ipos.z < m_max.z){
-      oldpos = glm::vec3(prev[i]);
-      mov = glm::normalize(ipos - oldpos);
-      //prev was outside x
-      if(oldpos.x <= m_min.x){ glm::intersectRayPlane(ipos, -mov, m_min, -xnorm, xdist);}
-      else if(oldpos.x >= m_max.x){ glm::intersectRayPlane(ipos, -mov, m_max, xnorm, xdist);}
-      //prev was outside y
-      if(oldpos.y <= m_min.y){ glm::intersectRayPlane(ipos, -mov, m_min, -ynorm, ydist);}
-      else if(oldpos.y >= m_max.y){glm::intersectRayPlane(ipos, -mov, m_max, ynorm, ydist);}
-      //prev was outside z
-      if(oldpos.z <= m_min.z){glm::intersectRayPlane(ipos, -mov, m_min, -znorm, zdist);}
-      else if(oldpos.z >= m_max.z){glm::intersectRayPlane(ipos, -mov, m_max, znorm, zdist);}
+    clp = ipos;
 
-      if(xdist > ydist){
-        //crossed through z
-        if(ydist > zdist){
-          newpos = ipos - mov * zdist;
-          zdist = glm::dot(znorm, newpos - ipos);
-          newpos = ipos + znorm * zdist;
+    if(ipos.x < m_min.x) { clp.x = m_min.x;}
+    else if(ipos.x > m_max.x) { clp.x = m_max.x;}
+    if(ipos.y < m_min.y) { clp.y = m_min.y;}
+    else if(ipos.y > m_max.y) { clp.y = m_max.y;}
+    if(ipos.z < m_min.z) { clp.z = m_min.z;}
+    else if(ipos.z > m_max.z) { clp.z = m_max.z;}
+
+    if(clp != ipos){
+      if(glm::length(clp - ipos) >= dist) continue;
+      mov = ipos - clp;
+      newpos = ipos + (dist - glm::length(mov)) * glm::normalize(mov);
+
+    } else {
+      glm::intersectRayPlane(ipos, xnorm, m_min, -xnorm, xmin);
+      glm::intersectRayPlane(ipos, -xnorm, m_max, xnorm, xmax);
+      if(xmin < xmax) { xnorm = xnorm * xmin;}
+      else { xnorm = -xnorm * xmax;}
+
+      glm::intersectRayPlane(ipos, ynorm, m_min, -ynorm, ymin);
+      glm::intersectRayPlane(ipos, -ynorm, m_max, ynorm, ymax);
+      if(ymin < ymax) { ynorm = ynorm * ymin;}
+      else { ynorm = -ynorm * ymax;}
+
+      glm::intersectRayPlane(ipos, znorm, m_min, -znorm, zmin);
+      glm::intersectRayPlane(ipos, -znorm, m_max, znorm, zmax);
+      if(zmin < zmax) { znorm = znorm * zmin;}
+      else { znorm = -znorm * zmax;}
+
+      if(glm::length(xnorm) > glm::length(ynorm)){
+        if(glm::length(ynorm) > glm::length(znorm)){
+          newpos = ipos + znorm + dist * glm::normalize(znorm);
+        } else {
+          newpos = ipos + ynorm + dist * glm::normalize(ynorm);
         }
-        //crossed through y
-        else {
-          newpos = ipos - mov * ydist;
-          ydist = glm::dot(ynorm, newpos - ipos);
-          std::cout << ipos.y << "," << newpos.y << "," << (ipos + ynorm * ydist).y << std::endl;
-          newpos = ipos + ynorm * ydist;
-        }
-      }
-      //crossed through z
-      else if(xdist > zdist){
-        newpos = ipos - mov * zdist;
-        zdist = glm::dot(znorm, newpos - ipos);
-        newpos = ipos + znorm * zdist;
-      }
-      //crossed through x
-      else {
-        newpos = ipos - mov * xdist;
-        xdist = glm::dot(xnorm, newpos - ipos);
-        newpos = ipos + xnorm * xdist;
+      } else if(glm::length(xnorm) > glm::length(znorm)) {
+        newpos = ipos + znorm + dist * glm::normalize(znorm);
+      } else {
+        newpos = ipos + xnorm + dist * glm::normalize(xnorm);
       }
 
-      pos[i] = glm::vec4(newpos, pos[i].w);
     }
+    pos[i] = glm::vec4(newpos, pos[i].w);
   }
 }
 
@@ -445,8 +453,8 @@ void ClothCollisionUpdater::init(ParticleData *p) {
   }
   auto bend = p->m_bend_con;
   for(auto const& s : *bend){
-    m_collide[(int)s.x][(int)s.y] = false;
-    m_collide[(int)s.y][(int)s.x] = false;
+    //m_collide[(int)s.x][(int)s.y] = false;
+    //m_collide[(int)s.y][(int)s.x] = false;
   }
 }
 
@@ -511,6 +519,23 @@ void SpringColourUpdater::update(float dt, ParticleData *p) {
 
   for(unsigned int i = 0; i < count; ++i){
     col[i] = glm::vec4(glm::normalize(glm::vec3(col[i])), 1);
+  }
+}
+
+void AirResistanceUpdater::update(float dt, ParticleData *p) {
+  size_t count = p->m_count;
+
+  auto acc = p->m_acc.get();
+  auto pos = p->m_pos.get();
+  auto prev = p->m_pos_prev.get();
+
+  glm::vec3 vel;
+
+  for(unsigned int i = 0; i < count; ++i){
+    vel = glm::vec3(pos[i] - prev[i]);
+    if(glm::length(vel) > 0) {
+      acc[i] += glm::vec4((-m_a * glm::normalize(vel) * glm::length(vel)), 0.f);
+    }
   }
 }
 

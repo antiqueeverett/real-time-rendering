@@ -178,7 +178,7 @@ void glut_display() {
 
   if(effect_->m_cube) {
     cube_->translation_matrix_ = glm::translate(glm::mat4(), effect_->m_cubePos);
-    cube_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_cubeDim - 2 * effect_->m_gridD));
+    cube_->scale_matrix_ = glm::scale(glm::mat4(), glm::vec3(effect_->m_cubeDim));
 
     object_shader_->activate();
 
@@ -249,7 +249,7 @@ void glut_display() {
 
   real_elapsed_ms = glutGet(GLUT_ELAPSED_TIME);
   effect_->update(0.f);
-  if(gui_mode_ == GUI_STD || gui_mode_ == GUI_DRAG)effect_ ->cpuUpdate((real_elapsed_ms - old_elapsed_ms)/1000.f);
+  if(gui_mode_ == GUI_STD || gui_mode_ == GUI_DRAG)effect_ ->cpuUpdate(16.f/1000.f);
   effect_ ->gpuUpdate();
   effect_ ->render();
   old_elapsed_ms = real_elapsed_ms;
@@ -324,7 +324,7 @@ void gui_display()
       }
       ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
       ImGui::InputFloat("Sphere Radius", &effect_->m_sphereRad);
-      /*ImGui::Separator();
+      ImGui::Separator();
       ImGui::Checkbox("Cube-Collision", &effect_->m_cube);
       {
         ImGui::Text("Cube Position");
@@ -334,7 +334,7 @@ void gui_display()
         ImGui::SliderFloat("##cpz", &effect_->m_cubePos.z, -10.f, 10.f);
         ImGui::PopItemWidth();
       }
-      ImGui::InputFloat("Cube Dim", &effect_->m_cubeDim);*/
+      ImGui::InputFloat("Cube Dim", &effect_->m_cubeDim);
 
 
       ImGui::Separator();
@@ -388,6 +388,7 @@ void gui_display()
     if(ImGui::Begin("Interactive Controls")){
       ImGui::PushItemWidth(ImGui::GetFontSize() * 10);
       ImGui::SliderFloat("Damping", &effect_->m_damp, 0.f, 1.f);
+      ImGui::InputFloat("Resistance", &effect_->m_res);
 
       ImGui::InputFloat("Structural k", &effect_->m_kStruct);
       ImGui::InputFloat("Shear k", &effect_->m_kShear);
@@ -604,6 +605,7 @@ int32_t main(int32_t argc, char* argv[]) {
   effect_->m_collision = true;
   effect_->m_wind = true;
   effect_->m_windVec = glm::vec3(1.5f, 0.1f, 0.f);
+  effect_->m_res = 1.f;
   effect_->init(10, camera);
   effect_->reset();
   for(int i = 0; i < 30; ++i){

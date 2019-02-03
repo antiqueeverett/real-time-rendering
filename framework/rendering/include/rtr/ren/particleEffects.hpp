@@ -218,6 +218,7 @@ public:
     int m_stretchIter;
     float m_collisionDist;
     float m_mass;
+	float m_res;
     glm::vec3 m_windVec;
 
     glm::vec4 m_dragParticle{0};
@@ -253,6 +254,7 @@ private:
 	std::shared_ptr<GroundCollisionUpdater> m_groundUp;
     std::shared_ptr<CubeCollisionUpdater> m_cubeUp;
     std::shared_ptr<WindForceUpdater> m_windUp;
+	std::shared_ptr<AirResistanceUpdater> m_resUp;
 
 };
 #endif

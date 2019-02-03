@@ -203,6 +203,12 @@ public:
 
     virtual void update(float dt, ParticleData *p) override;
 };
+
+class AirResistanceUpdater : public ParticleUpdater {
+public:
+	float m_a;
+	virtual void update(float dt, ParticleData *p) override;
+};
 /*
 class SphereFrictionUpdater : public ParticleUpdater {
 public:
