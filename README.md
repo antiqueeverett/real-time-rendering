@@ -1,7 +1,5 @@
 # RTR: Real-Time-Rendering
 
-## Introduction
-
 The main goal of this project is to learn about the foundations of real-time rendering. Instead of using already existing engines we explore underlying principles of modern computer animation and simulation. This project categorizes the topics relating to real-time rendering as:
 
 1. **Viewing:**
@@ -13,10 +11,10 @@ The main goal of this project is to learn about the foundations of real-time ren
   - Local vs. global illumination methods
 
 3. **Textures**
-  - 
+ 
 
 4. **Transformation**
-  -
+ 
 
 5. **Physics**
   - Simulating physically realistic behaviour
